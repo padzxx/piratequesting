@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<module>
+  <name>Sea</name>
+  <strings>chrome://piratequesting/locale/sea.properties</strings>
+  <script>chrome://piratequesting/content/modules/sea.js</script>
+</module>

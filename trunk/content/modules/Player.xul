@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/Player.dtd">
+<overlay id="PlayerOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="Player_tab" linkedpanel="Player_tabpanel" label="&piratequesting.Player.title;"/>
+	
+	<tabpanel id="Player_tabpanel">
+		<vbox pack="start">
+			<hbox style="margin-left: 10px; margin-right:10px;">
+				<hbox crop="end" flex="1">
+					<label id="name" value="&piratequesting.Player.Name;: " />
+					<label id="nameval"  persist="value" crop="right"/>
+				</hbox>
+				<hbox crop="end" flex="1">
+					<label id="level" value="&piratequesting.Player.Level;: " />
+					<label id="levelval"  persist="value" />
+				</hbox>
+			</hbox>
+			<hbox>
+				<groupbox >
+					<caption label="&piratequesting.Player.Stats;" />
+					<grid id="statsgrid">
+						<rows>
+							<row flex="1"/>
+							<row flex="1"/>
+							<row flex="1"/>
+							<row flex="1"/>
+						</rows>
+						<columns>
+							<column pack="start">
+								<label id="hp" value="&piratequesting.Player.HP;: " crop="right"/>
+								<label id="energy" value="&piratequesting.Player.Energy;: " crop="right"/>
+								<label id="awake" value="&piratequesting.Player.Awake;: " crop="right"/>
+								<label id="nerve" value="&piratequesting.Player.Nerve;: " crop="right"/>
+							</column>
+							<column pack="end">
+								<hbox flex="1" pack="end">
+									<label id="curhpval"  persist="value" type="stat" />
+								</hbox>
+								<hbox flex="1" pack="end">
+									<label id="curenergyval"  persist="value" type="stat" />
+								</hbox>
+								<hbox flex="1" pack="end">
+									<label id="curawakeval"  persist="value" type="stat" />
+								</hbox>
+								<hbox flex="1" pack="end">
+									<label id="curnerveval"  persist="value" type="stat" />
+								</hbox>
+							</column>
+							<column>
+								<label value="/" />
+								<label value="/" />
+								<label value="/" />
+								<label value="/" />
+							</column>
+							<column pack="start">
+								<label id="maxhpval"  persist="value" type="stat" />
+								<label id="maxenergyval"  persist="value" type="stat" />
+								<label id="maxawakeval"  persist="value" type="stat" />
+								<label id="maxnerveval"  persist="value" type="stat" />
+							</column>
+						</columns>
+					</grid>
+				</groupbox>
+								
+
+				<groupbox id="attsbox">
+					<caption label="&piratequesting.Player.Attributes;"/>
+					<hbox>
+						<vbox>
+							<label id="strength" value="&piratequesting.Player.Strength;: " crop="right"/>
+							<label id="defense" value="&piratequesting.Player.Defense;: " crop="right"/>
+							<label id="speed" value="&piratequesting.Player.Speed;: " crop="right"/>
+							<label id="total" value="&piratequesting.Player.Total;: " crop="right"/>
+						</vbox>
+						<vbox>
+							<label id="strval"  persist="value" />
+							<label id="defval"  persist="value" />
+							<label id="speval"  persist="value" />
+							<label id="totalval"  persist="value" />
+						</vbox>
+					</hbox>
+
+				</groupbox>
+			</hbox>
+		</vbox>
+	</tabpanel>
+</overlay>

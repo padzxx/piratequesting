@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE window SYSTEM "chrome://piratequesting/locale/EventsMessages.dtd">
+<overlay id="EventsMessagesOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<vbox id="pqmain_box">
+		<hbox id="EventsMessagesBox" class="statusbox" pack="start" align="center" position="1">
+			<hbox onclick="piratequesting.EventsMessages.openMessages();" align="center">
+				<image src="chrome://piratequesting/skin/icon_msg.gif" title="&piratequestingsidebar.messages.title;"/>
+				<label id="msg_num" value="0" persist="value"/>
+			</hbox>
+			<hbox style="margin-left:20px;" onclick="piratequesting.EventsMessages.openEvents();" align="center">
+				<image src="chrome://piratequesting/skin/icon_events_on.gif" title="&piratequestingsidebar.events.title;"/>
+				<label id="events_num" value="0" persist="value"/>
+			</hbox>
+			<label id="delete_events" tooltiptext="&piratequestingsidebar.events.clear.title;" value="&piratequestingsidebar.events.clear;" onclick="if(confirm('Are you sure you want to clear the Event Log?')) piratequesting.EventsMessages.clearEvents();"/>
+		</hbox>
+	</vbox>
+</overlay>

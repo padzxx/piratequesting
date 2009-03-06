@@ -1,0 +1,4 @@
+<!ENTITY piratequesting.Captcha.title "Enter the Code">
+<!ENTITY piratequesting.Captcha.submit "Submit">
+<!ENTITY piratequesting.Captcha.instructions "Enter the code shown below.">
+<!ENTITY piratequesting.Captcha.failure "Code Incorrect. Please try again.">

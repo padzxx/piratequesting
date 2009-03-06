@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay [
+  <!ENTITY % PointsEdiblesDTD SYSTEM "chrome://piratequesting/locale/PointsEdibles.dtd">
+  %PointsEdiblesDTD;
+  <!ENTITY % commonDTD SYSTEM "chrome://piratequesting/locale/common.dtd">
+  %commonDTD;
+]>
+<overlay id="PointsEdiblesOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="PointsEdibles_tab" linkedpanel="PointsEdibles_tabpanel" label="&piratequesting.PointsEdibles.title;" />
+	
+	<tabpanel id="PointsEdibles_tabpanel">
+<vbox flex="1">
+							<stack id="ptsstack">
+								<groupbox id="ptsgrp" type="">
+									<caption label="Points" />
+									<menulist height="20" id="pointslist">
+										<menupopup>
+											<menuitem value="disguise" label="Disguise Yourself (3)" />
+											<menuitem value="refill_energy" label="Refill Energy 100% (5)"/>
+											<menuitem value="refill_energy_1" label="Refill Energy 20% (1)"/>
+											<menuitem value="refill_nerve" label="Refill Nerve (5)"/>
+											<menuitem value="100_dollars" label="$100 (1)"/>
+											<menuitem value="refill_supplies" label="Restock Ship (1)"/>
+											<menuitem value="fix_ship" label="Repair Ship (3)"/>
+											<menuitem value="get_healed" label="Heal Faster (1)"/>
+											<menuitem value="get_out_of_jail" label="Bribe Jailer (1)"/>
+											<menuitem value="pillage_again" label="Pillage Again (50)"/>
+											<menuitem value="awake_the_drunk" label="Wake the Drunk (30)"/>
+										</menupopup>
+									</menulist>
+									<hbox flex="1">
+										<hbox align="center" pack="start" flex="1" style="padding-left:10px;">
+											<label type="bold" value="Points:" id="ptslabel" maxwidth="40" />
+											<label type="bold" id="pointsvalue" persist="value" />
+										</hbox>
+										<hbox align="center" pack="end">
+											<button type="A" label="Use" id="usepoints" maxwidth="40" />
+										</hbox>
+									</hbox>
+									
+								</groupbox>
+								<box align="center" id="ptscb" pack="center" type="hide" flex="1">
+									<groupbox type="cbox">
+										<caption type="coverlabel" label="Please wait..."/>
+									<hbox align="start" pack="start">
+										<progressmeter value="0" id="ptsmeter" mode="determinate"/>
+										<label id="pointsabort" value="Abort" type="abortbutton"/>
+									</hbox>
+									</groupbox>
+								</box> 
+							</stack>
+							<stack id="edistack">
+								<groupbox id="edigrp" type="">
+									<caption label="Edibles" />
+									<menulist height="20" id="edibleslist">
+										<menupopup id="edibleitems">
+										</menupopup>
+									</menulist>
+									<hbox align="center" pack="end">
+										<button type="A" label="Use" id="useedible1" maxwidth="40" />
+										<button type="A" label="Use 5" id="useedible5" maxwidth="40" />
+									</hbox>
+								</groupbox>
+								<box align="center" id="edicb" pack="center" type="hide" flex="1">
+									<groupbox type="cbox">
+										<caption type="coverlabel" label="&piratequestingsidebar.cover.title;"/>
+									<hbox align="start" pack="start">
+										<progressmeter value="0" id="edimeter" mode="determinate"/>
+										<label id="ediblesabort" value="&piratequestingsidebar.cover.abort;" type="abortbutton" onclick="piratequesting.PointsEdibles.abort()"/>
+									</hbox>
+									</groupbox>
+								</box> 
+							</stack>
+						</vbox>	
+					</tabpanel>
+</overlay>

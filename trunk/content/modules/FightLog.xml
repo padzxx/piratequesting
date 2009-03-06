@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<module>
+  <name>FightLog</name>
+  <description>Module for Reading from and Writing to the Fight Log</description>
+  <strings>chrome://piratequesting/locale/FightLog.properties</strings>
+  <script>chrome://piratequesting/content/modules/FightLog.js</script>
+  <overlay tabid="Logs_tab" tabpanelid="Logs_tabpanel">chrome://piratequesting/content/modules/Logs.xul</overlay>
+  <overlay>chrome://piratequesting/content/modules/FightLog.xul</overlay>
+</module>

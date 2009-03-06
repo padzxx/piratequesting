@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay [
+  <!ENTITY % BankDTD SYSTEM "chrome://piratequesting/locale/Bank.dtd">
+  %BankDTD;
+  <!ENTITY % commonDTD SYSTEM "chrome://piratequesting/locale/common.dtd">
+  %commonDTD;
+]>
+<overlay id="BankOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="Bank_tab" linkedpanel="Bank_tabpanel" label="&piratequesting.Bank.title;" />
+	
+	<tabpanel id="Bank_tabpanel">
+		<stack>
+							<vbox id="bankbox">
+								<hbox align="center">
+									<vbox align="start">
+										<label type="bold" id="points" value="&piratequesting.Bank.Points;: " />
+										<label type="bold" id="coins" value="&piratequesting.Bank.Coins;: " />
+										<label type="bold" id="chest" value="&piratequesting.Bank.Treasure;: "/>
+									</vbox>
+									<vbox align="end">
+										<label type="bold" id="points_val" persist="value" />
+										<label type="cash" id="coins_val" persist="value type" />
+										<label type="bold" id="chest_val" persist="value"/>
+									</vbox>	
+									<button height="20" label="&piratequesting.Bank.DepositAll;" id="depall" accesskey="a" oncommand="piratequesting.Bank.depositAll(event)" maxwidth="80" />
+								</hbox>
+								<hbox height="50">
+									<vbox style="padding-right: 5px;">
+										<label value="Withdrawal Amount" control="wamount" accesskey="w"/>	
+										<textbox id="wamount" value="" width="80" onkeypress="piratequesting.Bank.HandleKeyPressWithdraw(event)" />
+									</vbox>
+									<vbox>
+										<label value="Deposit Amount" control="damount" accesskey="d"/>
+										<textbox id="damount" value="" width="80" onkeypress="piratequesting.Bank.HandleKeyPressDeposit(event)" />
+									</vbox>
+								</hbox>
+								<vbox id="bankresult" crop="end" flex="1"/>
+							</vbox>
+							<box align="center" id="bankcb" pack="center" type="hide" flex="1">
+								<groupbox type="cbox">
+									<caption type="coverlabel" label="&piratequestingsidebar.cover.title;"/>
+									<hbox align="start" pack="start">
+										<progressmeter value="0" id="bankmeter" mode="determinate"/>
+										<label id="bankabort" value="&piratequestingsidebar.cover.abort;" type="abortbutton" onclick="piratequesting.Bank.abort()"/>
+									</hbox>
+								</groupbox>
+							</box> 
+
+						</stack>
+	</tabpanel>
+</overlay>

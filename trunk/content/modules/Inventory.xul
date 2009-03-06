@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay [
+  <!ENTITY % InventoryDTD SYSTEM "chrome://piratequesting/locale/Inventory.dtd">
+  %InventoryDTD;
+  <!ENTITY % commonDTD SYSTEM "chrome://piratequesting/locale/common.dtd">
+  %commonDTD;
+]>
+<overlay id="InventoryOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="Inventory_tab" linkedpanel="Inventory_tabpanel" label="&piratequesting.Inventory.title;" />
+	
+	<tabpanel id="Inventory_tabpanel">
+		<stack flex="1" minheight="210"> 
+			<deck id="invdeck" selectedIndex="0" flex="1">
+
+				<vbox flex="1" maxheight="210" id="inventorylist">
+
+				</vbox>
+				<hbox id="invbox" flex="1">
+					<vbox id="invdetails" flex="1">
+						<!-- the sale/market/price info goes here. -->
+					</vbox>
+				</hbox>
+			</deck>      	
+			<box align="center" id="invcb" pack="center" type="hide" flex="1">
+				<groupbox type="cbox">
+					<caption type="coverlabel" label="&piratequestingsidebar.cover.title;"/>
+					<hbox align="start" pack="start">
+						<progressmeter value="0" id="invmeter" mode="determinate"/>
+						<label id="inventoryabort" value="&piratequestingsidebar.cover.abort;" type="abortbutton" onclick="piratequesting.Inventory.abort()" />
+					</hbox>
+				</groupbox>
+			</box>  
+		</stack> 
+	</tabpanel> 
+</overlay>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<module>
+  <name>FightProcessor</name>
+  <description>Module required for fight logging or formatting</description>
+  <strings>chrome://piratequesting/locale/FightProcessor.properties</strings>
+  <script>chrome://piratequesting/content/modules/FightProcessor.js</script>
+</module>

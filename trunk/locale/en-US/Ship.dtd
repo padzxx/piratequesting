@@ -1,0 +1,8 @@
+<!ENTITY piratequesting.Ship.title "Ship">
+<!ENTITY piratequesting.Ship.Name "Name">
+<!ENTITY piratequesting.Ship.Type "Type">
+<!ENTITY piratequesting.Ship.CrewLevel "Crew Level">
+<!ENTITY piratequesting.Ship.HP "HP">
+<!ENTITY piratequesting.Ship.Cargo "Cargo">
+<!ENTITY piratequesting.Ship.Cannons "Cannons">
+<!ENTITY piratequesting.Ship.Armour "Armour">

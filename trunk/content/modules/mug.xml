@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<module>
+  <name>Mug</name>
+  <strings>chrome://piratequesting/locale/mug.properties</strings>
+  <script>chrome://piratequesting/content/modules/mug.js</script>
+</module>

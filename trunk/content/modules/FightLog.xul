@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/FightLog.dtd">
+<overlay id="FightLogOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+		<html:div id="Logs_Box">
+			<html:div style="width: 50%;float:left;text-decoration:underline;cursor:pointer;" onclick="piratequesting.FightLog.open();">&piratequesting.FightLog.linktitle;</html:div>			
+		</html:div>
+
+</overlay>

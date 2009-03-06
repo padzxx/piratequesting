@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="piratequesting.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/piratequesting.dtd">
+
+<dialog
+  xmlns:html="http://www.w3.org/1999/xhtml"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  id="aboutDialog"
+  title="About Pirate Questing"
+  ondialogaccept="return onOK();"
+  buttonlabelaccept="Close"
+  buttons="accept"
+  onload="aboutDialogOnLoad();"
+  persist="screenX screenY width height">
+
+	<script type="application/x-javascript" src="chrome://piratequesting/content/aboutDialog.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
+	<vbox align="center" pack="start">
+		<image id="PQImage" src="chrome://piratequesting/content/pqabout.jpg" style="margin: 0px 0px 20px 0px;"/>
+		<hbox align="center">
+			<vbox style="margin-right:20px;">
+				<hbox >
+					<label value="Version: "/>
+					<label value="&piratequestingsidebar.version;" />
+				</hbox>
+				<hbox style="padding-bottom: 10px;">
+					<label value="Release Date: "/>
+					<label value="&piratequestingsidebar.release;" />
+				</hbox>
+				<label value="Developed by Jonathan Fingland" />
+				<hbox >
+					<label value="E-mail: " />
+					<label class="text-link" href="mailto:pqsidebar@ashita.org" value="pqsidebar@ashita.org" type="link"/>
+				</hbox>
+				<hbox style="padding-bottom: 10px;">
+					<label value="In-game profile: " />
+					<label value="Gilgalad" onclick="openGilgalad();" type="link"/>
+				</hbox>
+			</vbox>
+			<html:div width="150">
+				All Pirate Quest related terms and <html:br />graphics copyright FinalMotive.<html:br />
+				All code for the sidebar and related <html:br />items copyright Jonathan Fingland <html:br />unless stated otherwise elsewhere.
+			</html:div>
+		</hbox>
+	</vbox>
+</dialog>

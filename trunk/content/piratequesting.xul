@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<?xml-stylesheet href="chrome://piratequesting/skin/piratequesting.css" type="text/css"?>
+
+<!DOCTYPE window SYSTEM "chrome://piratequesting/locale/piratequesting.dtd">
+<window id="piratequesting-sidebar" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script src="chrome://global/content/nsDragAndDrop.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/prototype.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/sidebar-main.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
+	<script src="dragboard.js"/>
+	<script type="application/x-javascript">
+		var observer;
+		showPQSBStyle();
+		window.addEventListener("load", function(e) {
+					observer = new overlayObserver();
+					piratequesting.sidebar.loadOverlays(observer);
+				}, false);
+		window.addEventListener("unload", function(e) {
+					try {
+						if (observer) {
+							observer.unregister();
+							observer = null;
+						}
+						piratequesting.sidebar = null;
+
+						hidePQSBStyle();
+					} catch (error) {
+						alert(getErrorString(error));
+					}
+				}, false);
+	</script>
+	<deck id="pqmain_deck" selectedIndex="0" flex="1">
+		<vbox flex="1" id="pqloadingbox" align="center" pack="center">
+			<label value="&piratequestingsidebar.loading;" />
+			<progressmeter id="pqloadprogress" mode="determined" />
+		</vbox>
+		<vbox flex="1" id="pqmain_box">
+			<toolbox id="pqtoolbox">
+				<toolbar id="pqmain_toolbar" pack="end">
+					<toolbaritem>
+						<menubar id="pqmenu">
+							<menu id="pqmenu_edit" label="&piratequestingsidebar.menu.edit;">
+								<menupopup id="pqmenu_edit_popup">
+									<menuitem label="Say Hello" oncommand="alert('hello')" />
+									<menuitem label="Say Goodbye" oncommand="alert('goodbye')" />
+								</menupopup>
+							</menu>
+							<menu id="pqmenu_help" label="&piratequestingsidebar.menu.help;">
+								<menupopup id="pqmenu_help_popup">
+									<menuitem label="&piratequestingsidebar.menu.about;" oncommand="alert('about me')" />
+								</menupopup>
+							</menu>
+						</menubar>
+					</toolbaritem>
+					<toolbarspring flex="1" />
+			
+				</toolbar>
+			</toolbox>
+			<vbox id="moduleContainer" flex="1">
+				<hbox id="plusTabboxBox">
+					<toolbarbutton tooltiptext="Add new Panel for Tabs" oncommand="piratequesting.sidebar.addTabbox();"/> 
+				</hbox>
+				<vbox />
+			</vbox>
+		</vbox>
+		<hbox flex="1" align="end" pack="end" >
+			<label type="link" value="Developed by Gilgalad" onclick="piratequesting.openGilgalad();"/>
+		</hbox>
+	</deck>
+</window>

@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin" type="text/css"?>
+<?xml-stylesheet href="piratequesting.css" type="text/css"?>
+
+
+<window id="fightLog" title="Fight Log" onunload="fightLog.onUnload()" onload="fightLog.onLoad();"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://piratequesting/content/prototype.js"/>
+  	<script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
+	<script type="application/x-javascript" src="LogViewer.js"/>
+	<script type="application/x-javascript" src="FightLogViewer.js"/>
+	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+	
+
+		<label value="Fight Log" style="font-size:14pt;font-weight:bold;font-family:verdana;"/>
+		<hbox align="baseline" height="40">
+		<vbox height="25" align="end">
+			<hbox height="5" />
+			<hbox>
+				<label value="Number of Results Logged: " />
+				<label id="tl" value="" />
+				<label value=" " style="width:150px;"/>
+			</hbox>
+		</vbox>
+		<hbox>
+			<vbox flex="1">
+				<radiogroup id="recordgroup">
+					<hbox>
+						<radio id="all" persist="selected" label="Show All" value="-1" onClick="document.getElementById('from').setAttribute('disabled','true');document.getElementById('to').setAttribute('disabled','true');"/>
+					</hbox>
+					<hbox align="center">
+						<radio label="Show " id="show" persist="selected" selected="true" onClick="document.getElementById('from').removeAttribute('disabled');document.getElementById('to').removeAttribute('disabled');" value="0"/>
+						<textbox persist="value" id="howmany" oninput="this.setAttribute('value', this.value);" style="width:50px;" value="100"/>
+						<label value="records, starting from"/>
+						<textbox persist="value" id="from" oninput="this.setAttribute('value', this.value);" style="width:50px;" value="0" tooltiptext="positive values are newest->oldest,&#10;negative values are oldest->newest,&#10;-0 is the oldest record,&#10;0 is the newest."/>
+					</hbox>
+				</radiogroup>
+			</vbox>
+			<vbox flex="1" align="start" pack="end">
+				<hbox >
+					
+				</hbox>
+			</vbox>
+		</hbox>
+		<button id="update" label="Update" oncommand="log.showResults();" height="23" />
+	</hbox> 
+
+		<tree id="log" flex="1" 
+					autostretch="always" seltype="multiple"
+					querytype="storage" enableColumnDrag="true">
+			<treecols id="colContainer">
+				<treecol id="id" hidden="true" ignoreincolumnpicker="true" sortActive="false"/>
+				<treecol	id="me" label="Me" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="opponent" label="Opponent" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="winner" label="Winner" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="prize" label="Prize" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="experience" label="Experience" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="myStrength" label="My Strength" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="myDefense" label="My Defense" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="mySpeed" label="My Speed" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="theirStrength" label="Opponent Strength" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="theirDefense" label="Opponent Defense" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+				<treecol	id="theirSpeed" label="Opponent Speed" flex="1" 
+									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+									sortActive="false"/>
+				<splitter class="tree-splitter" />
+			<treecol	id="dt" label="Date Time" 
+				flex="1" persist="width ordinal hidden sortActive sortDirection" 
+				class="sortDirectionIndicator"  sortActive="false"/>
+
+			</treecols>
+					<treechildren contextmenu="treemenu"/>
+	</tree>
+	<menupopup id="treemenu">
+		<menuitem label="Select All" onclick="log.selectAll();"/>
+		<menuseparator/>
+		<menuitem label="Copy Log Data" onclick="log.copy()" />
+		<menuitem label="Copy Opponent Reports" onclick="log.makeOppReports()" />
+		<menuseparator/>
+		<menuitem label="Delete" onclick="if (confirm('Are you sure you want to delete the selected records?')) log.delete();" />
+	</menupopup>
+	<textbox id="store" style="max-height:0px;" class="plain" multiline="true"/>
+</window>

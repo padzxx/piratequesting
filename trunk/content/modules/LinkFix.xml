@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<module>
+  <name>LinkFix</name>
+  <description>Changes all links on the page pointing to a PQ page, to point to the same PQ server you are using. Also changes text URLs into links.</description>
+  <script>chrome://piratequesting/content/modules/LinkFix.js</script>
+</module>

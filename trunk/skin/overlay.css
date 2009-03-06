@@ -1,0 +1,52 @@
+#piratequesting-toolbar-button
+{
+  list-style-image: url("chrome://piratequesting/skin/pq-button.png");
+  -moz-image-region: rect(0px 24px 24px 0px);
+}
+#piratequesting-toolbar-button:hover
+{
+  -moz-image-region: rect(24px 24px 48px  0px);
+}
+[iconsize="small"] #piratequesting-toolbar-button
+{
+  -moz-image-region: rect( 0px 40px 16px 24px);
+}
+[iconsize="small"] #piratequesting-toolbar-button:hover
+{
+  -moz-image-region: rect(24px 40px 40px 24px);
+ }
+ 
+sidebarheader.piratequesting {
+/*  min-height: 23px;
+  max-height: 25px; */
+  height: 30px;
+  background-color: #63422f !important;
+  background-image: url(chrome://piratequesting/skin/titlepattern.png) !important;
+  background-repeat:repeat !important;
+  color: #ffff99 !important;
+  -moz-appearance: none !important;
+  border-top: 1px solid ThreeDHighlight;
+  border-bottom: 0px;
+  padding-bottom: 1px !important;  /* adjust vertical alignment of sidebarheader contents */
+  font-weight: bold;
+}
+
+sidebarheader.piratequesting > label {
+  background-image: url(chrome://piratequesting/skin/pqtitle.png) !important;
+  background-repeat:no-repeat !important;
+  color:transparent !important;
+  height:25px !important;
+}
+
+sidebarheader.piratequesting > toolbarbutton {
+  list-style-image: url(chrome://piratequesting/skin/close-button.png) !important;
+  -moz-image-region: rect(0px 33px 23px 0px) !important;
+  margin: 0px !important;
+  padding: 0px !important;
+}
+sidebarheader.piratequesting > toolbarbutton:hover {
+  list-style-image: url(chrome://piratequesting/skin/close-button.png) !important;
+  -moz-image-region: rect(24px 33px 45px 0px) !important;
+  margin: 0px !important;
+  padding: 0px !important;
+}

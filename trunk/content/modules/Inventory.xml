@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<module>
+  <name>Inventory</name>
+  <description>Module for Inventory Management</description>
+  <strings>chrome://piratequesting/locale/Inventory.properties</strings>
+  <script>chrome://piratequesting/content/modules/InventoryManager.js</script>
+  <script>chrome://piratequesting/content/modules/Inventory.js</script>
+  <overlay tabid="Inventory_tab" tabpanelid="Inventory_tabpanel">chrome://piratequesting/content/modules/Inventory.xul</overlay>
+</module>

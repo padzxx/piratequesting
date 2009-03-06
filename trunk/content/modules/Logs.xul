@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/Logs.dtd">
+<overlay id="LogsOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="Logs_tab" linkedpanel="Logs_tabpanel" label="&piratequesting.Logs.title;" />
+	
+	<tabpanel id="Logs_tabpanel">
+		<html:div style="width:100%" flex="1" id="Logs_Box">
+			
+		</html:div>
+	</tabpanel>
+</overlay>

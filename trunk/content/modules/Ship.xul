@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/Ship.dtd">
+<overlay id="ShipOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="Ship_tab" linkedpanel="Ship_tabpanel" label="&piratequesting.Ship.title;" />
+	
+	<tabpanel id="Ship_tabpanel">
+		<hbox>
+			<vbox>
+		
+				<label id="shipname" value="&piratequesting.Ship.Name;: "  />
+				<label id="shiptype" value="&piratequesting.Ship.Type;: "  />
+				<label id="crewlevel" value="&piratequesting.Ship.CrewLevel;: "  />
+				<label id="shiphp" value="&piratequesting.Ship.HP;: "  />
+				<label id="cargo" value="&piratequesting.Ship.Cargo;: "  />
+				<label id="armour" value="&piratequesting.Ship.Armour;: "  />
+				<label id="cannons" value="&piratequesting.Ship.Cannons;: "  />
+			</vbox>
+			<vbox>
+				<label id="shipnameval"  persist="value"  />
+				<label id="shiptypeval"  persist="value"  />
+				<label id="crewlevelval"  persist="value" />
+				<label id="shiphpval"  persist="value"  />
+				<label id="cargoval"  persist="value"  />
+				<label id="armourval"  persist="value"  />
+				<label id="cannonsval"  persist="value"  />
+			</vbox>
+		</hbox>
+	</tabpanel>
+</overlay>
