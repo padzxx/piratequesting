@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<overlay id="TrainingOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="Training_tab" linkedpanel="Training_tabpanel" label="Training" />
+	
+	<tabpanel id="Training_tabpanel">
+		<vbox id="trainingsection" flex="1">
+			<hbox style="padding-bottom: 5px;">
+				<label value="Current chance of success: " />
+				<label id="trainchance" type="bold"  persist="value" />
+			</hbox>
+			<stack id="trnstack">
+				<vbox id="trngrp" flex="1">
+					<grid flex="1">
+ 
+						<rows>
+							<row/>
+							<row/>
+						</rows>
+						<columns equalsize="always" flex="1">
+							<column flex="1">
+								<label value="Strength" control="stramount" accesskey="s" onkeypress="piratequesting.Training.HandleKeyPressStats(event)"/>
+								<textbox persist="value" id="stramount" type="number" clickSelectsAll="true" flex="1" style="width: 0px;" oninput="this.setAttribute('value', this.value);"/>
+							</column>
+							<column flex="1">
+								<label value="Defense" control="defamount" accesskey="f" onkeypress="piratequesting.Training.HandleKeyPressStats(event)"/>
+								<textbox persist="value" id="defamount" type="number" clickSelectsAll="true" style="width: 0px;" oninput="this.setAttribute('value', this.value);"/>
+							</column>
+							<column flex="1">
+								<label value="Speed" control="speamount" accesskey="p" onkeypress="piratequesting.Training.HandleKeyPressStats(event)"/>
+								<textbox persist="value" id="speamount" type="number" clickSelectsAll="true" style="width: 0px;" oninput="this.setAttribute('value', this.value);"/>
+							</column>
+							<column flex="2">
+								<spacer/>
+								<button label="Train" id="train" style="min-width: 0px;" oncommand="piratequesting.Training.trainStats()"/>
+							</column>
+						</columns>
+					</grid>
+					<checkbox persist="checked" label="Above values are % of energy" id="peren" />
+					<vbox flex="1">
+						<label value="Max Train:" />
+						<hbox flex="1" equalsize="always">
+							<button flex="1" label="Strength" id="maxstr" style="min-width:0px;" oncommand="piratequesting.Training.maxStrength()" />
+							<button flex="1" label="Defense" id="maxdef" style="min-width:0px;" oncommand="piratequesting.Training.maxDefense()"/>
+							<button flex="1" label="Speed" id="maxspe" style="min-width:0px;" oncommand="piratequesting.Training.maxSpeed()"/>
+						</hbox>
+					</vbox>
+				</vbox>
+				<box align="center" id="trncb" pack="center" type="hide" flex="1">
+					<groupbox type="cbox">
+						<caption type="coverlabel" label="Please wait..."/>
+						<hbox align="start" pack="start">
+							<progressmeter value="0" id="trnmeter" mode="determinate"/>
+							<label id="trainabort" value="Abort" type="abortbutton" onclick="piratequesting.Training.abort()"/>
+						</hbox>
+					</groupbox>
+				</box> 
+			</stack>
+			<vbox id="trainresult" flex="1" style="margin-top:5px;">
+			</vbox>
+		</vbox>
+	</tabpanel>
+</overlay>

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<module>
+  <name>EventsMessages</name>
+  <description>Module for tracking Events and Messages</description>
+  <style>chrome://piratequesting/content/modules/EventsMessages.css</style>
+  <script>chrome://piratequesting/content/modules/EventsMessages.js</script>
+  <overlay>chrome://piratequesting/content/modules/EventsMessages.xul</overlay>
+</module>

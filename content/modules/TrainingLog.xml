@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<module>
+  <name>TrainingLog</name>
+  <description>Module for Reading and Writing to the Training Log</description>
+  <strings>chrome://piratequesting/locale/TrainingLog.properties</strings>
+  <script>chrome://piratequesting/content/modules/TrainingLog.js</script>
+  <overlay tabid="Logs_tab" tabpanelid="Logs_tabpanel">chrome://piratequesting/content/modules/Logs.xul</overlay>
+  <overlay>chrome://piratequesting/content/modules/TrainingLog.xul</overlay>
+</module>

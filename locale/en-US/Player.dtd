@@ -1,0 +1,13 @@
+<!ENTITY piratequesting.Player.title "Player">
+<!ENTITY piratequesting.Player.Stats "Stats">
+<!ENTITY piratequesting.Player.Name "Name">
+<!ENTITY piratequesting.Player.Level "Level">
+<!ENTITY piratequesting.Player.Attributes "Attributes">
+<!ENTITY piratequesting.Player.HP "HP">
+<!ENTITY piratequesting.Player.Energy "Energy">
+<!ENTITY piratequesting.Player.Awake "Awake">
+<!ENTITY piratequesting.Player.Nerve "Nerve">
+<!ENTITY piratequesting.Player.Strength "Strength">
+<!ENTITY piratequesting.Player.Defense "Defense">
+<!ENTITY piratequesting.Player.Speed "Speed">
+<!ENTITY piratequesting.Player.Total "Total">

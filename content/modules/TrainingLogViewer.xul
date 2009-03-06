@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin" type="text/css"?>
+<?xml-stylesheet href="piratequesting.css" type="text/css"?>
+
+
+<window id="trainLog" title="Training Log" onunload="trainingLog.onUnload()"  onload="trainingLog.onLoad();"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://piratequesting/content/prototype.js"/>
+  <script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
+  <script type="application/x-javascript" src="chrome://piratequesting/content/stringutils.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/modules/logViewer.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/modules/TrainingLogViewer.js"/>
+	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+
+	<label value="Training Log" style="font-size:14pt;font-weight:bold;font-family:verdana;"/>
+	<hbox align="baseline" height="40">
+		<vbox height="25" align="end">
+			<hbox height="5" />
+			<hbox>
+				<label value="Number of Results Logged: " />
+				<label id="tl" value="" />
+				<label value=" " style="width:150px;"/>
+			</hbox>
+		</vbox>
+		<hbox>
+			<vbox flex="1">
+				<radiogroup id="recordgroup">
+					<hbox>
+						<radio id="all" persist="selected" label="Show All" value="-1" onClick="document.getElementById('from').setAttribute('disabled','true');document.getElementById('to').setAttribute('disabled','true');"/>
+					</hbox>
+					<hbox align="center">
+						<radio label="Show " id="show" persist="selected" selected="true" onClick="document.getElementById('from').removeAttribute('disabled');document.getElementById('to').removeAttribute('disabled');" value="0"/>
+						<textbox persist="value" id="howmany" oninput="this.setAttribute('value', this.value);" style="width:50px;" value="100"/>
+						<label value="records, starting from"/>
+						<textbox persist="value" id="from" oninput="this.setAttribute('value', this.value);" style="width:50px;" value="0" tooltiptext="positive values are newest->oldest,&#10;negative values are oldest->newest,&#10;-0 is the oldest record,&#10;0 is the newest."/>
+					</hbox>
+				</radiogroup>
+			</vbox>
+		</hbox>
+		<button id="update" label="Update" oncommand="trainingLog.showResults();" height="23" />
+	</hbox> 
+
+	<tree id="log" flex="1" 
+					autostretch="always" seltype="multiple"
+					querytype="storage" enableColumnDrag="true">
+		<treecols id="colContainer">
+			<treecol id="id" ignoreincolumnpicker="true" hidden="true" sortActive="false"/>
+			<treecol	id="level" label="Level" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="attributes" label="Attributes" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator" 
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="energy" label="Energy" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="awake" label="Awake" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="increase" label="Increase" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="ratio" label="Ratio (Inc/Energy)" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="rolled" label="Number Rolled" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="chance" label="Success Chance" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="port" label="Port" flex="1" 
+				persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
+				 sortActive="false"/>
+			<splitter class="tree-splitter" />
+			<treecol	id="datetime" label="Date Time" 
+				flex="1" persist="width ordinal hidden sortActive sortDirection" 
+				class="sortDirectionIndicator" sortActive="true"/>
+
+		</treecols>
+		<treechildren contextmenu="treemenu"/>
+	</tree>
+	
+
+	<menupopup id="treemenu">
+		<!--<menuitem label="menu coming soon..." onclick="alert('You selected '+ trainlog.selectionMenu().length + ' records.\n\nYes, that\'s all it does right now.\nI\'ll be adding copy, and delete actions later on.');"/>-->
+		<menuitem label="Select All" onclick="log.selectAll();"/>
+		<menuseparator/>
+		<menuitem label="Copy PQ-style" onclick="log.copyPQ()" />
+		<menuitem label="Copy Log-style" onclick="log.copyLog()" />
+		<menuseparator/>
+		<menuitem label="Delete" onclick="if (confirm('Are you sure you want to delete the selected records?')) log.delete();" />
+	</menupopup>
+<textbox id="store" style="max-height:0px;" class="plain" multiline="true"/>
+</window>

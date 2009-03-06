@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - Copyright (c) 2008 Jonathan Fingland
+  -
+  - Permission to use, copy, modify, and distribute this software for any
+  - purpose with or without fee is hereby granted, provided that the above
+  - copyright notice and this permission notice appear in all copies.
+  -
+  - THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  - WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  - MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  - ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  - WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  - ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  - OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  - -->
+
+<?xml-stylesheet href="chrome://piratequesting/skin/overlay.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/piratequesting.dtd">
+<overlay id="piratequesting"
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
+  <script type="application/x-javascript" src="chrome://piratequesting/content/PageProcess.js"/>
+  <script type="application/x-javascript" src="chrome://piratequesting/content/stringutils.js"/>
+  <script type="application/x-javascript" src="chrome://piratequesting/content/StringBundle.js"/>
+  <script type="application/x-javascript" src="chrome://piratequesting/content/overlay.js"/>
+  <script type="application/x-javascript">
+    window.addEventListener("DOMContentLoaded", function(e) {
+      piratequesting.onLoad(e);
+    }, false);
+
+  </script>
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="piratequesting-strings" src="chrome://piratequesting/locale/piratequesting.properties"/>
+    <stringbundle id="piratequesting-sidebar-strings" src="chrome://piratequesting/locale/piratequesting-sidebar.properties"/>
+  </stringbundleset>
+
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="piratequesting-toolbar-button"
+      label="&piratequestingToolbar.label;"
+      tooltiptext="&piratequestingToolbar.tooltip;"
+      oncommand="toggleSidebar('viewPirateQuestingSidebar');"
+      class="toolbarbutton-1 chromeclass-toolbar-additional"/>
+  </toolbarpalette>
+  
+  <keyset id="mainKeyset">
+    <key id="key_openPirateQuestingSidebar" command="viewPirateQuestingSidebar"
+      key="&openpiratequestingsidebar.commandkey;" 
+      modifiers="&openpiratequestingsidebar.modifiers;" />
+  </keyset>
+  
+  <menupopup id="viewSidebarMenu">
+    <menuitem key="key_openPirateQuestingSidebar" observes="viewPirateQuestingSidebar"  />
+  </menupopup>
+  
+  <broadcasterset id="mainBroadcasterSet"> 
+    <broadcaster id="viewPirateQuestingSidebar" 
+      label="&piratequestingsidebar.title;"
+      autoCheck="false"
+      type="checkbox"
+      group="sidebar"
+      sidebarurl="chrome://piratequesting/content/piratequesting.xul"
+      sidebartitle="&piratequestingsidebar.title;"
+      oncommand="toggleSidebar('viewPirateQuestingSidebar');" />
+  </broadcasterset>
+</overlay>

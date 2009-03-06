@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/global.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/Captcha.dtd">
+<dialog
+  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+  id="codeDialog"
+  title="&piratequesting.Captcha.title;"
+  ondialogaccept="return onOK();"
+  buttonlabelaccept="&piratequesting.Captcha.submit;"
+  onload="codeDialogOnLoad();"
+  persist="screenX screenY width height">
+
+	<script type="application/x-javascript" src="chrome://piratequesting/content/modules/codeDialog.js"/>
+	<vbox>
+		<label id="failure" value="&piratequesting.Captcha.failure;" style="display:none;" />
+		<label id="instructions" value="&piratequesting.Captcha.instructions;" />
+		<image id="codeImage" alt="" />
+		<textbox width="50" id="codeValue" />
+	</vbox>
+</dialog>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<module>
+  <name>Clock</name>
+  <description>Basic Server clock based on the time returned by PQ. Becomes more accurate the longer it's let to run. Could be replaced to use a different source, e.g. NIST</description>
+  <script>chrome://piratequesting/content/modules/Clock.js</script>
+  <overlay>chrome://piratequesting/content/modules/Clock.xul</overlay>
+</module>

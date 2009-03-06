@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<module>
+  <name>Bank</name>
+  <description>Module for money and points tracking and processing</description>
+  <style>chrome://piratequesting/content/modules/Bank.css</style>
+  <script>chrome://piratequesting/content/modules/Bank.js</script>
+  <overlay tabid="Bank_tab" tabpanelid="Bank_tabpanel">chrome://piratequesting/content/modules/Bank.xul</overlay>
+</module>

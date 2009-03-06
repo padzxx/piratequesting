@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<module>
+  <name>Training</name>
+  <description>Module for training from the sidebar</description>
+  <style>chrome://piratequesting/content/modules/Training.css</style>
+  <strings>chrome://piratequesting/locale/Training.properties</strings>
+  <script>chrome://piratequesting/content/modules/Training.js</script>
+  <overlay tabid="Training_tab" tabpanelid="Training_tabpanel">chrome://piratequesting/content/modules/Training.xul</overlay>
+</module>

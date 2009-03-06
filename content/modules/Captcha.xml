@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<module>
+  <name>Captcha</name>
+  <strings>chrome://piratequesting/locale/Captcha.properties</strings>
+  <script>chrome://piratequesting/content/modules/Captcha.js</script>
+</module>

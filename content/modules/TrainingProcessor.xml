@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<module>
+  <name>TrainingProcessor</name>
+  <description>Module required for Training logging or Training through the sidebar</description>
+  <strings>chrome://piratequesting/locale/TrainingProcessor.properties</strings>
+  <script>chrome://piratequesting/content/modules/TrainingProcessor.js</script>
+</module>

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<module>
+  <name>Chirugeon</name>
+  <strings>chrome://piratequesting/locale/chiru.properties</strings>
+  <script>chrome://piratequesting/content/modules/chiru.js</script>
+</module>

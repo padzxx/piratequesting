@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/Tools.dtd">
+<overlay id="ToolsOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<tab id="Tools_tab" linkedpanel="Tools_tabpanel" label="&piratequesting.Tools.title;" />
+	
+	<tabpanel id="Tools_tabpanel">
+		<html:div style="width:100%" flex="1" id="Tools_Box">
+			
+		</html:div>
+	</tabpanel>
+</overlay>

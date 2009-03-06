@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<module>
+  <name>Ship</name>
+  <description>Ship information module</description>
+  <style>chrome://piratequesting/content/modules/Ship.css</style>
+  <script>chrome://piratequesting/content/modules/Ship.js</script>
+  <overlay tabid="Ship_tab" tabpanelid="Ship_tabpanel">chrome://piratequesting/content/modules/Ship.xul</overlay>
+</module>

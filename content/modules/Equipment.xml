@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<module>
+  <name>Equipment</name>
+  <strings>chrome://piratequesting/locale/Equipment.properties</strings>
+  <script>chrome://piratequesting/content/modules/InventoryManager.js</script>
+  <script>chrome://piratequesting/content/modules/Equipment.js</script>
+  <overlay tabid="Equipment_tab" tabpanelid="Equipment_tabpanel">chrome://piratequesting/content/modules/Equipment.xul</overlay>
+</module>

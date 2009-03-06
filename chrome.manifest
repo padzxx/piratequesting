@@ -1,0 +1,5 @@
+content	piratequesting	content/
+locale	piratequesting	en-US	locale/en-US/
+skin	piratequesting	classic/1.0	skin/
+overlay	chrome://browser/content/browser.xul	chrome://piratequesting/content/firefoxOverlay.xul
+style	chrome://global/content/customizeToolbar.xul	chrome://piratequesting/skin/overlay.css

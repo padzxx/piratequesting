@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<overlay id="EventsMessagesOverlay"
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<toolbar id="pqmain_toolbar" >
+		<toolbaritem align="end" pack="end">
+			<label align="end" pack="end" tooltiptext="PQ Server Time" id="servertime" value="Loading..." />
+		</toolbaritem>
+	</toolbar>
+</overlay>

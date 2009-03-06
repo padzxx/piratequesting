@@ -1,0 +1,20 @@
+#piratequesting-sidebar #EventsMessagesBox { 
+/*	background-color: #ebe5cb; 
+	border-width:1px;
+	border-style:solid;
+	border-color:#000000;*/
+	color: #ffff99; 
+	font-weight: bold; 
+	padding: 2px 2px 2px 10px; 
+	margin:0px;
+	background-color: #63422f !important;
+	background-image: url(chrome://piratequesting/skin/titlepattern.png) !important;
+	background-repeat:repeat !important;
+}
+
+#piratequesting-sidebar #EventsMessagesBox > hbox,
+#piratequesting-sidebar #EventsMessagesBox > hbox > *,
+#piratequesting-sidebar #EventsMessagesBox > label { 
+	cursor: pointer; 
+	margin-right:5px;
+}

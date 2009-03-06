@@ -1,0 +1,10 @@
+<!ENTITY piratequestingToolbar.label "PirateQuesting">
+<!ENTITY piratequestingToolbar.tooltip "Open PirateQuesting Sidebar">
+<!ENTITY piratequestingsidebar.title "Pirate Questing">
+<!ENTITY openpiratequestingsidebar.commandkey "E">
+<!ENTITY openpiratequestingsidebar.modifiers "shift accel">
+<!ENTITY piratequestingsidebar.title "Pirate Questing">
+<!ENTITY piratequestingsidebar.menu.edit "Edit">
+<!ENTITY piratequestingsidebar.menu.about "About">
+<!ENTITY piratequestingsidebar.menu.help "Help">
+<!ENTITY piratequestingsidebar.loading "Loading...">

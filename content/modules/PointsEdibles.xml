@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<module>
+  <name>PointsEdibles</name>
+  <description>Module for using Points and Edibles</description>
+  <strings>chrome://piratequesting/locale/PointsEdibles.properties</strings>
+  <script>chrome://piratequesting/content/modules/InventoryManager.js</script>
+  <script>chrome://piratequesting/content/modules/PointsEdibles.js</script>
+   <overlay tabid="PointsEdibles_tab" tabpanelid="PointsEdibles_tabpanel">chrome://piratequesting/content/modules/PointsEdibles.xul</overlay>
+</module>

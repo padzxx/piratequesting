@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<module>
+  <name>Player</name>
+  <description>Player information module</description>
+  <style>chrome://piratequesting/content/modules/Player.css</style>
+  <script>chrome://piratequesting/content/modules/Player.js</script>
+  <overlay tabid="Player_tab" tabpanelid="Player_tabpanel">chrome://piratequesting/content/modules/Player.xul</overlay>
+</module>
