@@ -33,7 +33,7 @@
  */
 
 var fightLog = new LogViewer();
-fightLog.tableName = "fightlog";
+fightLog.tableName = "fight";
 fightLog.query = "SELECT fight.id as id, me.name as me, opp.name as opponent, win.name as winner, me.strength as myStrength, me.defense as myDefense, me.speed as mySpeed, opp.strength as theirStrength, opp.defense as theirDefense, opp.speed as theirSpeed, prize, experience, fight.datetime FROM fight inner join player as me on fight.my_id = me.id inner join player as opp on fight.opponent_id = opp.id inner join player as win on fight.winner_id = win.id order by fight.datetime desc limit 100";
 fightLog.copy = function() {
 	var idList = fightLog.selectionMenu();

@@ -95,7 +95,7 @@
 									persist="width ordinal hidden sortActive sortDirection" class="sortDirectionIndicator"
 									sortActive="false"/>
 				<splitter class="tree-splitter" />
-			<treecol	id="dt" label="Date Time" 
+			<treecol	id="datetime" label="Date Time" 
 				flex="1" persist="width ordinal hidden sortActive sortDirection" 
 				class="sortDirectionIndicator"  sortActive="false"/>
 

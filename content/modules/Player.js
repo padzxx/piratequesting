@@ -196,8 +196,7 @@ piratequesting.Player = function() {
 				//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role").length);
 				
 				
-				name = getChildrenByClassName(doc.getElementById("profile_info"),"user_role")[0].getElementsByTagName('a')[1].firstChild.nodeValue;
-				//alert(name);
+				name = doc.evaluate('string(id("profile_info")//div[@class="user_role"][1]//a[last()])',doc,null,XPathResult.STRING_TYPE,null).stringValue;
 				//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role")[0].firstChild.nodeValue);
 				var lp = /lvl:\D+(\d+)\D+(\d+)/.exec(doc.evaluate('string(id("profile_info")//div[@class="user_role"][last()])',doc,null,XPathResult.STRING_TYPE,null).stringValue.stripCommas());
 				level = lp[1];

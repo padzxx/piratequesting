@@ -1,30 +1,34 @@
 var piratequesting = top.piratequesting;
 
+
 /**
  * Item creates a new inventory item
  * 
  * @class
  * @param {String}
- *            item_name - name of the inventory item
+ *            name - name of the inventory item
  * @param {String}
- *            item_type - type of the inventory item (e.g. "weapon")
+ *            type - type of the inventory item (e.g. "weapon")
  * @param {Integer}
- *            item_quantity - quantity of the inventory item
+ *            quantity - quantity of the inventory item
  * @param {String}
- *            item_imgsrc - source of the image for the inventory item
+ *            imgsrc - source of the image for the inventory item
  * @param {String}
- *            item_price - price of the inventory item
+ *            price - price of the inventory item
  * @param {String}
- *            item_actions - Array of Strings of actions available
+ *            actions - Array of Strings of actions available
  */
-function Item(item_name, item_type, item_quantity, item_imgsrc, item_id, item_price, item_actions) {
-	var type = item_type;
-	var imgsrc = item_imgsrc;
-	var name = item_name;
-	var quantity = item_quantity;
-	var id = item_id;
-	var price = item_price;
-	var actions = item_actions;
+function Item(name, quantity, imgsrc, id, action_id, price, cost, actions,adjustments,description) {
+	var imgsrc = imgsrc;
+	var name = name;
+	var quantity = quantity;
+	var id = id;
+	var action_id = action_id;
+	var price = price;
+	var cost = cost;
+	var actions = actions;
+	var adjustments = adjustments;
+	var description = description;
 
 	this.setQuantity = function(qty) {
 		quantity = addCommas(qty);
@@ -68,34 +72,6 @@ function Item(item_name, item_type, item_quantity, item_imgsrc, item_id, item_pr
 		quantity = 0;
 	};
 
-	this.generateXML = function(xmlDoc) {
-		var newNode = xmlDoc.createElement("item");
-		var newName = xmlDoc.createElement("name");
-		var newType = xmlDoc.createElement("type");
-		var newQuantity = xmlDoc.createElement("quantity");
-		var newSource = xmlDoc.createElement("imgsrc");
-		var newID = xmlDoc.createElement("id");
-		var newPrice = xmlDoc.createElement("price");
-		var newActions = xmlDoc.createElement("actions");
-
-		newName.appendChild(xmlDoc.createTextNode(name));
-		newType.appendChild(xmlDoc.createTextNode(type));
-		newQuantity.appendChild(xmlDoc.createTextNode(quantity));
-		newSource.appendChild(xmlDoc.createTextNode(imgsrc));
-		newID.appendChild(xmlDoc.createTextNode(id));
-		newPrice.appendChild(xmlDoc.createTextNode(price));
-		newActions.appendChild(xmlDoc.createTextNode(actions.join("|")));
-
-		newNode.appendChild(newName);
-		newNode.appendChild(newType);
-		newNode.appendChild(newQuantity);
-		newNode.appendChild(newSource);
-		newNode.appendChild(newID);
-		newNode.appendChild(newPrice);
-		newNode.appendChild(newActions);
-
-		return newNode;
-	};
 
 }
 
@@ -104,15 +80,15 @@ function Item(item_name, item_type, item_quantity, item_imgsrc, item_id, item_pr
  * 
  * @constructor
  * @param (String)
- *            type - Text identifier of the category type
+ *            name - Text identifier of the category type
  * @param (Integer)
  *            cat_number - Number identifying the associated item market
  *            category
  */
-function Category(type, cat_number) {
+function Category(name, cat_number) {
 	var items = new Array();
-	this.type = type;
-	this.cat = cat_number;
+	var name = name;
+	
 
 	/**
 	 * 
@@ -153,7 +129,6 @@ function Category(type, cat_number) {
 		}
 		return i;
 	};
-
 	/**
 	 * generateXML creates xml objects for the components of this category
 	 * 
@@ -181,464 +156,115 @@ function Category(type, cat_number) {
 	}
 }
 
-piratequesting.Inventory = function() {
+const SELL = 1;
+const MARKET = 2;
+const USE = 4;
+const EQUIP = 8;
+const UNEQUIP = 16;
+const RETURN = 32;
+const SEND = 64;
 
-	var categories = {
-		edibles : new Category("edibles", 3),
-		equipment : new Category("equipment", null),
-		head : new Category("head", 5),
-		weapons : new Category("weapon", 1),
-		armour : new Category("armor", 2),
-		offhand : new Category("offhand", 11),
-		grenades : new Category("grenade", 6),
-		miscellaneous : new Category("miscellaneous", 8),
-		poisons : new Category("poison", 4),
-		tokens : new Category("tokens", 12),
-		points : new Item("Points", "point", 0,
-				"chrome://piratequesting/content/points_dice.gif", "points",
-				null, ["market"])
+var ACTIONS = {
+	'sell' : SELL,
+	'market': MARKET,
+	'use': USE,
+	'equip': EQUIP,
+	'unequip': UNEQUIP,
+	'return': RETURN,
+	'send': SEND
+};
+
+piratequesting.InventoryManager = function() {
+
+	//check Database for appropriate tables and create if missing, then force check inventory if baseURL is set
+	/**
+	 * @type {Document}
+	 */
+	var inventory = function() { 
+						var doc = document.implementation.createDocument("","inventory",null);
+						var head = doc.createElement("category");
+						head.setAttribute("name", "head");
+						head.setAttribute("id","5");
+						var armour = doc.createElement("category");
+						armour.setAttribute("name", "armour");
+						armour.setAttribute("id","2");
+						var weapons = doc.createElement("category");
+						weapons.setAttribute("name", "weapons");
+						weapons.setAttribute("id","1");
+						var offhand = doc.createElement("category");
+						offhand.setAttribute("name", "offhand");
+						offhand.setAttribute("id","11");
+						var edibles = doc.createElement("category");
+						edibles.setAttribute("name", "edibles");
+						edibles.setAttribute("id","3");
+						var grenades = doc.createElement("category");
+						grenades.setAttribute("name", "grenades");
+						grenades.setAttribute("id","6");
+						var miscellaneous = doc.createElement("category");
+						miscellaneous.setAttribute("name", "miscellaneous");
+						miscellaneous.setAttribute("id","8");
+						var poisons = doc.createElement("category");
+						poisons.setAttribute("name", "poisons");
+						poisons.setAttribute("id","4");
+						var tokens = doc.createElement("category");
+						tokens.setAttribute("name", "tokens");
+						tokens.setAttribute("id","12");
+						
+						doc.documentElement.appendChild(head);
+						doc.documentElement.appendChild(armour);
+						doc.documentElement.appendChild(weapons);
+						doc.documentElement.appendChild(offhand);
+						doc.documentElement.appendChild(edibles);
+						doc.documentElement.appendChild(grenades);
+						doc.documentElement.appendChild(miscellaneous);
+						doc.documentElement.appendChild(poisons);
+						doc.documentElement.appendChild(tokens);
+						return doc;
+					}();
+
+	function write() {
+		//write current data to the database
+		//replace into? insert on duplicate update?
+		
+		//2009/03/14 - replace into will lose data if our tree isn't complete 
+		
 	}
-
+	
+	var ajax;
+	
 	return {
+		
+		getInventory : function () {
+			return inventory; 
+		},
 
 		clear : function() {
 			for (var category in categories) {
 				category.clear();
 			}
+			//add database clear.
 		},
 		setPoints : function(quantity) {
 			categories.points.setQuantity(quantity);
 		},
 
-		//TODO replace this with database 
-		exists : function() {
-			var profdir = Components.classes["@mozilla.org/file/directory_service;1"]
-					.getService(Components.interfaces.nsIProperties).get(
-							"ProfD", Components.interfaces.nsIFile).path;
-			var file = Components.classes["@mozilla.org/file/local;1"]
-					.createInstance(Components.interfaces.nsILocalFile);
-			file.initWithPath(profdir);
-			file.append("Inventory.xml");
-
-			var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-					.createInstance(Components.interfaces.nsIFileProtocolHandler);
-			var logfile = ph.getURLSpecFromFile(file);
-
-			return file.exists();
-		},
-		//TODO replace this with database
-		clear : function() {
-			piratequesting.Inventory.clearAll();
-			try {
-				var profd = Components.classes["@mozilla.org/file/directory_service;1"]
-						.getService(Components.interfaces.nsIProperties).get(
-								"ProfD", Components.interfaces.nsIFile).path;
-				var file = Components.classes["@mozilla.org/file/local;1"]
-						.createInstance(Components.interfaces.nsILocalFile);
-				file.initWithPath(profd);
-				file.append("Inventory.xml");
-				file.remove(true);
-			} catch (e) {
-				alert(e.message);
-			}
+		
+		checkInventory : function() {
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { onError: function() { alert('Error occurred while updating inventory'); } });
 		},
 
-		//TODO be sure to pass the check on to global parsing
-		checkInventory : function(extra) {
-			piratequesting.Inventory.checked = true;
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl + "/index.php?on=inventory";
-			// alert(url);
-			http.open("GET", url, true);
-			http.onerror = function(e) {
-				onError(e);
-			}
-			piratequesting.AJAX.edibleshttp = http;
-			http.onreadystatechange = function() {
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						// debugResponse(http.responseText);
-						piratequesting.Inventory.update(http.responseText);
-						piratequesting.Player.parse(http.responseText);
-						if (extra != null)
-							eval(extra);
-					} else {
-						alert("Inventory update failed due to error");
-						if (extra != null)
-							eval(extra);
-					}
-				}
-			}
-			http.send(null);
+		checkItemGuide : function() {
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=item_guide", { onError: function() { alert('Error occurred while updating item guide'); } });
 		},
 
-		//XXX Move the adjusted stuff out into a different module. Tools section probably
-		adjustedStrength : function() {
-			var item, adj, stat, total = 0;
-			stat = piratequesting.Player.attributes.strength;
-			stat = stripCommas(stat);
-			total = Number(stat);
-			for (var i = 0; i < piratequesting.Inventory.equipment.count(); i++) {
-				if (piratequesting.Inventory.equipment.GetItemAtIndex(i).name != "Nothing") {
-					item = piratequesting.ItemGuide
-							.getItemByName(piratequesting.Inventory.equipment
-									.GetItemAtIndex(i).name);
-					for (var j = 0; j < item.count(); j++) {
-						adj = item.getAdjustment(j);
-						if (adj.type == "Strength") {
-							total = total + adj.adjust(stat);
-						}
-					}
-				}
-			}
-			return Math.round((Number(total)) * 10) / 10;
-		},
 
-		adjustedDefense : function() {
-			var item, adj, stat, total = 0;
-			stat = piratequesting.Player.attributes.defense;
-			stat = stripCommas(stat);
-			total = Number(stat);
-			for (var i = 0; i < piratequesting.Inventory.equipment.count(); i++) {
-				if (piratequesting.Inventory.equipment.GetItemAtIndex(i).name != "Nothing") {
-					item = piratequesting.ItemGuide
-							.getItemByName(piratequesting.Inventory.equipment
-									.GetItemAtIndex(i).name);
-					for (var j = 0; j < item.count(); j++) {
-						adj = item.getAdjustment(j);
-						if (adj.type == "Defense") {
-							total = total + adj.adjust(stat);
-						}
-					}
-				}
-			}
-			return Math.round((Number(total)) * 10) / 10;
-		},
 
-		adjustedSpeed : function() {
-			var item, adj, stat, total = 0;
-			stat = piratequesting.Player.attributes.speed;
-			stat = stripCommas(stat);
-			total = Number(stat);
-			// alert(total);
-			// alert(piratequesting.Inventory.equipment.count());
-			for (var i = 0; i < piratequesting.Inventory.equipment.count(); i++) {
-				if (piratequesting.Inventory.equipment.GetItemAtIndex(i).name != "Nothing") {
-					item = piratequesting.ItemGuide
-							.getItemByName(piratequesting.Inventory.equipment
-									.GetItemAtIndex(i).name);
-					// alert(item.count());
-					for (var j = 0; j < item.count(); j++) {
-						adj = item.getAdjustment(j);
-						if (adj.type == "Speed") {
-							total = total + adj.adjust(total);
-							// alert(total);
-						}
-					}
-				}
-			}
-			return Math.round((Number(total)) * 10) / 10;
-		},
-
-		adjustedTotal : function() {
-			return Math.round(piratequesting.Inventory.adjustedStrength()
-					+ piratequesting.Inventory.adjustedDefense()
-					+ piratequesting.Inventory.adjustedSpeed());
-		},
-
-		//TODO Privatize!
-		makeTooltip : function(id, text) {
-			var tt, vb, l;
-			var labelset;
-			var emptytest = /^[\s]*$/;
-			tt = document.createElement("tooltip");
-			vb = document.createElement("vbox");
-			labelset = text.split("<br>");
-			for (var label in labelset) {
-				if (!emptytest.test(label)) {
-					l = document.createElement("label");
-					l.setAttribute("value", label);
-					vb.appendChild(l);
-				}
-			}
-			tt.setAttribute("id", "tt" + id);
-			tt.position = "end_before";
-			tt.appendChild(vb);
-
-			return tt;
-		},
-		//TODO Privatize!
-		updateEdiblesList : function() {
-			var createEdible = function(label, value) {
-				var menuitem = document.createElement('menuitem');
-				menuitem.setAttribute('label', label);
-				menuitem.setAttribute('value', value);
-				return menuitem;
-			};
-			var edibleitems = document.getElementById('edibleitems');
-			var edibleslist = document.getElementById('edibleslist');
-			var edible;
-			var pickme;
-			try {
-				if (edibleitems.hasChildNodes())
-					pickme = edibleslist.selectedItem.value;
-			} catch (e) {
-				// this is here just in case the user hasn't selected
-				// anything before the second update
-			}
-			// remove the old edibles
-			while (edibleitems.hasChildNodes()) {
-				edibleitems.removeChild(edibleitems.childNodes[0]);
-			}
-			for (var i = 0; i < piratequesting.Inventory.edibles.count(); i++) {
-				edible = piratequesting.Inventory.edibles.GetItemAtIndex(i);
-				edibleitems.appendChild(createEdible(edible.name + ' [x'
-								+ edible.quantity + ']', edible.id));
-				if (edible.id == pickme)
-					edibleslist.selectedIndex = i;
-			}
-		},
-		/*
-		 * var updatePoints = function (value) { this.points = new
-		 * Item("Points", "point", value,
-		 * "chrome://piratequesting/content/points_dice.jpg", l, null, null,
-		 * ["market"]); }
-		 */
-		//TODO Privatize!
-		updateInventoryList : function() {
-
-			var newInventoryItem = function(item, cat) {
-
-				// start by create all of the elements and setting their
-				// attributes.
-				var container = document.createElement("hbox");
-				container.setAttribute("align", "center");
-
-				var image = document.createElement("image");
-				image.setAttribute("src", item.imgsrc);
-				image.setAttribute("height", "50");
-				image.setAttribute("width", "50");
-
-				var labelbox = document.createElement("vbox");
-				labelbox.setAttribute("flex", "1");
-
-				var itemlabel = document.createElement("label");
-				itemlabel.setAttribute("type", "bold");
-				itemlabel.setAttribute("value", item.name + "  [x"
-								+ item.quantity + "]");
-
-				var actioncontainer = document.createElement("hbox");
-				actioncontainer.setAttribute("flex", "1");
-
-				if (item.hasAction("use")) {
-					var uselink = document.createElement("label");
-					uselink.setAttribute("value", "Use");
-					uselink.setAttribute("type", "link");
-					uselink.setAttribute("flex", "1");
-					uselink.setAttribute("onclick",
-							'piratequesting.Inventory.useItem("' + item.id
-									+ '");');
-					actioncontainer.appendChild(uselink);
-				}
-
-				if (item.hasAction("sell")) {
-					var selllink = document.createElement("label");
-					selllink.setAttribute("value", "Sell");
-					selllink.setAttribute("type", "link");
-					selllink.setAttribute("flex", "1");
-					selllink
-							.setAttribute("onclick",
-									'piratequesting.Inventory.showInventoryBox("'
-											+ item.id + '","' + item.price
-											+ '","' + item.name + '","'
-											+ item.quantity + '");');
-					actioncontainer.appendChild(selllink);
-				}
-
-				if (item.hasAction("market")) {
-					var marketlink = document.createElement("label");
-					marketlink.setAttribute("value", "Market");
-					marketlink.setAttribute("type", "link");
-					marketlink.setAttribute("flex", "1");
-					marketlink.setAttribute("number", item.id);
-					marketlink.setAttribute("onclick",
-							'piratequesting.Inventory.showInventoryBox("'
-									+ item.id + '","0","' + item.name + '","'
-									+ item.quantity + '");');
-					actioncontainer.appendChild(marketlink);
-				}
-
-				if (item.hasAction("market") || item.hasAction("sell")) {
-					var checklink = document.createElement("label");
-					checklink.setAttribute("value", "Check Prices");
-					checklink.setAttribute("type", "link");
-					checklink.setAttribute("flex", "1");
-					checklink.setAttribute("onclick",
-							'piratequesting.Inventory.showInventoryBox("'
-									+ item.id + '","-1","' + item.name + '","'
-									+ cat + '");');
-					actioncontainer.appendChild(checklink);
-				}
-
-				if (item.hasAction("return")) {
-					var returnlink = document.createElement("label");
-					returnlink.setAttribute("value", "Return");
-					returnlink.setAttribute("type", "link");
-					returnlink.setAttribute("flex", "1");
-					returnlink.setAttribute("onclick",
-							'piratequesting.Inventory.returnItem("' + item.id
-									+ '");');
-					actioncontainer.appendChild(returnlink);
-				}
-
-				// put the item info and actions together
-				labelbox.appendChild(itemlabel);
-				labelbox.appendChild(actioncontainer);
-
-				// put the image and various labels together
-				container.appendChild(image);
-				container.appendChild(labelbox);
-
-				// return our happy new container
-				return container;
-			};
-
-			var inventoryList = document.getElementById("inventorylist");
-
-			// clear the list
-			while (inventoryList.hasChildNodes())
-				inventoryList.removeChild(inventoryList.firstChild);
-
-			// First add the Head items
-			// assume the head item is the first item in equipment (it is
-			// for now.. unless they add new euipment types).. also check if
-			// it's empty...
-			// waiting for confirmation that we can add the equipment to the
-			// marketable items so they are currently not included
-
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.points, "points"));
-
-			// if (equipment.GetItemAtIndex(0).name != "Nothing")
-			// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(0)));
-			for (var i = 0; i < piratequesting.Inventory.head.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.head.GetItemAtIndex(i),
-						piratequesting.Inventory.head.cat));
-
-			// then the armour
-			// if (equipment.GetItemAtIndex(1).name != "Nothing")
-			// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(1)));
-			for (var i = 0; i < piratequesting.Inventory.armour.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.armour.GetItemAtIndex(i),
-						piratequesting.Inventory.armour.cat));
-
-			// then the weapons
-			// if (equipment.GetItemAtIndex(2).name != "Nothing")
-			// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(2)));
-			for (var i = 0; i < piratequesting.Inventory.weapons.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.weapons.GetItemAtIndex(i),
-						piratequesting.Inventory.weapons.cat));
-
-			// then the offhand
-			// if (equipment.GetItemAtIndex(3).name != "Nothing")
-			// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(3)));
-			for (var i = 0; i < piratequesting.Inventory.offhand.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.offhand.GetItemAtIndex(i),
-						piratequesting.Inventory.offhand.cat));
-
-			// now do the non-equipment items
-			for (var i = 0; i < piratequesting.Inventory.edibles.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.edibles.GetItemAtIndex(i),
-						piratequesting.Inventory.edibles.cat));
-
-			for (var i = 0; i < piratequesting.Inventory.grenades.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.grenades.GetItemAtIndex(i),
-						piratequesting.Inventory.grenades.cat));
-
-			for (var i = 0; i < piratequesting.Inventory.poisons.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.poisons.GetItemAtIndex(i),
-						piratequesting.Inventory.poisons.cat));
-
-			for (var i = 0; i < piratequesting.Inventory.miscellaneous.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.miscellaneous
-								.GetItemAtIndex(i),
-						piratequesting.Inventory.miscellaneous.cat));
-
-			for (var i = 0; i < piratequesting.Inventory.tokens.count(); i++)
-				inventoryList.appendChild(newInventoryItem(
-						piratequesting.Inventory.tokens.GetItemAtIndex(i),
-						piratequesting.Inventory.tokens.cat));
-
-			// done :)
-		},
 
 		//TODO replace this with database
 		write : function() {
-
-			var profdir = Components.classes["@mozilla.org/file/directory_service;1"]
-					.getService(Components.interfaces.nsIProperties).get(
-							"ProfD", Components.interfaces.nsIFile).path
-			var file = Components.classes["@mozilla.org/file/local;1"]
-					.createInstance(Components.interfaces.nsILocalFile);
-			file.initWithPath(profdir);
-			file.append("Inventory.xml");
-
-			// get the local file:// url
-			var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-					.createInstance(Components.interfaces.nsIFileProtocolHandler);
-			var logfile = ph.getURLSpecFromFile(file);
-
-			// load the log and add our new values
-			var xmlDoc = document.implementation.createDocument("",
-					"Inventory", null);
-
-			// has to be done for each category
-			// piratequesting.Inventory.armour;
-			xmlDoc.documentElement.appendChild(piratequesting.Inventory.armour
-					.generateXML(xmlDoc));
-			xmlDoc.documentElement.appendChild(piratequesting.Inventory.edibles
-					.generateXML(xmlDoc));
-			xmlDoc.documentElement
-					.appendChild(piratequesting.Inventory.grenades
-							.generateXML(xmlDoc));
-			xmlDoc.documentElement.appendChild(piratequesting.Inventory.head
-					.generateXML(xmlDoc));
-			xmlDoc.documentElement
-					.appendChild(piratequesting.Inventory.miscellaneous
-							.generateXML(xmlDoc));
-			xmlDoc.documentElement.appendChild(piratequesting.Inventory.offhand
-					.generateXML(xmlDoc));
-			xmlDoc.documentElement.appendChild(piratequesting.Inventory.poisons
-					.generateXML(xmlDoc));
-			xmlDoc.documentElement.appendChild(piratequesting.Inventory.tokens
-					.generateXML(xmlDoc));
-			xmlDoc.documentElement.appendChild(piratequesting.Inventory.weapons
-					.generateXML(xmlDoc));
-			xmlDoc.documentElement
-					.appendChild(piratequesting.Inventory.equipment
-							.generateXML(xmlDoc));
-
-			var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-					.createInstance(Components.interfaces.nsIFileOutputStream);
-			// clear the file for writing the new doc
-			foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); // write,
-			// create,
-			// truncate
-			var ser = new XMLSerializer();
-			// write the serialized XML to file
-			ser.serializeToStream(xmlDoc, foStream, "");
-			foStream.close();
 		},
 		
-		//TODO this needs massive changes. Say goodbye to friday 
+		//TODO this needs massive changes. Say goodbye to friday.... make that sunday.. make the a whole week
 		update : (function() {
 			// piratequesting.Inventory.checked=true;
 
@@ -889,94 +515,7 @@ piratequesting.Inventory = function() {
 
 			//TODO Privatize!
 			//TODO Could probably be made much more efficient as well. I guess that's saturday gone, too
-			/**
-			 * updateMenu Creates the equipment list and the popup menus for
-			 * each equipment slot
-			 * 
-			 * @param (String)
-			 *            menu_id - weapon_menu, armor_menu, head_menu,
-			 *            offhand_menu
-			 * @param (String)
-			 *            category - the associated Category object
-			 */
-			var updateMenu = function(menu_id, category, skip) {
-				skip = (skip) ? true : false;
-				var wm = document.getElementById(menu_id);
-				var mi, tt, igr;
-				var eqi = null;
-				var ttbox = document.getElementById("ttbox");
-				// clear menu
-				var success = true;
-				while (wm.hasChildNodes())
-					wm.removeChild(wm.childNodes[0]);
 
-				// clear tooltips
-				// while(ttbox.hasChildNodes())
-				// ttbox.removeChild(ttbox.childNodes[0]);
-
-				// determine whether or not the associated equipment slot has an
-				// item
-				for (var i = 0; i < piratequesting.Inventory.equipment.count(); i++) {
-					if (piratequesting.Inventory.equipment.GetItemAtIndex(i).type == category.type) {
-						if (piratequesting.Inventory.equipment
-								.GetItemAtIndex(i).name != "Nothing") {
-							eqi = piratequesting.Inventory.equipment
-									.GetItemAtIndex(i);
-						}
-						break;
-					}
-				}
-				// add the unequiiped items to the menu, create the associated
-				// labels, values and oncommand action
-				if (eqi == null)
-					for (var i = 0; i < category.count(); i++) {
-						igr = piratequesting.ItemGuide.getItemByName(category
-								.GetItemAtIndex(i).name);
-						if ((!skip) && (igr == null))
-							return false; // item not found,
-						// get the item
-						// guide and start
-						// over
-						else if (igr != null) {
-							mi = document.createElement("menuitem");
-							mi.setAttribute("label", "Equip "
-											+ category.GetItemAtIndex(i).name);
-							mi.setAttribute("value",
-									category.GetItemAtIndex(i).id);
-							// set the oncommand based on whether or not there
-							// is an
-							// item in the slot already
-							mi
-									.setAttribute(
-											"oncommand",
-											(eqi == null)
-													? "piratequesting.Inventory.equip(this.value)"
-													: "swap(this.value,"
-															+ eqi.id + ")");
-							tt = igr.makeTooltip("tt"
-									+ category.GetItemAtIndex(i).id);
-							document.getElementById('ttbox').appendChild(tt);
-							mi.setAttribute("tooltip", "tt"
-											+ category.GetItemAtIndex(i).id);
-							mi.setAttribute("popupanchor", "topright");
-							wm.appendChild(mi);
-						}
-					}
-
-				// add the equipped item, if present, to the menu and set its
-				// associated label, value, and oncommand action
-				if (eqi != null) {
-					// if (category.HasItems())
-					// wm.appendChild(document.createElement("menuseparator"));
-					mi = document.createElement("menuitem");
-					mi.setAttribute("label", "Unequip " + eqi.name);
-					mi.setAttribute("value", eqi.id);
-					mi.setAttribute("oncommand",
-							"piratequesting.Inventory.unequip(this.value)");
-					wm.appendChild(mi);
-				}
-				return true;
-			};
 
 			var updateEdibles = function(text) {
 				// should find and retrieve the full names (in
@@ -1194,635 +733,148 @@ piratequesting.Inventory = function() {
 			return upd;
 		})(),
 
-		//TODO can probably cut this
-		checkedInventory : function() {
-			return piratequesting.Inventory.checked;
-		},
-
-		//TODO Move this to the Inventory Module
-		showInventoryBox : function(id, price, name, qty) {
-			document.getElementById("invdeck").setAttribute("selectedIndex",
-					"1");
-			var invd = document.getElementById("invdetails");
-
-			// clear the details
-			while (invd.hasChildNodes())
-				invd.removeChild(invd.firstChild);
-
-			var prn = Number(priceToNumber(price));
-			if (prn > 0) {
-				// selling
-				var msg1 = document.createElement("description");
-				msg1
-						.setAttribute("value", "You have " + qty + " " + name
-										+ ".");
-				var msg3 = document.createElement("description");
-				msg3.setAttribute("value", "How many would you like to sell?");
-				invd.appendChild(msg1);
-				invd.appendChild(msg3);
-
-				var sellbox = document.createElement("hbox");
-				sellbox.setAttribute("align", "center");
-
-				var qtyin = document.createElement("textbox");
-				qtyin.setAttribute("type", "number");
-				qtyin.setAttribute("width", "50");
-				qtyin.setAttribute("id", "qtyin");
-				qtyin.setAttribute("max", qty);
-				qtyin.setAttribute("min", 0);
-
-				var hiddenpricein = document.createElement("textbox");
-				hiddenpricein.setAttribute("value", prn);
-				hiddenpricein.setAttribute("id", "pricein");
-				hiddenpricein.setAttribute("type", "hide");
-
-				var hiddenid = document.createElement("textbox");
-				hiddenid.setAttribute("value", id);
-				hiddenid.setAttribute("id", "item_id");
-				hiddenid.setAttribute("type", "hide");
-
-				var pricelabel = document.createElement("label");
-				pricelabel.setAttribute("value", " @ " + price + " each");
-
-				var totalbox = document.createElement("hbox");
-				totalbox.setAttribute("align", "center");
-
-				var totallabel = document.createElement("label");
-				totallabel.setAttribute("value", "Total: $");
-
-				var resultlabel = document.createElement("label");
-				resultlabel.setAttribute("value", "0");
-				resultlabel.setAttribute("id", "result");
-
-				var buttonbox = document.createElement("hbox");
-				buttonbox.setAttribute("align", "center");
-
-				var actionbutton = document.createElement("button");
-				actionbutton.setAttribute("label", "Sell");
-				actionbutton.setAttribute("id", "actionbutton");
-				actionbutton.setAttribute("maxwidth", "70");
-				actionbutton
-						.setAttribute(
-								"oncommand",
-								'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.sellitem()');
-
-				var cancelbutton = document.createElement("button");
-				cancelbutton.setAttribute("label", "Cancel");
-				cancelbutton.setAttribute("id", "cancelbutton");
-				cancelbutton.setAttribute("maxwidth", "70");
-				cancelbutton.setAttribute("oncommand",
-						'piratequesting.Inventory.hideInventoryBox()');
-
-				// now put them in the doc
-				totalbox.appendChild(totallabel);
-				totalbox.appendChild(resultlabel);
-
-				sellbox.appendChild(qtyin);
-				sellbox.appendChild(pricelabel);
-				sellbox.appendChild(hiddenpricein);
-
-				invd.appendChild(hiddenid);
-				invd.appendChild(sellbox);
-				invd.appendChild(totalbox);
-
-				buttonbox.appendChild(actionbutton);
-				buttonbox.appendChild(cancelbutton);
-				invd.appendChild(buttonbox);
-				document.getElementById("qtyin").addEventListener("change",
-						piratequesting.Inventory.giveResult, true);
-				document.getElementById("qtyin").addEventListener("input",
-						piratequesting.Inventory.giveResult, true);
-				document.getElementById('qtyin').addEventListener('keypress',
-						piratequesting.Inventory.HandleKeyPressItems, true);
-				document.getElementById("qtyin").focus();
-				// document.getElementById("qtyin").addEventListener("command",
-				// function () {
-				// document.getElementById("sellbutton").doCommand(); }, true);
-
-			} else if (prn == 0) {
-				// marketing
-
-				var msg1 = document.createElement("description");
-				msg1
-						.setAttribute("value", "You have " + qty + " " + name
-										+ ".");
-				var msg2 = document.createElement("description");
-				msg2.setAttribute("value",
-						"How many would you like to put on the market?");
-				var msg3 = document.createElement("description");
-				msg3.setAttribute("value", "And for how much?");
-				invd.appendChild(msg1);
-				invd.appendChild(msg2);
-				invd.appendChild(msg3);
-
-				var sellbox = document.createElement("hbox");
-				sellbox.setAttribute("align", "center");
-
-				var qtyin = document.createElement("textbox");
-				qtyin.setAttribute("type", "number");
-				qtyin.setAttribute("width", "50");
-				qtyin.setAttribute("id", "qtyin");
-				qtyin.setAttribute("max", qty);
-				qtyin.setAttribute("min", 0);
-
-				var pricein = document.createElement("textbox");
-				// pricein.setAttribute("value",prn);
-				pricein.setAttribute("id", "pricein");
-				pricein.setAttribute("wdith", "70");
-
-				var hiddenid = document.createElement("textbox");
-				hiddenid.setAttribute("value", id);
-				hiddenid.setAttribute("id", "item_id");
-				hiddenid.setAttribute("type", "hide");
-
-				var pricelabel = document.createElement("label");
-				pricelabel.setAttribute("value", " @ $");
-
-				var pricelabel2 = document.createElement("label");
-				pricelabel2.setAttribute("value", " each");
-
-				var totalbox = document.createElement("hbox");
-				totalbox.setAttribute("align", "center");
-
-				var totallabel = document.createElement("label");
-				totallabel.setAttribute("value", "Total: $");
-
-				var resultlabel = document.createElement("label");
-				resultlabel.setAttribute("value", "0");
-				resultlabel.setAttribute("id", "result");
-
-				var buttonbox = document.createElement("hbox");
-				buttonbox.setAttribute("align", "center");
-
-				var actionbutton = document.createElement("button");
-				actionbutton.setAttribute("label", "Market");
-				actionbutton.setAttribute("id", "actionbutton");
-				actionbutton.setAttribute("maxwidth", "70");
-				actionbutton
-						.setAttribute(
-								"oncommand",
-								'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.marketitem()');
-
-				var cancelbutton = document.createElement("button");
-				cancelbutton.setAttribute("label", "Cancel");
-				cancelbutton.setAttribute("id", "cancelbutton");
-				cancelbutton.setAttribute("maxwidth", "70");
-				cancelbutton.setAttribute("oncommand",
-						'piratequesting.Inventory.hideInventoryBox()');
-
-				// now put them in the doc
-				totalbox.appendChild(totallabel);
-				totalbox.appendChild(resultlabel);
-
-				sellbox.appendChild(qtyin);
-				sellbox.appendChild(pricelabel);
-				sellbox.appendChild(pricein);
-				sellbox.appendChild(pricelabel2);
-
-				invd.appendChild(hiddenid);
-				invd.appendChild(sellbox);
-				invd.appendChild(totalbox);
-
-				buttonbox.appendChild(actionbutton);
-				buttonbox.appendChild(cancelbutton);
-				invd.appendChild(buttonbox);
-
-				document.getElementById("qtyin").addEventListener("change",
-						piratequesting.Inventory.giveResult, true);
-				document.getElementById("qtyin").addEventListener("input",
-						piratequesting.Inventory.giveResult, true);
-				document.getElementById('qtyin').addEventListener('keypress',
-						piratequesting.Inventory.HandleKeyPressItems, true);
-				document.getElementById("pricein").addEventListener("input",
-						piratequesting.Inventory.giveResult, true);
-				document.getElementById('pricein').addEventListener('keypress',
-						piratequesting.Inventory.HandleKeyPressItems, true);
-				document.getElementById("qtyin").focus();
-			} else if (prn < 0) {
-				// checking prices
-				// note qty is treated at the category number for the item
-				// market here.
-				var cat = qty;
-				var msg1 = document.createElement("description");
-				msg1.setAttribute("value", "Current market prices for:");
-				var msg2 = document.createElement("description");
-				msg2.setAttribute("value", name);
-				msg2.setAttribute("style", "padding-left:20px;")
-
-				invd.appendChild(msg1);
-				invd.appendChild(msg2);
-
-				var buttonbox = document.createElement("hbox");
-				buttonbox.setAttribute("align", "center");
-
-				var cancelbutton = document.createElement("button");
-				cancelbutton.setAttribute("label", "Close");
-				cancelbutton.setAttribute("id", "cancelbutton");
-				cancelbutton.setAttribute("maxwidth", "70");
-				cancelbutton.setAttribute("oncommand",
-						'piratequesting.Inventory.hideInventoryBox()');
-
-				buttonbox.appendChild(cancelbutton);
-
-				var pricebox = document.createElement("hbox");
-				var pricelist = document.createElement("listbox");
-				pricelist.setAttribute("id", "pricelist");
-				var spacer = document.createElement("box");
-				spacer.setAttribute("flex", "1");
-				// pricelist.setAttribute("style","");
-				// pricelist.setAttribute("max-height", "120");
-
-				pricebox.appendChild(pricelist);
-				pricebox.appendChild(spacer);
-				invd.appendChild(pricebox);
-				invd.appendChild(buttonbox);
-				piratequesting.Inventory.getPrices(cat, name);
-			}
-
-		},
-
-		//TODO Move this to the inventory module (and probably refactor/privatize)
-		getPrices : function(cat, name) {
-			piratequesting.Inventory.disableInventory();
-			var http = new XMLHttpRequest();
-			piratequesting.AJAX.inventoryhttp = http;
-			if (cat == "points")
-				var url = piratequesting.baseurl
-						+ "/index.php?on=points_market";
-			else
-				var url = piratequesting.baseurl
-						+ "/index.php?ajax=item_market&category=" + cat;
-			http.open("GET", url, true);
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-
-			http.onreadystatechange = function() {
-				document.getElementById('invmeter').setAttribute(
-						'value',
-						Number(document.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						if (cat == "points")
-							piratequesting.Player.parse(http.responseText);
-						piratequesting.Inventory.processPrices(name,
-								http.responseText);
-					} else {
-						alert("Price list request failed due to error");
-					}
-				}
-			}
-			http.send(null);
-		},
-
-		//TODO Privatize!
-		processPrices : function(name, text) {
-			var pricelist = document.getElementById("pricelist");
-			var stripex;// = /<h2>Item Market<\/h2>[\s\S]*?(<table
-			// class=['"]one['"]>[\s\S]*?<\/table>)/;
-			// var stripex2 = /<h2>Points Market<\/h2><\/span>[\s\S]*?(<table
-			// class=['"]one['"]>[\s\S]*?<\/table>)/;
-			if (name == "Points") {
-				stripex = /<h2>Points Market<\/h2><\/span>[\s\S]*?(<table class=['"]one['"]>[\s\S]*?<\/table>)/;
-				if (stripex.test(text)) {
-					text = stripex.exec(text)[1];
-					var itemex = new RegExp(
-							"<td class=['\"]textl[\"']>([,0-9]+)<\\/td>[\\s\\S]*?<td class=['\"]textl[\"']>(\\$[.,0-9]+)<\\/td>",
-							"g");
-					var match = itemex.exec(text);
-					var li;
-					var order = 0;
-					while (match != null) {
-						order++;
-						li = document.createElement("listitem");
-						li.setAttribute("label", match[1] + "  " + match[2]);
-						li.setAttribute("order", (order % 2) ? "odd" : "even");
-						pricelist.appendChild(li);
-						match = itemex.exec(text);
-					}
-				} else
-					alert("Error retrieving prices. Page returned by server\nwas not the points market.");
-			} else {
-				stripex = /<div id=['"]citemmkt['"]>[\s\S]*?(<table[\s\S]*?<\/table>)/;
-				if (stripex.test(text)) {
-					text = stripex.exec(text)[1];
-					// now look for rows that contain our item name and add
-					// their
-					// prices to the list
-					var itemex = new RegExp(
-							"<td class=['\"]hlink_adjust[\"']>[\\s\\S]*?>"
-									+ RegExp.escape(name)
-									+ "<[\\s\\S]*?(\[x[,0-9]+\])[\\s\\S]*?(\\$[.,0-9]+)",
-							"g");
-					var match = itemex.exec(text);
-					var li;
-					var order = 0;
-					while (match != null) {
-						order++;
-						li = document.createElement("listitem");
-						li.setAttribute("label", match[1] + "  " + match[2]);
-						li.setAttribute("order", (order % 2) ? "odd" : "even");
-						pricelist.appendChild(li);
-						match = itemex.exec(text);
-					}
-				} else
-					alert("Error retrieving prices. Page returned by server\nwas not the item market");
-			}
-
-			piratequesting.Inventory.enableInventory();
-		},
-
-		//TODO Move to Inventory Module
-		hideInventoryBox : function() {
-			document.getElementById("invdeck").setAttribute("selectedIndex",
-					"0");
-			var invd = document.getElementById("invdetails");
-			content.focus();
-			// clear the details
-			while (invd.hasChildNodes())
-				invd.removeChild(invd.firstChild);
-
-		},
-
-		//TODO Move to Inventory Module
-		HandleKeyPressItems : function(e) {
-			switch (e.keyCode) {
-				case e.DOM_VK_RETURN :
-				case e.DOM_VK_ENTER :
-					document.getElementById("actionbutton").doCommand();
-				case e.DOM_VK_ESCAPE :
-					content.focus();
-					return;
-			}
-		},
-
-		//TODO Move to Inventory Module
-		giveResult : function() {
-			var qty = Number(document.getElementById("qtyin").value);
-			var price = Number(document.getElementById("pricein").value);
-			var result = addCommas(String(qty * price));
-
-			document.getElementById("result").setAttribute("value", result);
-		},
-
-		//TODO Move to Inventory Module
-		sellitem : function() {
-			piratequesting.Inventory.disableInventory();
-			var qty = document.getElementById("qtyin").value;
-			var id = document.getElementById("item_id").value;
-
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl
-					+ "/index.php?on=inventory&action=sell&id=" + id;;
-			var params = "quantity=" + qty + "&sell=Sell";
-			http.open("POST", url, true);
-
-			// Send the proper header information along with the request
-			http.setRequestHeader("Content-type",
-					"application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-			piratequesting.AJAX.inventoryhttp = http;
-			http.onreadystatechange = function() {
-				document.getElementById('invmeter').setAttribute(
-						'value',
-						Number(document.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Inventory
-								.checkInventory("piratequesting.Inventory.hideInventoryBox(); piratequesting.Inventory.enableInventory();");
-					} else {
-						alert("Sale failed due to error");
-					}
-				}
-			}
-			http.send(params);
-			// hideInvBox();
-		},
-
-		//TODO Move to Inventory Module
-		marketitem : function() {
-			piratequesting.Inventory.disableInventory();
-			var qty = document.getElementById("qtyin").value;
-			var id = document.getElementById("item_id").value;
-			var price = document.getElementById("pricein").value;
-			var url;
-			var http = new XMLHttpRequest();
-			if (id != "points")
-				url = piratequesting.baseurl
-						+ "/index.php?on=inventory&action=market&id=" + id;
-			else
-				url = piratequesting.baseurl + "/index.php?on=points_market";
-			var params = "quantity=" + qty + "&cost=" + price + "&market=Add";
-			http.open("POST", url, true);
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-			piratequesting.AJAX.inventoryhttp = http;
-			// Send the proper header information along with the request
-			http.setRequestHeader("Content-type",
-					"application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-
-			http.onreadystatechange = function() {
-				document.getElementById('invmeter').setAttribute(
-						'value',
-						Number(document.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Inventory
-								.checkInventory("piratequesting.Inventory.hideInventoryBox(); piratequesting.Inventory.enableInventory();");
-					} else {
-						alert("Marketing failed due to error");
-					}
-				}
-			}
-			http.send(params);
-			// hideInvBox();
-		},
-
-		//TODO Move to Equipment Module
-		unequip : function(id) {
-			piratequesting.Inventory.disableEquip();
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl + "/index.php";
-
-			var params = '?on=inventory&action=unequip&id=' + id;
-			http.open("GET", url + params, true);
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableEquip();
-			}
-			piratequesting.AJAX.equipmenthttp = http;
-			http.onreadystatechange = function() {
-				document.getElementById('eqmeter').setAttribute(
-						'value',
-						Number(document.getElementById('eqmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Inventory
-								.checkInventory("piratequesting.Inventory.enableEquip()");
-					} else {
-						alert("Unequipping failed due to error");
-					}
-				}
-			}
-			http.send(null);
-		},
-
-		//TODO Move to Equipment Module
-		equip : function(id) {
-			piratequesting.Inventory.disableEquip();
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl + "/index.php";
-
-			var params = '?on=inventory&action=equip&id=' + id;
-			http.open("GET", url + params, true);
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableEquip();
-			}
-			piratequesting.AJAX.equipmenthttp = http;
-			http.onreadystatechange = function() {
-				document.getElementById('eqmeter').setAttribute(
-						'value',
-						Number(document.getElementById('eqmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Inventory
-								.checkInventory("piratequesting.Inventory.enableEquip()");
-					} else {
-						alert("Equipping failed due to error");
-					}
-				}
-			}
-			http.send(null);
-		},
-
-		//TODO Move to Equipment Module
-		returnItem : function(id) {
-			piratequesting.Inventory.disableInventory();
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl + "/index.php";
-
-			var params = '?on=inventory&action=return&id=' + id;
-			http.open("GET", url + params, true);
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-			piratequesting.AJAX.inventoryhttp = http;
-			http.onreadystatechange = function() {
-				document.getElementById('invmeter').setAttribute(
-						'value',
-						Number(document.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Inventory
-								.checkInventory("piratequesting.Inventory.enableInventory()");
-					} else {
-						alert("Returning failed due to error");
-					}
-				}
-			}
-			http.send(null);
-		},
-
-		//TODO Move to Inventory Module
-		useItem : function(id) {
-			piratequesting.Inventory.disableInventory();
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl + "/index.php?ajax=items";
-
-			var params = 'useamount=1&action=use&id=' + id;
-			http.open("post", url, true);
-			http.setRequestHeader("Content-type",
-					"application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-			piratequesting.AJAX.inventoryhttp = http;
-			http.onreadystatechange = function() {
-				document.getElementById('invmeter').setAttribute(
-						'value',
-						Number(document.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						var xmlRes = http.responseXML;
-						var item = piratequesting.Inventory.edibles
-								.GetItemById(id);
-						if (item != null) {
-							item
-									.setQuantity(xmlRes
-											.getElementsByTagName('left')[0].firstChild.nodeValue);
-							piratequesting.Inventory.updateInventoryList();
-							piratequesting.Inventory.updateEdiblesList();
-							piratequesting.Inventory.write();
+		processInventory: function(doc){
+			//do nothing if the swapspace isn't there. That means the inventory page is in a different mode. 
+			if (doc.evaluate("not(boolean(descendant-or-self::div[@id='swapspace']))", doc, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) return;
+						try{
+							
+							
+				function addItem(category,item,equipped) {
+					try {
+					var name;
+					//first need to check if the node actually has something equipped. The best way is to check if the equipment has a name associated with an item_view link. if there's no item_view then it's not a valid item
+					if (!item || !category) return;
+					if (name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null)) {
+						if (!name.stringValue) return;
+						name = name.stringValue;
+						var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						
+						var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						
+						
+						var value = (/(\$[.,\d]+)/.exec(doc.evaluate("string(.)", item, null, XPathResult.STRING_TYPE,null).stringValue));
+						if (value && value.length > 0) value = value[1].toNumber();
+						else value = 0;
+						
+						
+						var action_id = doc.evaluate("substring-after(descendant-or-self::a[starts-with(@href,'index.php?on=inventory&action=')]/@href,'id=')", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						var quantity = doc.evaluate("substring-before(substring-after(.[a[@class='item_view']],'[x'),']')", item, null, XPathResult.STRING_TYPE,null).stringValue.toNumber();
+						//this will only get the non-'use' actions. If there's a way to do group_concat, I don't know it.
+						var action_list =  doc.evaluate("descendant-or-self::a[starts-with(@href,'index.php?on=inventory&action=')]/text()", item, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+						var actions = 0;
+						for (var j=0,alen = action_list.snapshotLength; j<alen;++j) {
+							actions = actions | Number(ACTIONS[action_list.snapshotItem(j).nodeValue]);
 						}
+						var attributes = {name:name, id:id, action_id: action_id, image:image, quantity:quantity, value:value,actions:actions, equipped:((equipped)?equipped:0)};
+					
+						var item_check = inventory.evaluate("./item[@id='"+id+"']", category, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+						if (item_check.snapshotLength > 0 ) {
+							var item = item_check.snapshotItem(0); 
+							item.setAttributes(attributes);
+						} else {
+							var item = inventory.newElement("item",attributes);
+							category.insertBefore(item,category.firstChild);
+		
+						}
+					}
+					}catch (error) { dump("\n" + getErrorString(error) + "\n");}
+				}
+			var categories = inventory.evaluate("//category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			var category,items,item;
+			for (var i = 0, len=categories.snapshotLength; i<len;++i){
+				/**
+				 * @type {Node}
+				 */
+				category = categories.snapshotItem(i);
+				//this gem gets each item in a cateogory from the inventory page. It does not, however, ghet the equipped items which have to be acquired separately below
+				// (//div[@id='"+ category.getAttribute("name") +"'])[1] is used because FM adds each category twice (bug?) and we only want to add the items from one of them.
+				// tr[position() mod 2 = 1] is used because every second row is empty
+				items = doc.evaluate("(//div[@id='"+ category.getAttribute("name") +"'])[1]/table/tbody/tr[last()]/td/table/tbody/tr[position() mod 2 = 1]/td", doc, null, XPathResult.ANY_TYPE,null);
+				while (item = items.iterateNext()) {
+					
+					addItem(category,item,0);
+				}
+				
+								
+			}
+			//now to get the equipped items
+			//tbody[contains(tr[1]/td[last()],'Equipped')] is used to find the correct table. -- deprecated. there was enough specificity in other areas that this was unnecessary given its cost
+			////td[not(@align)] is used because FM puts out 4 empty columns, carrying the align attribute, then 4 columns with the data we want.
+			items = doc.evaluate("//div[@id='contentarea']/form/table[1]/tbody/tr[2]/td//td[not(@align)]",doc,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			//There will be exactly 4 results unless FM adds a new category to the equipment... in which case bigger changes need to happen.
+			//There should also be 4 categories selected so we'll just use the same index and need to be careful that the order is the same 
+			categories = inventory.evaluate("/inventory/category[@id='5' or @id='2' or @id='1' or @id='11'] ", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			for (var i = 0, len=categories.snapshotLength; i<len;++i){
+				/**
+				 * @type {Node}
+				 */
+				category = categories.snapshotItem(i);
+				item = items.snapshotItem(i);
+				addItem(category,item,1);
+			}
 
-						piratequesting.Inventory.enableInventory();
+			document.fire('piratequesting:InventoryUpdated');
+			}catch(error) { alert(getErrorString(error)); }
+		},
+		
+		processItemGuide: function (doc) {
+			try{
+			var categories = inventory.evaluate("//category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			
+			for (var i = 0, len=categories.snapshotLength; i<len;++i){
+				/**
+				 * @type {Node}
+				 */
+				var category = categories.snapshotItem(i);
+				var items = doc.evaluate("//div[@id='"+ category.getAttribute("name") +"']//table[@id='item_guide']", doc, null, XPathResult.ANY_TYPE,null);
+				while (item = items.iterateNext()) {
+					var name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null).stringValue;
+					var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
+					var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
+					var cost = (/(\$[.,\d]+)/.exec(doc.evaluate("descendant-or-self::td[@class='bot']", item, null, XPathResult.STRING_TYPE,null).stringValue))[1].toNumber();
+					
+					var description = doc.evaluate("normalize-space(descendant-or-self::td[@class='desc'][1])", item, null, XPathResult.STRING_TYPE,null).stringValue;
+					var features = doc.evaluate("normalize-space(descendant-or-self::table//td[b[.='Features:']])", item, null, XPathResult.STRING_TYPE,null).stringValue;
+					features = features.split(/[^\+\-\:%\s\w]/).splice(1);
+					var attributes = {name:name, id:id, image:image, cost:cost};
+					///[+-:%\s\w]/
+					function addFeatures() {
+						for (var j = 0, flen = features.length; j<flen;++j) {
+							var feature = features[j].trim().replace(/([A-Za-z\s]+):? ?([\-\+,.\d%]+)/,"$1: $2").split(": ");
+							item.insert(inventory.newElement("feature", { type: feature[0], value: feature[1] } ));
+						}
+					}
+					var item_check = inventory.evaluate("./item[@id='"+id+"']", category, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+					if (item_check.snapshotLength > 0 ) {
+						item = item_check.snapshotItem(0); 
+						item.setAttributes(attributes);
+						while(item.hasChildNodes()) item.removeChild(item.firstChild);
+						item.insert(inventory.newElement("description").update(description));
+						addFeatures();
+						
 					} else {
-						alert("Returning failed due to error");
+						item = inventory.newElement("item",attributes).insert(inventory.newElement("description").update(description));
+						addFeatures();
+						category.insert(item);
+
 					}
 				}
 			}
-			http.send(params);
+			document.fire('piratequesting:InventoryUpdated');
+			}catch(error) { alert(getErrorString(error)); }
 		},
-
-		//TODO Move to Equipment Module
-		disableEquip : function() {
-			document.getElementById('equiplist').setAttribute("type", "cover");
-			document.getElementById('eqcb').setAttribute("type", "cbox");
-			document.getElementById('eqmeter').setAttribute('value', '0');
+		
+		process:function(doc) {
+			
 		},
-
-		//TODO Move to Equipment Module
-		enableEquip : function() {
-			document.getElementById('equiplist').setAttribute("type", "");
-			document.getElementById('eqcb').setAttribute("type", "hide");
-		},
-
-		//TODO Move to Inventory Module
-		disableInventory : function() {
-			document.getElementById('invdeck').setAttribute("type", "cover");
-			document.getElementById('invcb').setAttribute("type", "cbox");
-			document.getElementById('invmeter').setAttribute('value', '0');
-		},
-
-		//TODO Move to Inventory Module
-		enableInventory : function() {
-			document.getElementById('invdeck').setAttribute("type", "");
-			document.getElementById('invcb').setAttribute("type", "hide");
-		},
-
-		//TODO Move to Equipment/Inventory/PointsEdibles Modules
-		abort : function() {
-
+		
+		toString:function() {
+			return ((new XMLSerializer()).serializeToString(inventory));
 		}
 	}
 }();
+
+
+piratequesting.addLoadProcess(new RegExp("index.php\\?on=inventory",""),piratequesting.InventoryManager.processInventory);
+piratequesting.addLoadProcess(new RegExp("index.php\\?on=item_guide",""),piratequesting.InventoryManager.processItemGuide);
+piratequesting.addLoadProcess(new RegExp("",""),piratequesting.InventoryManager.process);

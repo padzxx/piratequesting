@@ -143,18 +143,22 @@ var piratequesting = {
 		_iframe.docShell.allowImages = false;
 
 		var doc = _iframe.contentDocument; 
-		doc.getElementsByTagName("html")[0].innerHTML = /<html[\s\S]*?>([\s\S]*?)<\/html>/i
-				.exec(htmlText)[1];
-		var curProc;
-		//first run the standard processors 
-		for (var i = 0, len = piratequesting.PQLoadCollection.length; i < len; i++) {
-			curProc = piratequesting.PQLoadCollection[i];
-			curProc.run(url, doc);
-		}
-		//then run the ajax response processors - at this time only the captcha code stuff 
-		for (var i = 0, len = piratequesting.PQResponseProcessorCollection.length; i < len; i++) {
-			curProc = piratequesting.PQResponseProcessorCollection[i];
-			curProc.run(url, doc);
+		var strip = /<html[\s\S]*?>([\s\S]*?)<\/html>/i;
+		if (strip.test(htmlText)) {
+			doc.getElementsByTagName("html")[0].innerHTML = strip.exec(htmlText)[1];
+			if (!(doc.body && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
+				var curProc;
+				//first run the standard processors 
+				for (var i = 0, len = piratequesting.PQLoadCollection.length; i < len; i++) {
+					curProc = piratequesting.PQLoadCollection[i];
+					curProc.run(url, doc);
+				}
+				//then run the ajax response processors - at this time only the captcha code stuff 
+				for (var i = 0, len = piratequesting.PQResponseProcessorCollection.length; i < len; i++) {
+					curProc = piratequesting.PQResponseProcessorCollection[i];
+					curProc.run(url, doc);
+				}
+			}
 		}
 	},
 	/**
@@ -192,11 +196,15 @@ var piratequesting = {
 
 					}
 					// we're on a piratequest page. yay!
+					
+					//check if it's reset time
+					if (!(doc.body && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
 					// now run all of the added test-function pairs
-					var curProc;
-					for (var i = 0; i < top.piratequesting.PQLoadCollection.length; i++) {
-						curProc = top.piratequesting.PQLoadCollection[i];
-						curProc.run(doc.location, doc);
+						var curProc;
+						for (var i = 0; i < top.piratequesting.PQLoadCollection.length; i++) {
+							curProc = top.piratequesting.PQLoadCollection[i];
+							curProc.run(doc.location, doc);
+						}
 					}
 				}
 			}

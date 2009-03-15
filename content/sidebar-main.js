@@ -18,8 +18,8 @@ piratequesting.sidebar = {
 	
 	_element : null,
 	load : function(event) {
-		piratequesting.sidebar.strings = $('piratequesting-sidebar-strings');
-		piratequesting.sidebar._element = $("piratequesting-sidebar");
+		piratequesting.sidebar.strings = document.getElementById('piratequesting-sidebar-strings');
+		piratequesting.sidebar._element = document.getElementById("piratequesting-sidebar");
 	},
 	getElement : function() {
 		return piratequesting.sidebar._element;

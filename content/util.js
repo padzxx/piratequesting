@@ -396,7 +396,7 @@ function createLabel(text, rows, fade) {
 //from http://www.leigeber.com/2008/05/javascript-color-fading-script/
 // main function to process the fade request //
 function colorFade(id,element,start,end,steps,speed) {
-  var startrgb,endrgb,er,eg,eb,step,rint,gint,bint,step;
+  var startrgb,endrgb,er,eg,eb,step,rint,gint,bint,step,r,g,b;
   var target; 
   if (typeof id == "string")
   	target = document.getElementById(id);
@@ -486,4 +486,130 @@ function colorConv(color) {
     parseInt(color.substring(2,4),16), 
     parseInt(color.substring(4,6),16)];
   return rgb;
+}
+
+/**
+ * 
+ * @param {String} tag
+ * @param {Object} attributes
+ * @return {Node}
+ */
+Document.prototype.newElement = function (tag, attributes) {
+	var element = this.createElement(tag);
+	if (attributes) {
+		for (attribute in attributes) {
+			
+			element.setAttribute(attribute, attributes[attribute]);
+		}
+	}
+	return element;
+
+}
+/**
+ * 
+ * @param {String} event_name
+ */
+Document.prototype.fire = function (event_name,target) {
+		var evt = this.createEvent("MouseEvents");
+			evt.initMouseEvent(event_name,false,true, window,
+   				0, 0, 0, 0, 0, false, false, false, false, 0, target);
+
+			this.dispatchEvent(evt);
+}
+
+document.fire = Document.prototype.fire;
+/**
+ * 
+ * @param {String} tag
+ * @param {Obect} attributes
+ * @return {Node}
+ */
+Node.prototype.newElement = function (tag, attributes) {
+	var element = this.ownerDocument.createElement(tag);
+	if (attributes) {
+		for (attribute in attributes) {
+			
+			element.setAttribute(attribute, attribues[attribute]);
+		}
+	}
+	return element;
+
+}
+
+/**
+ * 
+ * @param {Node} element
+ * @return {Node}
+ */
+Node.prototype.insert = function (element) {
+	this.appendChild(element);
+	return this;
+}
+
+/**
+ * 
+ * @param {Object} attributes
+ * @return {Node}
+ */
+Node.prototype.setAttributes = function (attributes) {
+	if (attributes) {
+		for (attribute in attributes) {
+			
+			this.setAttribute(attribute, attributes[attribute]);
+		}
+	}
+	return this;
+}
+
+/**
+ * 
+ * @param {String} text
+ * @return {Node}
+ */
+Node.prototype.update = function(text) {
+	this.appendChild(this.ownerDocument.createTextNode(text));
+	return this;
+}
+
+function dumpError(error) {
+	dump("\n" + getErrorString(error)+ "\n");
+	
+}
+
+function AjaxRequest(url, options) {
+	var options = options || {}; 
+	var http = new XMLHttpRequest();
+	var protocol = (options.protocol || "get").toLowerCase();
+	var params = options.params;
+	var async = options.async || true;
+	var onFailure = options.onFailure || function () { dump('\nAjax request to '+url+' failed.\n'); };
+	var onSuccess = options.onSuccess || function () { dump('\nAjax request to '+url+' succeeded.\n'); };
+	var onStateChange = options.onStateChange;
+	http.open(protocol, url, async);
+	if (protocol == "post") {
+			http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			http.setRequestHeader("Content-length", params.length);
+			http.setRequestHeader("Connection", "close");
+	}
+	http.onerror = options.onError;
+	http.onreadystatechange = function() {
+		if (onStateChange) onStateChange(http);
+		if (http.readyState == 4) {
+			if (http.status == 200) {
+				try {
+					piratequesting.ProcessResponse(url,http.responseText)
+				} catch (e) { dumpError(e) }
+				try {
+					onSuccess();
+				} catch (e) { dumpError(e) }
+				
+			} else {
+				try {
+					onFailure();
+				} catch (e) { dumpError(e) }
+			}
+		}
+	}
+	http.send(params);
+	return http;
 }

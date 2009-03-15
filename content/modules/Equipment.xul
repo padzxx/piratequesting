@@ -42,10 +42,11 @@
 			</box> 
 		</stack> 
 	</tabpanel>
-	
-	<menupopup type="equipment" id="weapon_menu" width="250" />
-	<menupopup type="equipment" id="head_menu" width="250" />
-	<menupopup type="equipment" id="armor_menu" width="250" />
-	<menupopup type="equipment" id="offhand_menu" width="250" /> 
+	<window id='piratequesting-sidebar'>
+		<menupopup type="equipment" id="weapon_menu" width="250" />
+		<menupopup type="equipment" id="head_menu" width="250" />
+		<menupopup type="equipment" id="armor_menu" width="250" />
+		<menupopup type="equipment" id="offhand_menu" width="250" />
+	</window> 
 </overlay>
 
