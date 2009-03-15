@@ -14,12 +14,14 @@ String.prototype.stripwhitespace = function() {
   return this.replace(regex, "");
 }
 
-String.prototype.trim = function () {
-  if (this != "") {
-    var regex = /^[\s]+|[\s]+$/g;
-    return this.replace(regex, "");
-  }
-  return "";
+if (!String.prototype.trim) {
+	String.prototype.trim = function () {
+	  if (this != "") {
+	    var regex = /^[\s]+|[\s]+$/g;
+	    return this.replace(regex, "");
+	  }
+	  return "";
+	}
 }
 
 String.prototype.stripCommas = function () {
@@ -44,6 +46,6 @@ String.prototype.stripDollars = function () {
 }
 
 String.prototype.toNumber = function() {
-  var regex = /[^\d.]/g;
+  var regex = /[^\d.+-]/g;
   return this.replace(regex, "");
 }

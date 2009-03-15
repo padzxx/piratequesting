@@ -115,51 +115,18 @@ piratequesting.Training = function() {
 
 	function doTraining(params) {
 		var trainresult = sidebar.contentDocument.getElementById("trainresult");
-
 		createResponse(trainresult, new Array("Training"));
 
-		// alert(params);
 		try {
 			disable();
-			var url = piratequesting.baseURL + "/index.php?on=train";
-			var http = new XMLHttpRequest();
-			var rt = null;
-			http.open("POST", url, true);
-			http.onerror = function(e) {
-				onError(e);
-				enable();
-			}
-			ajax = http;
-			// Send the proper header information along with the request
-			http.setRequestHeader("Content-type",
-					"application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-
-			http.onreadystatechange = function() {
-				try {
-					sidebar.contentDocument.getElementById('trnmeter')
-							.setAttribute(
-									'value',
-									Number(sidebar.contentDocument
-											.getElementById('trnmeter')
-											.getAttribute('value'))
-											+ 25);
-					if (http.readyState == 4) {
-						if (http.status == 200) {
-							enable();
-							piratequesting.ProcessResponse(url,
-									http.responseText);
-						} else {
-							alert("Training failed due to error");
-							enable();
-						}
-					}
-				} catch (error) {
-					alert(getErrorString(error));
-				}
-			}
-			http.send(params);
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=train", { 	
+						protocol: "post", 
+						onSuccess: enable, 
+						onFailure: function() { enable(); alert('Failed to complete Training.');}, 
+						onError: function() { enable(); alert('Error occurred when Training.');}, 
+						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('trnmeter').setAttribute('value',http.readyState * 25); }, 
+						params: params
+			});
 		} catch (error) {
 			alert(getErrorString(error));
 		}
@@ -345,7 +312,6 @@ try {
 			}
 		},
 		abort : function() {
-			alert("aborting...");
 			ajax.abort();
 			enable();
 		}
