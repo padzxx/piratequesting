@@ -586,7 +586,8 @@ function AjaxRequest(url, options) {
 	var onSuccess = options.onSuccess || function () { dump('\nAjax request to '+url+' succeeded.\n'); };
 	var onStateChange = options.onStateChange;
 	http.open(protocol, url, async);
-	if (protocol == "post") {
+	http.setRequestHeader("Cache-Control","no-cache");
+		if (protocol == "post") {
 			http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 			http.setRequestHeader("Content-length", params.length);
 			http.setRequestHeader("Connection", "close");

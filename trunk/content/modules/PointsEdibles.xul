@@ -36,7 +36,7 @@
 											<label type="bold" id="pointsvalue" persist="value" />
 										</hbox>
 										<hbox align="center" pack="end">
-											<button type="A" label="Use" id="usepoints" maxwidth="40" />
+											<button type="A" label="Use" id="usepoints" maxwidth="40" onclick="piratequesting.PointsEdibles.usePoints()"/>
 										</hbox>
 									</hbox>
 									
@@ -59,8 +59,8 @@
 										</menupopup>
 									</menulist>
 									<hbox align="center" pack="end">
-										<button type="A" label="Use" id="useedible1" maxwidth="40" />
-										<button type="A" label="Use 5" id="useedible5" maxwidth="40" />
+										<button type="A" label="Use" id="useedible1" maxwidth="40" onclick="piratequesting.PointsEdibles.useEdible(1);"/>
+										<button type="A" label="Use 5" id="useedible5" maxwidth="40" onclick="piratequesting.PointsEdibles.useEdible(5)"/>
 									</hbox>
 								</groupbox>
 								<box align="center" id="edicb" pack="center" type="hide" flex="1">

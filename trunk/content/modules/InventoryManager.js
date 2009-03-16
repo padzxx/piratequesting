@@ -230,6 +230,13 @@ piratequesting.InventoryManager = function() {
 		
 	}
 	
+	function zeroItems() {
+		var items = inventory.evaluate("//item",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+		for (var i=0,len=items.snapshotLength;i<len;++i) {
+			items.snapshotItem(i).setAttribute("quantity",0);
+		}
+	}
+	
 	var ajax;
 	
 	return {
@@ -735,9 +742,11 @@ piratequesting.InventoryManager = function() {
 
 		processInventory: function(doc){
 			//do nothing if the swapspace isn't there. That means the inventory page is in a different mode. 
-			if (doc.evaluate("not(boolean(descendant-or-self::div[@id='swapspace']))", doc, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) return;
+			//dump("\n\n"+ doc.evaluate("//div[@id='contentarea']/form/table[1]",doc,null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotItem(0).innerHTML + "\n\n");
+			if (doc.evaluate("not(boolean(descendant-or-self::div[@id='swapspace']))", doc, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {  return; }
+			
 						try{
-							
+							zeroItems();
 							
 				function addItem(category,item,equipped) {
 					try {
@@ -747,7 +756,7 @@ piratequesting.InventoryManager = function() {
 					if (name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null)) {
 						if (!name.stringValue) return;
 						name = name.stringValue;
-						var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						var image = "/" + doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
 						
 						var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
 						
@@ -791,7 +800,6 @@ piratequesting.InventoryManager = function() {
 				// tr[position() mod 2 = 1] is used because every second row is empty
 				items = doc.evaluate("(//div[@id='"+ category.getAttribute("name") +"'])[1]/table/tbody/tr[last()]/td/table/tbody/tr[position() mod 2 = 1]/td", doc, null, XPathResult.ANY_TYPE,null);
 				while (item = items.iterateNext()) {
-					
 					addItem(category,item,0);
 				}
 				
@@ -800,10 +808,11 @@ piratequesting.InventoryManager = function() {
 			//now to get the equipped items
 			//tbody[contains(tr[1]/td[last()],'Equipped')] is used to find the correct table. -- deprecated. there was enough specificity in other areas that this was unnecessary given its cost
 			////td[not(@align)] is used because FM puts out 4 empty columns, carrying the align attribute, then 4 columns with the data we want.
-			items = doc.evaluate("//div[@id='contentarea']/form/table[1]/tbody/tr[2]/td//td[not(@align)]",doc,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			items = doc.evaluate("//div[@id='contentarea']/form//table[1]/tbody[contains(tr[1]/td[last()],'Equipped')]/tr[2]/td//td[not(@align)]",doc,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 			//There will be exactly 4 results unless FM adds a new category to the equipment... in which case bigger changes need to happen.
 			//There should also be 4 categories selected so we'll just use the same index and need to be careful that the order is the same 
 			categories = inventory.evaluate("/inventory/category[@id='5' or @id='2' or @id='1' or @id='11'] ", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			try {
 			for (var i = 0, len=categories.snapshotLength; i<len;++i){
 				/**
 				 * @type {Node}
@@ -811,6 +820,9 @@ piratequesting.InventoryManager = function() {
 				category = categories.snapshotItem(i);
 				item = items.snapshotItem(i);
 				addItem(category,item,1);
+			}
+			} catch(e) {
+				dumpError(e);
 			}
 
 			document.fire('piratequesting:InventoryUpdated');
@@ -830,7 +842,7 @@ piratequesting.InventoryManager = function() {
 				while (item = items.iterateNext()) {
 					var name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null).stringValue;
 					var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
-					var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
+					var image = "/" + doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
 					var cost = (/(\$[.,\d]+)/.exec(doc.evaluate("descendant-or-self::td[@class='bot']", item, null, XPathResult.STRING_TYPE,null).stringValue))[1].toNumber();
 					
 					var description = doc.evaluate("normalize-space(descendant-or-self::td[@class='desc'][1])", item, null, XPathResult.STRING_TYPE,null).stringValue;
