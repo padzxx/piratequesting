@@ -23,22 +23,19 @@ piratequesting.Equipment = function() {
 	 * @param (String)
 	 *            category - the associated Category object
 	 */
-	function updateMenu (menu_id, category_id, skip) {
+	function updateMenu (category_id, skip) {
 		/**
 		 * @type {Document}
 		 */
 		var sbcd = sidebar.contentDocument;
 		
 		var skip = skip || false;
-		var wm = sbcd.getElementById(menu_id);
 		var mi, tt,id;
 		var eqi,items,item;
 		var ttbox = sbcd.getElementById("ttbox");
 		// clear menu
 		var success = true;
-		while (wm.hasChildNodes())
-			wm.removeChild(wm.childNodes[0]);
-
+		
 		// clear tooltips
 		// while(ttbox.hasChildNodes())
 		// ttbox.removeChild(ttbox.childNodes[0]);
@@ -46,6 +43,11 @@ piratequesting.Equipment = function() {
 		//check the category by name or by id number
 		var cat = inventory.evaluate("/inventory/category[@id='"+ category_id + "' or @name='"+ category_id +"']", inventory, null, XPathResult.ANY_UNORDERED_NODE_TYPE,null).singleNodeValue;
 		if (!cat) return;	//The category doesn't exist. bail!
+		var menu_id = cat.getAttribute("name") + "_menu";
+		dump("\n"+menu_id+"\n");
+		var wm = sbcd.getElementById(menu_id);
+		while (wm.hasChildNodes())
+			wm.removeChild(wm.childNodes[0]);
 		
 		if (eqi = inventory.evaluate(".//item[@equipped='1']", cat, null, XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue) {
 			// if (category.HasItems())
@@ -55,10 +57,13 @@ piratequesting.Equipment = function() {
 			mi.setAttribute("value", eqi.getAttribute("action_id"));
 			mi.setAttribute("oncommand", "piratequesting.Equipment.unequip(this.value)");
 			wm.appendChild(mi);
+			
+			sbcd.getElementById(cat.getAttribute("name") + "_image").setAttribute("src", piratequesting.baseURL + eqi.getAttribute('image'));
+			sbcd.getElementById(cat.getAttribute("name") + "_label").setAttribute("value", eqi.getAttribute('name'));
 		} else {
 		// add the unequipped items to the menu, create the associated
 		// labels, values and oncommand action
-			items = inventory.evaluate(".//item[@equipped='0']", cat, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			items = inventory.evaluate(".//item[@equipped='0' and @quantity>0]", cat, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 			for (var i = 0, len = items.snapshotLength; i < len; ++i) {
 				item = items.snapshotItem(i);
 				// get the item
@@ -76,6 +81,23 @@ piratequesting.Equipment = function() {
 				mi.setAttribute("tooltip", tt.getAttribute("id"));
 				mi.setAttribute("popupanchor", "topright");
 				wm.appendChild(mi);
+				
+				switch (cat.getAttribute("name")) {
+					case "weapons":
+						sbcd.getElementById("weapons_image").setAttribute("src", piratequesting.baseURL + "/images/fists.gif");
+						break;
+					case "head":
+						sbcd.getElementById("head_image").setAttribute("src", piratequesting.baseURL + "/images/head.gif");
+						break;
+					case "armour":
+						sbcd.getElementById("armour_image").setAttribute("src", piratequesting.baseURL + "/images/armor.gif");
+						break;
+					case "offhand":
+						sbcd.getElementById("offhand_image").setAttribute("src", piratequesting.baseURL + "/images/offhand.gif");
+						break;
+					
+				}
+				sbcd.getElementById(cat.getAttribute("name") + "_label").setAttribute("value", "Nothing!");
 			}
 		}
 		return true;
@@ -89,7 +111,7 @@ piratequesting.Equipment = function() {
 		tt.setAttribute("id", "tt" + id);
 		tt.id = "tt" + id;
 		
-		var features = inventory.evaluate("descendant::item[@id='"+id+"']//feature", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+		var features = inventory.evaluate("/inventory/category/item[@action_id='"+id+"']//feature", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 
 		for (var i=0,len=features.snapshotLength;i<len;++i) {
 			feature = features.snapshotItem(i);
@@ -124,7 +146,7 @@ piratequesting.Equipment = function() {
 		dump("\nChecking inventory.\n")
 		var sbcd = sidebar.contentDocument;	
 		sbcd.getElementById('eqmeter').setAttribute('value',0);
-		ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { 
+		ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&m=1", { 
 				onSuccess: function() { try { enable(); dump("\nInventory check succeeded.\n") } catch (error) {dump("\n" + getErrorString(error) + "\n");} }, 
 				onFailure: function() { enable(); alert('Failed to update Inventory.');}, 
 				onError: function() { enable(); alert('Error occurred when updating Inventory.');}, 
@@ -141,8 +163,10 @@ piratequesting.Equipment = function() {
 			disable();
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
-			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=unequip&id=" + id, { 
-					onSuccess: checkInventory, 
+			//onSuccess: checkInventory, 
+					
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=unequip&id=" + id, {
+					onSuccess: enable, 
 					onFailure: function() { enable(); alert('Failed to unequip item.');}, 
 					onError: function() { enable(); alert('Error occurred when unequipping item.');}, 
 					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); }
@@ -154,8 +178,10 @@ piratequesting.Equipment = function() {
 			disable();
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
+			//onSuccess: checkInventory, 
+					
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=equip&id=" + id, { 
-					onSuccess: checkInventory, 
+					onSuccess: enable, 
 					onFailure: function() { enable(); alert('Failed to equip item.');}, 
 					onError: function() { enable(); alert('Error occurred when equipping item.');}, 
 					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); }
@@ -169,25 +195,25 @@ piratequesting.Equipment = function() {
 		},
 		process : function () {
 			try {
-			dump("\nEvent received; Equipment process launched\n");
 			var sbcd = sidebar.contentDocument;
 			if (!sbcd) return;
 			
 			
 			inventory = piratequesting.InventoryManager.getInventory();
-			if ( !sbcd.getElementById("weapon_menu") ||  !sbcd.getElementById("head_menu") || !sbcd.getElementById("armor_menu") || !sbcd.getElementById("offhand_menu")) {
+			if ( !sbcd.getElementById("weapons_menu") ||  !sbcd.getElementById("head_menu") || !sbcd.getElementById("armour_menu") || !sbcd.getElementById("offhand_menu")) {
 				//if stuff isn't loaded yet, wait a second and try again
-				dump("\nSidebar content not yet loaded. Trying again in 1 second.\n");
-				setTimeout(piratequesting.Equipment.process,1000);
+				dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
+				setTimeout(piratequesting.Equipment.process,2000);
 				return;
 			}
-			dump("\nPassed menu check\n");
 			
-			//re-get the item guide info if any of the items are missing a description
-			if (!inventory.evaluate("boolean(descendant::item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
-				dump("\n"+inventory+"\n");
-				dump('\nItem found without cost:\n\t'+inventory.evaluate("string(descendant::item[not(@cost)]/@*)", inventory, null, XPathResult.STRING_TYPE,null).stringValue + "\n");
-				
+				var equipped_items = inventory.evaluate("descendant::item[@equipped=1]", inventory, null, XPathResult.ANY_TYPE,null);
+				while (item = equipped_items.iterateNext()) {
+					dump("\n"+item.parentNode.getAttribute("name")+ ": " + item.getAttribute("name")+"\n");
+				}
+
+				//re-get the item guide info if any of the items are missing a description
+			if (inventory.evaluate("boolean(//item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 				var cur_time = (new Date()).getTime();  
 				if (cur_time - last_check > 5000) {
 					last_check = cur_time;
@@ -196,15 +222,13 @@ piratequesting.Equipment = function() {
 					alert("Error Processing Item Guide Data");
 				}
 				return; // item description not found. bail.
-			}
+			} else {
 				
-			dump("\nupdating menus\n");
-			updateMenu("weapon_menu", "weapons");
-			updateMenu("head_menu", "head");
-			updateMenu("armor_menu", "armour");
-			updateMenu("offhand_menu", "offhand");
-			dump("\nfinished menu updates\n");
-			
+			updateMenu("weapons");
+			updateMenu("head");
+			updateMenu("armour");
+			updateMenu("offhand");
+			}
 			} catch (error) { alert(getErrorString(error)); }
 
 		}

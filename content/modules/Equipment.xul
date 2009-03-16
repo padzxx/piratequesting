@@ -17,13 +17,13 @@
 					<image id="head_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
 					<label id="head_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
-				<hbox align="center" popup="armor_menu" flex="1" tooltiptext="Click to change">
-					<image id="armor_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
-					<label id="armor_label" persist="value" type="bold" tooltiptext="Click to change"/>
+				<hbox align="center" popup="armour_menu" flex="1" tooltiptext="Click to change">
+					<image id="armour_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
+					<label id="armour_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
-				<hbox align="center" popup="weapon_menu" flex="1" tooltiptext="Click to change">
-					<image id="weapon_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
-					<label id="weapon_label" persist="value" type="bold" tooltiptext="Click to change"/>
+				<hbox align="center" popup="weapons_menu" flex="1" tooltiptext="Click to change">
+					<image id="weapons_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
+					<label id="weapons_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
 				<hbox align="center" popup="offhand_menu" flex="1" tooltiptext="Click to change">
 					<image id="offhand_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
@@ -43,9 +43,9 @@
 		</stack> 
 	</tabpanel>
 	<window id='piratequesting-sidebar'>
-		<menupopup type="equipment" id="weapon_menu" width="250" />
+		<menupopup type="equipment" id="weapons_menu" width="250" />
 		<menupopup type="equipment" id="head_menu" width="250" />
-		<menupopup type="equipment" id="armor_menu" width="250" />
+		<menupopup type="equipment" id="armour_menu" width="250" />
 		<menupopup type="equipment" id="offhand_menu" width="250" />
 	</window> 
 </overlay>
