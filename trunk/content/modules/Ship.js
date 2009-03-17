@@ -67,7 +67,8 @@ piratequesting.Ship = function() {
 		var sbcd = sidebar.contentDocument; 		
 	
 		if (piratequesting.sidebar) {
-			if (sbcd.getElementById('Ship_tabpanel')) {
+			//tests the parent, first and last child... should be enough. if need be, 'll assign them all to variable and test/use them
+			if (sbcd.getElementById('Ship_tabpanel') && sbcd.getElementById('shipnameval') && sbcd.getElementById('cannonsval')) {
 				sbcd.getElementById('shipnameval').value = name;
 				sbcd.getElementById('shiptypeval').value = type;
 				sbcd.getElementById('crewlevelval').value = crewLevel + " [" + progress+"%]";

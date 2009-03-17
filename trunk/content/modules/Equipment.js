@@ -44,7 +44,6 @@ piratequesting.Equipment = function() {
 		var cat = inventory.evaluate("/inventory/category[@id='"+ category_id + "' or @name='"+ category_id +"']", inventory, null, XPathResult.ANY_UNORDERED_NODE_TYPE,null).singleNodeValue;
 		if (!cat) return;	//The category doesn't exist. bail!
 		var menu_id = cat.getAttribute("name") + "_menu";
-		dump("\n"+menu_id+"\n");
 		var wm = sbcd.getElementById(menu_id);
 		while (wm.hasChildNodes())
 			wm.removeChild(wm.childNodes[0]);
@@ -168,11 +167,10 @@ piratequesting.Equipment = function() {
 		if (!sbcd) return;
 		
 		
-		inventory = piratequesting.InventoryManager.getInventory();
 		if ( !sbcd.getElementById("weapons_menu") ||  !sbcd.getElementById("head_menu") || !sbcd.getElementById("armour_menu") || !sbcd.getElementById("offhand_menu")) {
 			//if stuff isn't loaded yet, wait a second and try again
 			dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
-			setTimeout(piratequesting.Equipment.process,2000);
+			setTimeout(update,2000);
 			return;
 		}
 		
@@ -242,6 +240,7 @@ piratequesting.Equipment = function() {
 		},
 		process : function () {
 			try {
+				inventory = piratequesting.InventoryManager.getInventory();
 				update(true);
 			} catch (error) { alert(getErrorString(error)); }
 

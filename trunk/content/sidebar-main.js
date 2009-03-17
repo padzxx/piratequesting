@@ -228,7 +228,21 @@ overlayObserver.prototype = {
   			sidebar.contentDocument.getElementById("pqloadprogress").value = piratequesting.overlayRegistry.progress();
   			sidebar.contentDocument.loadOverlay(nex.getOverlayFile(),this);
   		} else {
+  			//we've finished loading the modules
   			sidebar.contentDocument.getElementById("pqmain_deck").selectedIndex="1";
+  			
+  			//setTimeout( function () {
+  			var mod_boxes = sidebar.contentDocument.getElementsByTagName("tabbox"); 
+  			//Node.prototype.getChildrenByClassName.call(sidebar.contentDocument.firstChild, "moduleBox");
+  			for (var i=0,len=mod_boxes.length;i<len;++i) {
+  				if (hasClassName(mod_boxes[i],"moduleBox")) {
+  					mod_boxes[i].selectedIndex = 0;
+  				}
+  				//var num_tabs = mod_boxes[i].getElementsByTagName("tab").length;
+  				//mod_boxes[i].getElementsByTagName("tab")[num_tabs-1].click();
+  				//mod_boxes[i].getElementsByTagName("tab")[0].click();
+  			}
+  			//},500);
   			/*var tabs = sidebar.contentDocument.getElementsByTagName('tab');
   			var tl = tabs.length;
   			alert(tl);

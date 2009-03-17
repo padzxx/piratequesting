@@ -1,160 +1,8 @@
 var piratequesting = top.piratequesting;
 
-
-/**
- * Item creates a new inventory item
- * 
- * @class
- * @param {String}
- *            name - name of the inventory item
- * @param {String}
- *            type - type of the inventory item (e.g. "weapon")
- * @param {Integer}
- *            quantity - quantity of the inventory item
- * @param {String}
- *            imgsrc - source of the image for the inventory item
- * @param {String}
- *            price - price of the inventory item
- * @param {String}
- *            actions - Array of Strings of actions available
- */
-function Item(name, quantity, imgsrc, id, action_id, price, cost, actions,adjustments,description) {
-	var imgsrc = imgsrc;
-	var name = name;
-	var quantity = quantity;
-	var id = id;
-	var action_id = action_id;
-	var price = price;
-	var cost = cost;
-	var actions = actions;
-	var adjustments = adjustments;
-	var description = description;
-
-	this.setQuantity = function(qty) {
-		quantity = addCommas(qty);
-	};
-	/**
-	 * @param {Number}
-	 *            how_much
-	 */
-	this.reduce = function(how_much) {
-		quantity = stripCommas(quantity) - how_much;
-		if (quantity < 0)
-			quantity = 0;
-		quantity = addCommas(quantity);
-		return quantity;
-	};
-
-	this.hasAction = function(action_type) {
-		var rv = false;
-		for (var action in actions) {
-			if (action == action_type) {
-				rv = true;
-				break;
-			}
-		}
-		return rv;
-	};
-
-	this.output = function() {
-		return {
-			type : type,
-			imgsrc : imgsrc,
-			name : name,
-			quantity : quantity,
-			id : id,
-			price : price,
-			actions : actions
-		}
-	};
-
-	this.clear = function() {
-		quantity = 0;
-	};
-
-
-}
-
-/**
- * Category creates a collection of Inventory items
- * 
- * @constructor
- * @param (String)
- *            name - Text identifier of the category type
- * @param (Integer)
- *            cat_number - Number identifying the associated item market
- *            category
- */
-function Category(name, cat_number) {
-	var items = new Array();
-	var name = name;
-	
-
-	/**
-	 * 
-	 * @param {Item} item
-	 */
-	this.AddItem = function(item) {
-		items.push(item);
-	};
-	this.GetItemAtIndex = function(index) {
-		return items[index];
-	};
-	this.RemoveItemAtIndex = function(index) {
-		items.splice(index, 1);
-	};
-	this.HasItems = function() {
-		return (items.length > 0);
-	};
-	this.FirstItem = function() {
-		return (items.length > 0) ? items[0] : null;
-	};
-	this.LastItem = function() {
-		return (items.length > 0) ? items[items.length - 1] : null;
-	};
-	this.clear = function() {
-		items = new Array();
-	};
-	this.count = function() {
-		return items.length;
-	};
-
-	this.GetItemById = function(id) {
-		var i = null;
-		for (var item in items) {
-			if (item.id == id) {
-				i = item;
-				break;
-			}
-		}
-		return i;
-	};
-	/**
-	 * generateXML creates xml objects for the components of this category
-	 * 
-	 * @param (XMLDocument)
-	 *            xmlDoc - xml document in which to create the items
-	 * @returns newNode
-	 * @type (Node)
-	 * @member Category
-	 */
-	this.generateXML = function(xmlDoc) {
-		var newNode = xmlDoc.createElement("category");
-		var newCat = xmlDoc.createElement("cat");
-		var newType = xmlDoc.createElement("type");
-
-		newCat.appendChild(xmlDoc.createTextNode(this.cat));
-		newType.appendChild(xmlDoc.createTextNode(this.type));
-
-		newNode.appendChild(newCat);
-		newNode.appendChild(newType);
-		for (var item in items) {
-			newNode.appendChild(item.generateXML(xmlDoc));
-		}
-
-		return newNode;
-	}
-}
+if(!IM_LOADED) {
+	//prevent multiple loading of this Manager. It usually doesn't matter too much but this makes a difference
+	const IM_LOADED=true;
 
 const SELL = 1;
 const MARKET = 2;
@@ -176,51 +24,21 @@ var ACTIONS = {
 
 piratequesting.InventoryManager = function() {
 
-	//check Database for appropriate tables and create if missing, then force check inventory if baseURL is set
+	var logfile = function() {
+		var profdir = Components.classes["@mozilla.org/file/directory_service;1"]
+				.getService(Components.interfaces.nsIProperties).get(
+						"ProfD", Components.interfaces.nsIFile).path;
+		var file = Components.classes["@mozilla.org/file/local;1"]
+				.createInstance(Components.interfaces.nsILocalFile);
+		file.initWithPath(profdir);
+		file.append("Inventory.xml");
+		return file;
+	}();
+	
 	/**
 	 * @type {Document}
 	 */
-	var inventory = function() { 
-						var doc = document.implementation.createDocument("","inventory",null);
-						var head = doc.createElement("category");
-						head.setAttribute("name", "head");
-						head.setAttribute("id","5");
-						var armour = doc.createElement("category");
-						armour.setAttribute("name", "armour");
-						armour.setAttribute("id","2");
-						var weapons = doc.createElement("category");
-						weapons.setAttribute("name", "weapons");
-						weapons.setAttribute("id","1");
-						var offhand = doc.createElement("category");
-						offhand.setAttribute("name", "offhand");
-						offhand.setAttribute("id","11");
-						var edibles = doc.createElement("category");
-						edibles.setAttribute("name", "edibles");
-						edibles.setAttribute("id","3");
-						var grenades = doc.createElement("category");
-						grenades.setAttribute("name", "grenades");
-						grenades.setAttribute("id","6");
-						var miscellaneous = doc.createElement("category");
-						miscellaneous.setAttribute("name", "miscellaneous");
-						miscellaneous.setAttribute("id","8");
-						var poisons = doc.createElement("category");
-						poisons.setAttribute("name", "poisons");
-						poisons.setAttribute("id","4");
-						var tokens = doc.createElement("category");
-						tokens.setAttribute("name", "tokens");
-						tokens.setAttribute("id","12");
-						
-						doc.documentElement.appendChild(head);
-						doc.documentElement.appendChild(armour);
-						doc.documentElement.appendChild(weapons);
-						doc.documentElement.appendChild(offhand);
-						doc.documentElement.appendChild(edibles);
-						doc.documentElement.appendChild(grenades);
-						doc.documentElement.appendChild(miscellaneous);
-						doc.documentElement.appendChild(poisons);
-						doc.documentElement.appendChild(tokens);
-						return doc;
-					}();
+	var inventory; 
 
 	function write() {
 		//write current data to the database
@@ -231,13 +49,101 @@ piratequesting.InventoryManager = function() {
 	}
 	
 	function zeroItems() {
-		var items = inventory.evaluate("//item",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+		var items = inventory.evaluate("/inventory/category/item",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 		for (var i=0,len=items.snapshotLength;i<len;++i) {
 			items.snapshotItem(i).setAttribute("quantity",0);
 		}
 	}
 	
+	function write () {
+		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+                         .createInstance(Components.interfaces.nsIFileOutputStream);
+		// clear the file for writing the new doc
+		foStream.init(logfile, 0x02 | 0x08 | 0x20, 0666, 0); // write,
+															// create,
+															// truncate
+		var ser = new XMLSerializer();
+		// write the serialized XML to file
+		ser.serializeToStream(inventory, foStream, ""); 
+		foStream.close();	
+	}
+	
+	function makeNewInventory () { 
+		var doc = document.implementation.createDocument("","inventory",null);
+		var head = doc.createElement("category");
+		head.setAttribute("name", "head");
+		head.setAttribute("id","5");
+		var armour = doc.createElement("category");
+		armour.setAttribute("name", "armour");
+		armour.setAttribute("id","2");
+		var weapons = doc.createElement("category");
+		weapons.setAttribute("name", "weapons");
+		weapons.setAttribute("id","1");
+		var offhand = doc.createElement("category");
+		offhand.setAttribute("name", "offhand");
+		offhand.setAttribute("id","11");
+		var edibles = doc.createElement("category");
+		edibles.setAttribute("name", "edibles");
+		edibles.setAttribute("id","3");
+		var grenades = doc.createElement("category");
+		grenades.setAttribute("name", "grenades");
+		grenades.setAttribute("id","6");
+		var miscellaneous = doc.createElement("category");
+		miscellaneous.setAttribute("name", "miscellaneous");
+		miscellaneous.setAttribute("id","8");
+		var poisons = doc.createElement("category");
+		poisons.setAttribute("name", "poisons");
+		poisons.setAttribute("id","4");
+		var tokens = doc.createElement("category");
+		tokens.setAttribute("name", "tokens");
+		tokens.setAttribute("id","12");
+		
+		doc.documentElement.appendChild(head);
+		doc.documentElement.appendChild(armour);
+		doc.documentElement.appendChild(weapons);
+		doc.documentElement.appendChild(offhand);
+		doc.documentElement.appendChild(edibles);
+		doc.documentElement.appendChild(grenades);
+		doc.documentElement.appendChild(miscellaneous);
+		doc.documentElement.appendChild(poisons);
+		doc.documentElement.appendChild(tokens);
+		return doc;
+	}
+	
+	function load() {
+		var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
+				.createInstance(Components.interfaces.nsIFileProtocolHandler);
+		var logF = ph.getURLSpecFromFile(logfile);
+
+		var log = new XMLHttpRequest();
+		log.open("GET", logF, true);
+		log.onerror = function(e) {
+			onError(e);
+		}
+
+
+		log.onreadystatechange = function() {
+			if (log.readyState == 4) {
+				var temp_inventory = log.responseXML;
+				//if there is a 'cat' element, then it belongs to the old system 
+				if (temp_inventory.evaluate("not(//cat)",temp_inventory,null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+					dump("Importing Inventory from file.\n")
+					inventory = temp_inventory;
+					document.fire('piratequesting:InventoryUpdated');
+				} else {
+					dump("Found old inventory file. Making new Inventory.\n");
+					inventory = makeNewInventory();
+				}
+			}
+		}
+		log.send(null);
+	}
 	var ajax;
+	
+	if (logfile.exists())
+		load();
+	else 
+		inventory = makeNewInventory();
 	
 	return {
 		
@@ -263,482 +169,6 @@ piratequesting.InventoryManager = function() {
 		checkItemGuide : function() {
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=item_guide", { onError: function() { alert('Error occurred while updating item guide'); } });
 		},
-
-
-
-
-		//TODO replace this with database
-		write : function() {
-		},
-		
-		//TODO this needs massive changes. Say goodbye to friday.... make that sunday.. make the a whole week
-		update : (function() {
-			// piratequesting.Inventory.checked=true;
-
-			function load() {
-				var profdir = Components.classes["@mozilla.org/file/directory_service;1"]
-						.getService(Components.interfaces.nsIProperties).get(
-								"ProfD", Components.interfaces.nsIFile).path;
-				var file = Components.classes["@mozilla.org/file/local;1"]
-						.createInstance(Components.interfaces.nsILocalFile);
-				file.initWithPath(profdir);
-				file.append("Inventory.xml");
-
-				var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"]
-						.createInstance(Components.interfaces.nsIFileProtocolHandler);
-				var logfile = ph.getURLSpecFromFile(file);
-
-				var log = new XMLHttpRequest();
-				log.open("GET", logfile, true);
-				log.onerror = function(e) {
-					onError(e);
-				}
-
-				piratequesting.Inventory.weapons = new Category("weapon", 1);
-				piratequesting.Inventory.armour = new Category("armor", 2);
-				piratequesting.Inventory.edibles = new Category("edibles", 3);
-				piratequesting.Inventory.poisons = new Category("poison", 4);
-				piratequesting.Inventory.head = new Category("head", 5);
-				piratequesting.Inventory.grenades = new Category("grenade", 6);
-				piratequesting.Inventory.miscellaneous = new Category(
-						"miscellaneous", 8);
-				piratequesting.Inventory.offhand = new Category("offhand", 11);
-				piratequesting.Inventory.tokens = new Category("tokens", 12);
-				piratequesting.Inventory.equipment = new Category("equipment",
-						null);
-				piratequesting.Inventory.points = new Item("Points", "point",
-						(piratequesting.Player.points != "")
-								? piratequesting.Player.points
-								: document.getElementById("pointsval").value,
-						"chrome://piratequesting/content/points_dice.gif",
-						"points", null, ["market"]);
-
-				log.onreadystatechange = function() {
-					if (log.readyState == 4) {
-						var xmlDoc = log.responseXML;
-						try {
-
-							var cats = xmlDoc.getElementsByTagName("category");
-							var catno, type, items;
-
-							for (var i = 0; i < cats.length; i++) {
-								catno = cats[i].firstChild;
-								type = catno.nextSibling;
-								item = type.nextSibling;
-								if (catno.firstChild == null) {
-									// equipment
-									while (item != null) {
-										piratequesting.Inventory.equipment
-												.AddItem(new Item(
-														item.childNodes[0].firstChild.nodeValue,
-														item.childNodes[1].firstChild.nodeValue,
-														item.childNodes[2].firstChild.nodeValue,
-														item.childNodes[3].firstChild.nodeValue,
-														item.childNodes[4].firstChild.nodeValue,
-														item.childNodes[5].firstChild.nodeValue,
-														item.childNodes[6].firstChild.nodeValue
-																.split("|")));
-										item = item.nextSibling;
-									}
-								} else {
-									switch (catno.firstChild.nodeValue) {
-										case '1' :
-											// weapons
-											while (item != null) {
-												piratequesting.Inventory.weapons
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '2' :
-											// armour
-											while (item != null) {
-												piratequesting.Inventory.armour
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '3' :
-											// edibles
-											while (item != null) {
-												piratequesting.Inventory.edibles
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '4' :
-											// poison
-											while (item != null) {
-												piratequesting.Inventory.poisons
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '5' :
-											// head
-											while (item != null) {
-												piratequesting.Inventory.head
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '6' :
-											// grenade
-											while (item != null) {
-												piratequesting.Inventory.grenades
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '8' :
-											// miscellaneous
-											while (item != null) {
-												piratequesting.Inventory.miscellaneous
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '11' :
-											// offhand
-											while (item != null) {
-												piratequesting.Inventory.offhand
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-										case '12' :
-											// tokens
-											while (item != null) {
-												piratequesting.Inventory.tokens
-														.AddItem(new Item(
-																item.childNodes[0].firstChild.nodeValue,
-																item.childNodes[1].firstChild.nodeValue,
-																item.childNodes[2].firstChild.nodeValue,
-																item.childNodes[3].firstChild.nodeValue,
-																item.childNodes[4].firstChild.nodeValue,
-																item.childNodes[5].firstChild.nodeValue,
-																item.childNodes[6].firstChild.nodeValue
-																		.split("|")));
-												item = item.nextSibling;
-											}
-									}
-								}
-							}
-							if (!updateMenu("weapon_menu",
-									piratequesting.Inventory.weapons)) {
-								piratequesting.ItemGuide.checkItemGuide();
-								// try only one more time
-								updateMenu("weapon_menu",
-										piratequesting.Inventory.weapons);
-							}
-
-							if (!updateMenu("head_menu",
-									piratequesting.Inventory.head)) {
-								piratequesting.ItemGuide.checkItemGuide();
-								updateMenu("head_menu",
-										piratequesting.Inventory.head);
-							}
-
-							if (!updateMenu("armor_menu",
-									piratequesting.Inventory.armour)) {
-								piratequesting.ItemGuide.checkItemGuide();
-								updateMenu("armor_menu",
-										piratequesting.Inventory.armour);
-							}
-
-							if (!updateMenu("offhand_menu",
-									piratequesting.Inventory.offhand)) {
-								piratequesting.ItemGuide.checkItemGuide();
-								updateMenu("offhand_menu",
-										piratequesting.Inventory.offhand);
-							}
-
-							piratequesting.Inventory.updateEdiblesList();
-							piratequesting.Inventory.updateInventoryList();
-						} catch (e) {
-							alert(getErrorString(e));
-						}
-					}
-				}
-				log.send(null);
-
-			}
-
-			//TODO Privatize!
-			//TODO Could probably be made much more efficient as well. I guess that's saturday gone, too
-
-
-			var updateEdibles = function(text) {
-				// should find and retrieve the full names (in
-				// match[1]+match[2]) and quantities in match[3]. Meant to be
-				// run until unsuccessful. array ids will be modified when we
-				// remove the plain text
-				var stripex = /<h2>Edibles<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.edibles, stripex);
-				piratequesting.Inventory.updateEdiblesList();
-			};
-
-			var updateEquipment = function(text) {
-				var stripex = /<h2>Items Worn or Held \(Equipped\)<\/h2>[\s\S]*?<\/table>/i;
-				// first check if this is even the right page... or if the
-				// equipment section is now gone (PQ Devs changed?)
-				if (piratequesting.Inventory.equipment.HasItems())
-					piratequesting.Inventory.equipment.ClearItems();
-				while (document.getElementById('ttbox').hasChildNodes())
-					document.getElementById('ttbox').removeChild(document
-							.getElementById('ttbox').firstChild);
-				if (stripex.test(text)) {
-					var text = stripex.exec(text)[0];
-					var item;
-
-					// note: testPattern must not use the g flag.
-					// extra note. the following patterns use ['"] because, for
-					// some reason, firefox returns both cases for the same
-					// page. the actual page code, of course, should not be
-					// different.
-
-					var testPattern = /<td><strong>([\s\S]*?):<\/strong><br ?\/?><br ?\/?><img src=['"]([\S]*?)["'][\s\S]*?<a class=['"]item_view["'][\s\S]*?>([\s\S]*?)<\/a><br ?\/?>\[x([,0-9]+)\][\s\S]*?(\$[,0-9]+)<br ?\/?>[\s\S]*?id=([0-9]+)[\s\S]*?<\/td>|<td><b>([\s\S]*?)<\/b><br ?\/?><br ?\/?><img src=['"]([\S]*?)['"][\s\S]*?<em>Nothing Equipped!<\/em>/;
-					var equipmentPattern = /<td><strong>([\s\S]*?):<\/strong><br ?\/?><br ?\/?><img src=['"]([\S]*?)["'][\s\S]*?<a class=['"]item_view["'][\s\S]*?>([\s\S]*?)<\/a><br ?\/?>\[x([,0-9]+)\][\s\S]*?(\$[,0-9]+)<br ?\/?>[\s\S]*?id=([0-9]+)[\s\S]*?<\/td>|<td><b>([\s\S]*?)<\/b><br ?\/?><br ?\/?><img src=['"]([\S]*?)['"][\s\S]*?<em>Nothing Equipped!<\/em>/g;
-					// var testPattern =
-					// /<td><strong>([\s\S]*?):<\/strong><br><br><img
-					// src=['"]([\S]*?)['"][\s\S]*?<a
-					// class=['"]item_view['"][\s\S]*?>([\s\S]*?)<\/a><br>\[x([,0-9]+)\]<br
-					// \/>[\s\S]*?(\$[,0-9]+)<br>[\s\S]*?id=([0-9]+)[\s\S]*?<\/td>|<td><b>([\s\S]*?)<\/b><br><br><img
-					// src=['"]([\S]*?)['"][\s\S]*?<em>Nothing Equipped!<\/em>/;
-					// var equipmentPattern =
-					// /<td><strong>([\s\S]*?):<\/strong><br><br><img
-					// src=['"]([\S]*?)['"][\s\S]*?<a
-					// class=['"]item_view['"][\s\S]*?>([\s\S]*?)<\/a><br>\[x([,0-9]+)\]<br
-					// \/>[\s\S]*?(\$[,0-9]+)<br>[\s\S]*?id=([0-9]+)[\s\S]*?<\/td>|<td><b>([\s\S]*?)<\/b><br><br><img
-					// src=['"]([\S]*?)['"][\s\S]*?<em>Nothing
-					// Equipped!<\/em>/g;
-
-					if (testPattern.test(text)) {
-						var match = equipmentPattern.exec(text);
-						var elnum = 0;
-						while (match != null) {
-							// assigns a real or empty item depending on state
-							// of 'match'
-							item = (match[7] == null) ? new Item(match[3],
-									stripWhitespace(match[1]).toLowerCase(),
-									match[4], fixURL(piratequesting.baseurl
-											+ '/' + match[2]), match[6],
-									match[5], ["none"]) : new Item("Nothing",
-									(match[7]).toLowerCase(), 0,
-									fixURL(piratequesting.baseurl + '/'
-											+ match[8]), " ", " ", ["none"]);
-							piratequesting.Inventory.equipment.AddItem(item);
-							// alert("IT: " + item.type);
-							document.getElementById(item.type + "_image")
-									.setAttribute("src", item.imgsrc);
-							document.getElementById(item.type + "_label")
-									.setAttribute("value", item.name);
-							elnum++;
-							match = equipmentPattern.exec(text);
-						}
-					}
-				}
-			};
-
-			var updateStandard = function(text, category, stripex) {
-				// first check if this is even the right page... or if the
-				// equipment section is now gone (PQ Devs changed?)
-				if (category.HasItems())
-					category.ClearItems();
-				if (stripex.test(text)) {
-					var text = stripex.exec(text)[0];
-					var item;
-					// note: testPattern must not use the g flag.
-					// extra note. the following patterns use ['"] because, for
-					// some reason, firefox returns both cases for the same
-					// page. the actual page code, of course, should not be
-					// different.
-					var testPattern = /<td[\s\S]*?<img src=['"]([\S]*?)['"][\s\S]*?<a class=['"]item_view['"][\s\S]*?>([\s\S]*?)<\/a><br ?\/?>[\s\S]*?\[x([,0-9]+)\][\s\S]*?(\$[,0-9]+)<br ?\/?>[\s\S]*?id=([0-9]+)[\s\S]*?<\/td>/;
-					var standardPattern = /<td[\s\S]*?<img src=['"]([\S]*?)['"][\s\S]*?<a class=['"]item_view['"][\s\S]*?>([\s\S]*?)<\/a><br ?\/?>[\s\S]*?\[x([,0-9]+)\][\s\S]*?(\$[,0-9]+)<br ?\/?>[\s\S]*?id=([0-9]+)[\s\S]*?<\/td>/g;
-					// debugResponse(text);
-					if (testPattern.test(text)) {
-						var match = standardPattern.exec(text);
-						var elnum = 0;
-						while (match != null) {
-							// we're gonna use the links to determine the
-							// actions to use....
-							var actionex = /on=inventory&action=([\S]*?)&id=/g;
-							var action = actionex.exec(match[0]);
-							var actions = new Array();
-							while (action != null) {
-								actions.push(action[1]);
-								action = actionex.exec(match[0]);
-							}
-							// alert(match[0]);
-							// Special check for "Use" after the change on Dec
-							// 30th, 2008
-							var use_regex = /<input[\s\S]*?value=['"]use['"][\s\S]*?type=['"]button['"]/i;
-							if (use_regex.test(match[0]))
-								actions.push("use");
-
-							item = new Item(match[2], category.type, match[3],
-									fixURL(piratequesting.baseurl + '/'
-											+ match[1]), match[5], match[4],
-									actions);
-							category.AddItem(item);
-							elnum++;
-							match = standardPattern.exec(text);
-						}
-					}
-				}
-
-			};
-
-			var updateWeapons = function(text) {
-				var stripex = /<h2>Weapons<\/h2>[\s\S]*?<\/table>/i;
-				// debugResponse(stripex.exec(text)[0]);
-				updateStandard(text, piratequesting.Inventory.weapons, stripex);
-				updateMenu("weapon_menu", piratequesting.Inventory.weapons);
-			};
-
-			var updateHead = function(text) {
-				var stripex = /<h2>Head<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.head, stripex);
-				updateMenu("head_menu", piratequesting.Inventory.head);
-			};
-
-			var updateArmour = function(text) {
-				var stripex = /<h2>Armour<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.armour, stripex);
-				updateMenu("armor_menu", piratequesting.Inventory.armour);
-			};
-
-			var updateOffhand = function(text) {
-				var stripex = /<h2>OffHand<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.offhand, stripex);
-				updateMenu("offhand_menu", piratequesting.Inventory.offhand);
-			};
-
-			var updateGrenades = function(text) {
-				var stripex = /<h2>Grenades<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.grenades, stripex);
-			};
-
-			var updatePoisons = function(text) {
-				var stripex = /<h2>Poisons<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.poisons, stripex);
-			};
-
-			var updateTokens = function(text) {
-				var stripex = /<h2>Tokens<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.tokens, stripex);
-			};
-
-			var updateMiscellaneous = function(text) {
-				var stripex = /<h2>Miscellaneous<\/h2>[\s\S]*?<\/table>/i;
-				updateStandard(text, piratequesting.Inventory.miscellaneous,
-						stripex);
-			};
-
-			var upd = function(text) {
-				// first make sure we haven't been sent back to port or
-				// something
-				var invcheck = /<h2>Items Worn or Held \(Equipped\)<\/h2>/;
-				if (invcheck.test(text)) {
-					piratequesting.Inventory.edibles = new Category("edibles",
-							3);
-					piratequesting.Inventory.equipment = new Category(
-							"equipment", null);
-					piratequesting.Inventory.head = new Category("head", 5);
-					piratequesting.Inventory.weapons = new Category("weapon", 1);
-					piratequesting.Inventory.armour = new Category("armor", 2);
-					piratequesting.Inventory.offhand = new Category("offhand",
-							11);
-					piratequesting.Inventory.grenades = new Category("grenade",
-							6);
-					piratequesting.Inventory.miscellaneous = new Category(
-							"miscellaneous", 8);
-					piratequesting.Inventory.poisons = new Category("poison", 4);
-					piratequesting.Inventory.tokens = new Category("tokens", 12);
-					piratequesting.Inventory.points = new Item("Points",
-							"point", piratequesting.Player.points,
-							"chrome://piratequesting/content/points_dice.gif",
-							"points", null, ["market"]);
-					// updatePoints();
-					updateEdibles(text);
-					updateEquipment(text);
-					updateWeapons(text);
-					updateHead(text);
-					updateArmour(text);
-					updateOffhand(text);
-					updateGrenades(text);
-					updatePoisons(text);
-					updateMiscellaneous(text);
-					updateTokens(text);
-					piratequesting.Inventory.updateInventoryList();
-					piratequesting.Inventory.checked = true;
-					piratequesting.Inventory.write();
-				} else if (text == null) {
-					load();
-				} else {
-					// not the inventory page... grrrr...
-					alert("Failed updating inventory as the page returned \nwas not, in fact, the inventory page.");
-				}
-			}
-
-			return upd;
-		})(),
 
 		processInventory: function(doc){
 			//do nothing if the swapspace isn't there. That means the inventory page is in a different mode. 
@@ -788,7 +218,26 @@ piratequesting.InventoryManager = function() {
 					}
 					}catch (error) { dump("\n" + getErrorString(error) + "\n");}
 				}
-			var categories = inventory.evaluate("//category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			
+			var coinsnpts = doc.getElementById('coinsnpts');
+			// check to see if it exists
+			if (coinsnpts) {
+				// the first <a> should be the points, and since it has
+				// no id, we just have to hope it stays that way
+				var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
+				var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost: 0};
+				var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+				if (item_check.snapshotLength > 0 ) {
+					var item = item_check.snapshotItem(0); 
+					item.setAttributes(attributes);
+				} else {
+					var item = inventory.newElement("item",attributes);
+					inventory.documentElement.appendChild(item);
+
+				}
+									
+			}
+			var categories = inventory.evaluate("/inventory/category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 			var category,items,item;
 			for (var i = 0, len=categories.snapshotLength; i<len;++i){
 				/**
@@ -824,7 +273,7 @@ piratequesting.InventoryManager = function() {
 			} catch(e) {
 				dumpError(e);
 			}
-
+			write();
 			document.fire('piratequesting:InventoryUpdated');
 			}catch(error) { alert(getErrorString(error)); }
 		},
@@ -872,12 +321,52 @@ piratequesting.InventoryManager = function() {
 					}
 				}
 			}
+			var coinsnpts = doc.getElementById('coinsnpts');
+			// check to see if it exists
+			if (coinsnpts) {
+				// the first <a> should be the points, and since it has
+				// no id, we just have to hope it stays that way
+				var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
+				var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost:0 };
+				var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+				if (item_check.snapshotLength > 0 ) {
+					var item = item_check.snapshotItem(0); 
+					item.setAttributes(attributes);
+				} else {
+					var item = inventory.newElement("item",attributes);
+					inventory.documentElement.appendChild(item);
+
+				}
+									
+			}
+
+			write();
 			document.fire('piratequesting:InventoryUpdated');
 			}catch(error) { alert(getErrorString(error)); }
 		},
 		
 		process:function(doc) {
-			
+			dump('processing points\n');
+			var coinsnpts = doc.getElementById('coinsnpts');
+			// check to see if it exists
+			if (coinsnpts) {
+				// the first <a> should be the points, and since it has
+				// no id, we just have to hope it stays that way
+				var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
+				var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost: 0};
+				var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+				if (item_check.snapshotLength > 0 ) {
+					var item = item_check.snapshotItem(0); 
+					item.setAttributes(attributes);
+				} else {
+					var item = inventory.newElement("item",attributes);
+					inventory.documentElement.appendChild(item);
+
+				}
+				write();
+				document.fire('piratequesting:InventoryUpdated');
+			}
+
 		},
 		
 		toString:function() {
@@ -889,4 +378,5 @@ piratequesting.InventoryManager = function() {
 
 piratequesting.addLoadProcess(new RegExp("index.php\\?on=inventory",""),piratequesting.InventoryManager.processInventory);
 piratequesting.addLoadProcess(new RegExp("index.php\\?on=item_guide",""),piratequesting.InventoryManager.processItemGuide);
-piratequesting.addLoadProcess(new RegExp("",""),piratequesting.InventoryManager.process);
+piratequesting.addLoadProcess(new RegExp("index.php(?!\\?on=item_guide|\\?on=inventory)",""),piratequesting.InventoryManager.process);
+}

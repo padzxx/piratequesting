@@ -11,9 +11,22 @@ piratequesting.PointsEdibles = function() {
 	var inventory;
 	var pending_points = 0;
 	var pending_edibles = 0;
-	function updateEdiblesList() {
+	
+	var forced_update_count = 0;
+	function updateEdiblesList(fromEvent) {
+		if (!fromEvent) {
+			if (++forced_update_count >= 3) return;
+		} else {
+			forced_update_count = 0;
+		}
+		
 		var sbcd = sidebar.contentDocument;
-			
+		if (!sbcd || !sbcd.getElementById('edibleitems') || !sbcd.getElementById('edibleslist')) {			//if stuff isn't loaded yet, wait a second and try again
+			dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
+			setTimeout(updateEdiblesList,2000);
+			return;
+		}
+
 		var createEdible = function(label, value) {
 			var menuitem = sbcd.createElement('menuitem');
 			menuitem.setAttribute('label', label);
@@ -142,10 +155,11 @@ piratequesting.PointsEdibles = function() {
 
 		},*/
 		process : function () {
+			dump("Updating Edibles List");
+			try {
 			inventory = piratequesting.InventoryManager.getInventory();
-			var sbcd = sidebar.contentDocument;
-			if (!sbcd || !sbcd.getElementById('edibleitems') || !sbcd.getElementById('edibleslist')) return;
-			updateEdiblesList();
+			updateEdiblesList(true);
+			} catch (e) { dumpError(e); }
 		},
 		
 		processPoints : function(doc) {

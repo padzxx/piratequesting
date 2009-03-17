@@ -88,7 +88,10 @@ var piratequesting = {
 							.createTable(
 									'"main"."moduleLayout"',
 									'"box" INTEGER NOT NULL , "position" INTEGER NOT NULL , "tab_id" VARCHAR PRIMARY KEY  NOT NULL');
-					alert("Thank you for using PirateQuesting.\nYou'll probably want to start by opening the sidebar \n(Press Ctrl+Shift+E or go to the View Menu -> Sidebar -> PirateQuesting.)\nYou can add a toolbar icon by right-clicking on the Firefox toolbar and selecting \"Customize...\".\n\nFeel free to create new boxes for the tabs and drag the tabs to the new boxes.\nYour layout will automatically be saved.\n\nIf you have any problems, please let me (Gilgalad/Jonathan Fingland) know on Pirate Quest or on addons.mozilla.org");
+					piratequesting.DBConn.beginTransaction();
+					piratequesting.DBConn.executeSimpleSQL("INSERT INTO `moduleLayout` VALUES(0,0,'Bank_tab'); INSERT INTO `moduleLayout` VALUES(0,1,'Player_tab'); INSERT INTO `moduleLayout` VALUES(0,2,'Ship_tab'); INSERT INTO `moduleLayout` VALUES(0,3,'Logs_tab'); INSERT INTO `moduleLayout` VALUES(1,0,'Training_tab'); INSERT INTO `moduleLayout` VALUES(2,0,'PointsEdibles_tab'); INSERT INTO `moduleLayout` VALUES(2,1,'Inventory_tab'); INSERT INTO `moduleLayout` VALUES(2,2,'Equipment_tab');");
+					piratequesting.DBConn.commitTransaction();					
+					alert("Thank you for using PirateQuesting.\nYou'll probably want to start by opening the sidebar \n(Press Ctrl+Shift+E or go to the View Menu -> Sidebar -> PirateQuesting.)\nYou can add a toolbar icon by right-clicking on the Firefox toolbar and selecting \"Customize...\".\n\nFeel free to create new boxes for the tabs and drag the tabs to the new boxes.\nYour layout will automatically be saved.\n\nIf you have any problems, please let me (Gilgalad/Jonathan Fingland) know on Pirate Quest or at pqsidebar@ashita.org");
 				}
 
 				mainWindow.getBrowser().addEventListener("DOMContentLoaded",
