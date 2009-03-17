@@ -146,9 +146,30 @@ piratequesting.PointsEdibles = function() {
 			var sbcd = sidebar.contentDocument;
 			if (!sbcd || !sbcd.getElementById('edibleitems') || !sbcd.getElementById('edibleslist')) return;
 			updateEdiblesList();
+		},
+		
+		processPoints : function(doc) {
+			var coinsnpts = doc.getElementById('coinsnpts');
+			// check to see if it exists
+			if (coinsnpts) {
+				// the first <a> should be the points, and since it has
+				// no id, we just have to hope it stays that way
+				points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue
+						.toNumber();
+				var points_val, coins_val, chest_val;
+				if (piratequesting.sidebar) {
+					if (points_val = sidebar.contentDocument
+							.getElementById('pointsvalue')) {
+						points_val.value = points;
+						points_val.setAttribute('value', points);
+					}
+				}						
+			}
+
 		}
 
 	}
 }();
 
 document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.PointsEdibles.process(); }, false);
+piratequesting.addLoadProcess(new RegExp("",""),piratequesting.PointsEdibles.processPoints);

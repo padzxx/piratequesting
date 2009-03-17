@@ -154,6 +154,53 @@ piratequesting.Equipment = function() {
 		});
 	}
 	
+	var forced_update_count = 0;
+	function update (fromEvent) {
+		if (!fromEvent) {
+			++forced_update_count;
+			if (forced_update_count >= 3) return;
+		} else {
+			forced_update_count = 0;
+		}
+		
+		
+		var sbcd = sidebar.contentDocument;
+		if (!sbcd) return;
+		
+		
+		inventory = piratequesting.InventoryManager.getInventory();
+		if ( !sbcd.getElementById("weapons_menu") ||  !sbcd.getElementById("head_menu") || !sbcd.getElementById("armour_menu") || !sbcd.getElementById("offhand_menu")) {
+			//if stuff isn't loaded yet, wait a second and try again
+			dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
+			setTimeout(piratequesting.Equipment.process,2000);
+			return;
+		}
+		
+			var equipped_items = inventory.evaluate("descendant::item[@equipped=1]", inventory, null, XPathResult.ANY_TYPE,null);
+			while (item = equipped_items.iterateNext()) {
+				dump("\n"+item.parentNode.getAttribute("name")+ ": " + item.getAttribute("name")+"\n");
+			}
+
+			//re-get the item guide info if any of the items are missing a description
+		if (inventory.evaluate("boolean(//item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+			var cur_time = (new Date()).getTime();  
+			if (cur_time - last_check > 5000) {
+				last_check = cur_time;
+				piratequesting.InventoryManager.checkItemGuide();
+			} else {
+				alert("Error Processing Item Guide Data");
+			}
+			return; // item description not found. bail.
+		} else {
+			
+		updateMenu("weapons");
+		updateMenu("head");
+		updateMenu("armour");
+		updateMenu("offhand");
+		}	
+		
+	}
+	
 	return {
 
 
@@ -195,40 +242,7 @@ piratequesting.Equipment = function() {
 		},
 		process : function () {
 			try {
-			var sbcd = sidebar.contentDocument;
-			if (!sbcd) return;
-			
-			
-			inventory = piratequesting.InventoryManager.getInventory();
-			if ( !sbcd.getElementById("weapons_menu") ||  !sbcd.getElementById("head_menu") || !sbcd.getElementById("armour_menu") || !sbcd.getElementById("offhand_menu")) {
-				//if stuff isn't loaded yet, wait a second and try again
-				dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
-				setTimeout(piratequesting.Equipment.process,2000);
-				return;
-			}
-			
-				var equipped_items = inventory.evaluate("descendant::item[@equipped=1]", inventory, null, XPathResult.ANY_TYPE,null);
-				while (item = equipped_items.iterateNext()) {
-					dump("\n"+item.parentNode.getAttribute("name")+ ": " + item.getAttribute("name")+"\n");
-				}
-
-				//re-get the item guide info if any of the items are missing a description
-			if (inventory.evaluate("boolean(//item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
-				var cur_time = (new Date()).getTime();  
-				if (cur_time - last_check > 5000) {
-					last_check = cur_time;
-					piratequesting.InventoryManager.checkItemGuide();
-				} else {
-					alert("Error Processing Item Guide Data");
-				}
-				return; // item description not found. bail.
-			} else {
-				
-			updateMenu("weapons");
-			updateMenu("head");
-			updateMenu("armour");
-			updateMenu("offhand");
-			}
+				update(true);
 			} catch (error) { alert(getErrorString(error)); }
 
 		}
