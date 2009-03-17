@@ -6,14 +6,14 @@
    <r:Seq> 
      <r:li> 
        <r:Description> 
-         <version>2.0a1</version> 
+         <version>2.0b1</version> 
          <targetApplication> 
            <r:Description> 
              <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id> 
              <minVersion>3.0</minVersion> 
-             <maxVersion>3.1b2</maxVersion> 
+             <maxVersion>3.1b3</maxVersion> 
              <updateLink>http://pq.ashita.org/piratequesting.xpi</updateLink>
-             <updateInfoURL>http://pq.ashita.org/update2.0a1.xhtml</updateInfoURL>
+             <updateInfoURL>http://pq.ashita.org/update2.0b1.xhtml</updateInfoURL>
              <updateHash>sha1:78fc1d2887eda35b4ad2e3a0b60120ca271ce6e6</updateHash>
            </r:Description> 
          </targetApplication> 
@@ -21,7 +21,7 @@
      </r:li> 
    </r:Seq> 
  </updates> 
- <version>2.0a1</version> 
+ <version>2.0b1</version> 
  <updateLink>http://pq.ashita.org/piratequesting.xpi</updateLink> 
 </r:Description> 
 </r:RDF>

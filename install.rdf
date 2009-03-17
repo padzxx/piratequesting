@@ -4,7 +4,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>{96ef5663-f9b6-b7e8-fc3f-a601af7c72}</em:id>
     <em:name>PirateQuesting</em:name>
-    <em:version>2.0a1</em:version>
+    <em:version>2.0b1</em:version>
     <em:creator>Jonathan Fingland</em:creator>
     <em:description>Unofficial add-on for the browser game Pirate Quest found at www.piratequest.net</em:description>
     <em:homepageURL>http://pq.ashita.org</em:homepageURL>
@@ -15,7 +15,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- firefox -->
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>3.1b2</em:maxVersion>
+        <em:maxVersion>3.1b3</em:maxVersion>
       </Description>
     </em:targetApplication>
   </Description>
