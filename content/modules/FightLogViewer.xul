@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <?xml-stylesheet href="chrome://global/skin" type="text/css"?>
-<?xml-stylesheet href="piratequesting.css" type="text/css"?>
+<?xml-stylesheet href="chrome://piratequesting/skin/pqxul.css" type="text/css"?>
 
 
 <window id="fightLog" title="Fight Log" onunload="fightLog.onUnload()" onload="fightLog.onLoad();"

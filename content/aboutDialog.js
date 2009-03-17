@@ -47,10 +47,7 @@ function onOK() {
 
 function openGilgalad() {
 	try {
-		var sidebar = mainWindow.document.getElementById("sidebar");
-		var sidebarWindow = sidebar.contentWindow;
-
-		sidebarWindow.openGilgalad();
+		mainWindow.piratequesting.openLink(mainWindow.piratequesting.baseURL+'/index.php?on=profile&user=60051');
 	} catch (e) {
 	}
 }
