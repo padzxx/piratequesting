@@ -1,0 +1,61 @@
+dialog,window {
+	background-color: #FFFFFF !important;
+	background-image: url(chrome://piratequesting/content/mainback.jpg)
+		!important;
+	background-repeat: repeat !important;
+	overflow: auto !important;
+	font-size: 11px !important;
+}
+
+dialog {
+	border: 5px double #63422f;
+}
+
+*[type="hide"] {
+	display: none;
+}
+
+*[type="show"] {
+	
+}
+
+
+caption {
+	background-color: #white;
+	font-weight: bold;
+	color: #4e462f;
+	border: 1px solid black;
+}
+
+treechildren: :-moz-tree-row {
+	background-color: #FFFFFF;
+	color: #4e462f;
+}
+
+treechildren: :-moz-tree-row(odd) {
+	background-color: #ddd7b9;
+	color: #4e462f;
+}
+
+treechildren: :-moz-tree-row (odd,selected ) {
+	background-color: #63422f;
+	color: #ffff99;
+	font-weight: bold;
+}
+
+treechildren: :-moz-tree-row(selected) {
+	background-color: #63422f;
+	color: #ffff99;
+	font-weight: bold;
+}
+
+treechildren: :-moz-tree-cell-text(selected) {
+	background-color: #63422f;
+	color: #ffff99;
+	font-weight: bold;
+}
+
+richlistitem:focus {
+	background-color: #f5efd3;
+}
+

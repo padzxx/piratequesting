@@ -354,6 +354,14 @@ var piratequesting = {
 			piratequesting.sidebar.loadOverlays();
 		}
 
+	},
+	openLink: function (addr) {
+			openAndReuseOneTabPerURL(addr);
+	},
+	openAbout: function () {
+		var params = {in:mainWindow, out:null};       
+		window.openDialog("chrome://piratequesting/content/aboutDialog.xul", "",
+    	"chrome, dialog, titlebar=no, close=no,centerscreen, resizable=no, status=no, height=270, width=430", params).focus();
 	}
 
 }

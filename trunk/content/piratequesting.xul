@@ -48,7 +48,7 @@
 							</menu>
 							<menu id="pqmenu_help" label="&piratequestingsidebar.menu.help;">
 								<menupopup id="pqmenu_help_popup">
-									<menuitem label="&piratequestingsidebar.menu.about;" oncommand="alert('about me')" />
+									<menuitem label="&piratequestingsidebar.menu.about;" oncommand="piratequesting.openAbout();" />
 								</menupopup>
 							</menu>
 						</menubar>
@@ -63,10 +63,11 @@
 				</hbox>
 				<vbox />
 			</vbox>
-		</vbox>
 		<hbox flex="1" align="end" pack="end" >
-			<label type="link" value="Developed by Gilgalad" onclick="piratequesting.openGilgalad();"/>
+			<label type="link" value="Developed by Gilgalad" onclick="piratequesting.openLink(piratequesting.baseURL+'/index.php?on=profile&amp;user=60051');"/>
 		</hbox>
+
+		</vbox>
 	</deck>
 	<box id="ttbox"/>	
 </window>
