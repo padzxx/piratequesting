@@ -141,7 +141,7 @@ piratequesting.Player = function() {
 		var sbcd = sidebar.contentDocument; 		
 	
 		if (piratequesting.sidebar) {
-			if (sbcd.getElementById('Player_tabpanel')) {
+			if (sbcd.getElementById('Player_tabpanel') && sbcd.getElementById('curhpval') && sbcd.getElementById('totalval')) {
 				sbcd.getElementById('curhpval').value = String(stats.hp.getCurrent()).addCommas();
 				sbcd.getElementById('maxhpval').value = String(stats.hp.getMax()).addCommas();
 				sbcd.getElementById('curawakeval').value = String(stats.awake.getCurrent()).addCommas();

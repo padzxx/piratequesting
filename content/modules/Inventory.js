@@ -32,23 +32,45 @@ piratequesting.Inventory = function() {
 		while (invd.hasChildNodes())
 			invd.removeChild(invd.firstChild);
 	}
-
-	function updateInventoryList() {
-		var sbcd = sidebar.contentDocument;	
+	
+	
+	var forced_update_count = 0;
+	function updateInventoryList(fromEvent) {
+		if (!fromEvent) {
+			if (++forced_update_count >= 3) return;
+		} else {
+			forced_update_count = 0;
+		}
 		
+		var sbcd = sidebar.contentDocument;
+		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait a second and try again
+			dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
+			setTimeout(updateInventoryList,2000);
+			return;
+		}
+
 		/**
 		 * @param {Element} item
-		 * @param {Node} cat
+		 * @param {Element} cat
 		 */
 		function newInventoryItem (item, cat) {
+
+			var actions = item.getAttribute("actions");
+			var canUse = actions & USE,
+				canSell = actions & SELL,
+				canMarket = actions & MARKET,
+				canReturn = actions & RETURN;
+				
 			
 			// start by creating all of the elements and setting their
 			// attributes.
 			var container = sbcd.createElement("hbox");
 			container.setAttribute("align", "center");
-
+			var img_src = item.getAttribute("image");
+			if (img_src.indexOf("chrome://") < 0 )
+				img_src = piratequesting.baseURL + img_src;
 			var image = sbcd.createElement("image");
-			image.setAttribute("src", item.getAttribute("image"));
+			image.setAttribute("src",  img_src);
 			image.setAttribute("height", "50");
 			image.setAttribute("width", "50");
 
@@ -63,7 +85,7 @@ piratequesting.Inventory = function() {
 			var actioncontainer = sbcd.createElement("hbox");
 			actioncontainer.setAttribute("flex", "1");
 
-			if (item.hasAction("use")) {
+			if (canUse) {
 				var uselink = sbcd.createElement("label");
 				uselink.setAttribute("value", "Use");
 				uselink.setAttribute("type", "link");
@@ -74,7 +96,7 @@ piratequesting.Inventory = function() {
 				actioncontainer.appendChild(uselink);
 			}
 
-			if (item.hasAction("sell")) {
+			if (canSell) {
 				var selllink = sbcd.createElement("label");
 				selllink.setAttribute("value", "Sell");
 				selllink.setAttribute("type", "link");
@@ -88,7 +110,7 @@ piratequesting.Inventory = function() {
 				actioncontainer.appendChild(selllink);
 			}
 
-			if (item.hasAction("market")) {
+			if (canMarket) {
 				var marketlink = sbcd.createElement("label");
 				marketlink.setAttribute("value", "Market");
 				marketlink.setAttribute("type", "link");
@@ -102,7 +124,7 @@ piratequesting.Inventory = function() {
 				actioncontainer.appendChild(marketlink);
 			}
 
-			if (item.hasAction("market") || item.hasAction("sell")) {
+			if (canMarket || canSell) {
 				var checklink = sbcd.createElement("label");
 				checklink.setAttribute("value", "Check Prices");
 				checklink.setAttribute("type", "link");
@@ -111,17 +133,17 @@ piratequesting.Inventory = function() {
 						'piratequesting.Inventory.showInventoryBox("'
 								+ item.getAttribute("action_id") + '",-1,"' 
 								+ item.getAttribute("name") + '","'
-								+ cat.getAttribute('id') + '");');
+								+ cat + '");');
 				actioncontainer.appendChild(checklink);
 			}
 
-			if (item.hasAction("return")) {
+			if (canReturn) {
 				var returnlink = sbcd.createElement("label");
 				returnlink.setAttribute("value", "Return");
 				returnlink.setAttribute("type", "link");
 				returnlink.setAttribute("flex", "1");
 				returnlink.setAttribute("onclick",
-						'piratequesting.Inventory.returnItem("' + item.getAttribute('id') + '");');
+						'piratequesting.Inventory.returnItem("' + item.getAttribute('action_id') + '");');
 				actioncontainer.appendChild(returnlink);
 			}
 
@@ -150,373 +172,36 @@ piratequesting.Inventory = function() {
 		// waiting for confirmation that we can add the equipment to the
 		// marketable items so they are currently not included
 
-		inventoryList.appendChild(newInventoryItem(
-				piratequesting.Inventory.points, "points"));
-
-		// if (equipment.GetItemAtIndex(0).name != "Nothing")
-		// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(0)));
-		for (var i = 0; i < piratequesting.Inventory.head.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.head.GetItemAtIndex(i),
-					piratequesting.Inventory.head.cat));
-
-		// then the armour
-		// if (equipment.GetItemAtIndex(1).name != "Nothing")
-		// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(1)));
-		for (var i = 0; i < piratequesting.Inventory.armour.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.armour.GetItemAtIndex(i),
-					piratequesting.Inventory.armour.cat));
-
-		// then the weapons
-		// if (equipment.GetItemAtIndex(2).name != "Nothing")
-		// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(2)));
-		for (var i = 0; i < piratequesting.Inventory.weapons.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.weapons.GetItemAtIndex(i),
-					piratequesting.Inventory.weapons.cat));
-
-		// then the offhand
-		// if (equipment.GetItemAtIndex(3).name != "Nothing")
-		// inventoryList.appendChild(newInventoryItem(equipment.GetItemAtIndex(3)));
-		for (var i = 0; i < piratequesting.Inventory.offhand.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.offhand.GetItemAtIndex(i),
-					piratequesting.Inventory.offhand.cat));
-
-		// now do the non-equipment items
-		for (var i = 0; i < piratequesting.Inventory.edibles.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.edibles.GetItemAtIndex(i),
-					piratequesting.Inventory.edibles.cat));
-
-		for (var i = 0; i < piratequesting.Inventory.grenades.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.grenades.GetItemAtIndex(i),
-					piratequesting.Inventory.grenades.cat));
-
-		for (var i = 0; i < piratequesting.Inventory.poisons.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.poisons.GetItemAtIndex(i),
-					piratequesting.Inventory.poisons.cat));
-
-		for (var i = 0; i < piratequesting.Inventory.miscellaneous.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.miscellaneous
-							.GetItemAtIndex(i),
-					piratequesting.Inventory.miscellaneous.cat));
-
-		for (var i = 0; i < piratequesting.Inventory.tokens.count(); i++)
-			inventoryList.appendChild(newInventoryItem(
-					piratequesting.Inventory.tokens.GetItemAtIndex(i),
-					piratequesting.Inventory.tokens.cat));
-
-		// done :)
-	}
-	function makeTooltip(id, text) {
-		var tt, vb, l;
-		var labelset;
-		var emptytest = /^[\s]*$/;
-		tt = sbcd.createElement("tooltip");
-		vb = sbcd.createElement("vbox");
-		labelset = text.split("<br>");
-		for (var label in labelset) {
-			if (!emptytest.test(label)) {
-				l = sbcd.createElement("label");
-				l.setAttribute("value", label);
-				vb.appendChild(l);
-			}
+		var points = inventory.evaluate("/inventory/item[@id='points' and @quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+		if (points.snapshotLength > 0 ) {
+			inventoryList.appendChild(newInventoryItem(points.snapshotItem(0), "points"));
 		}
-		tt.setAttribute("id", "tt" + id);
-		tt.position = "end_before";
-		tt.appendChild(vb);
 
-		return tt;
-	}
-	
-	function showInventoryBox(id, price, name, qty) {
-		sbcd.getElementById("invdeck").setAttribute("selectedIndex",
-				"1");
-		var invd = sbcd.getElementById("invdetails");
-
-		// clear the details
-		while (invd.hasChildNodes())
-			invd.removeChild(invd.firstChild);
-
-		var prn = Number(priceToNumber(price));
-		if (prn > 0) {
-			// selling
-			var msg1 = sbcd.createElement("description");
-			msg1
-					.setAttribute("value", "You have " + qty + " " + name
-									+ ".");
-			var msg3 = sbcd.createElement("description");
-			msg3.setAttribute("value", "How many would you like to sell?");
-			invd.appendChild(msg1);
-			invd.appendChild(msg3);
-
-			var sellbox = sbcd.createElement("hbox");
-			sellbox.setAttribute("align", "center");
-
-			var qtyin = sbcd.createElement("textbox");
-			qtyin.setAttribute("type", "number");
-			qtyin.setAttribute("width", "50");
-			qtyin.setAttribute("id", "qtyin");
-			qtyin.setAttribute("max", qty);
-			qtyin.setAttribute("min", 0);
-
-			var hiddenpricein = sbcd.createElement("textbox");
-			hiddenpricein.setAttribute("value", prn);
-			hiddenpricein.setAttribute("id", "pricein");
-			hiddenpricein.setAttribute("type", "hide");
-
-			var hiddenid = sbcd.createElement("textbox");
-			hiddenid.setAttribute("value", id);
-			hiddenid.setAttribute("id", "item_id");
-			hiddenid.setAttribute("type", "hide");
-
-			var pricelabel = sbcd.createElement("label");
-			pricelabel.setAttribute("value", " @ " + price + " each");
-
-			var totalbox = sbcd.createElement("hbox");
-			totalbox.setAttribute("align", "center");
-
-			var totallabel = sbcd.createElement("label");
-			totallabel.setAttribute("value", "Total: $");
-
-			var resultlabel = sbcd.createElement("label");
-			resultlabel.setAttribute("value", "0");
-			resultlabel.setAttribute("id", "result");
-
-			var buttonbox = sbcd.createElement("hbox");
-			buttonbox.setAttribute("align", "center");
-
-			var actionbutton = sbcd.createElement("button");
-			actionbutton.setAttribute("label", "Sell");
-			actionbutton.setAttribute("id", "actionbutton");
-			actionbutton.setAttribute("maxwidth", "70");
-			actionbutton
-					.setAttribute(
-							"oncommand",
-							'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.sellitem()');
-
-			var cancelbutton = sbcd.createElement("button");
-			cancelbutton.setAttribute("label", "Cancel");
-			cancelbutton.setAttribute("id", "cancelbutton");
-			cancelbutton.setAttribute("maxwidth", "70");
-			cancelbutton.setAttribute("oncommand",
-					'piratequesting.Inventory.hideInventoryBox()');
-
-			// now put them in the doc
-			totalbox.appendChild(totallabel);
-			totalbox.appendChild(resultlabel);
-
-			sellbox.appendChild(qtyin);
-			sellbox.appendChild(pricelabel);
-			sellbox.appendChild(hiddenpricein);
-
-			invd.appendChild(hiddenid);
-			invd.appendChild(sellbox);
-			invd.appendChild(totalbox);
-
-			buttonbox.appendChild(actionbutton);
-			buttonbox.appendChild(cancelbutton);
-			invd.appendChild(buttonbox);
-			sbcd.getElementById("qtyin").addEventListener("change",
-					piratequesting.Inventory.giveResult, true);
-			sbcd.getElementById("qtyin").addEventListener("input",
-					piratequesting.Inventory.giveResult, true);
-			sbcd.getElementById('qtyin').addEventListener('keypress',
-					piratequesting.Inventory.HandleKeyPressItems, true);
-			sbcd.getElementById("qtyin").focus();
-			// sbcd.getElementById("qtyin").addEventListener("command",
-			// function () {
-			// sbcd.getElementById("sellbutton").doCommand(); }, true);
-
-		} else if (prn == 0) {
-			// marketing
-
-			var msg1 = sbcd.createElement("description");
-			msg1
-					.setAttribute("value", "You have " + qty + " " + name
-									+ ".");
-			var msg2 = sbcd.createElement("description");
-			msg2.setAttribute("value",
-					"How many would you like to put on the market?");
-			var msg3 = sbcd.createElement("description");
-			msg3.setAttribute("value", "And for how much?");
-			invd.appendChild(msg1);
-			invd.appendChild(msg2);
-			invd.appendChild(msg3);
-
-			var sellbox = sbcd.createElement("hbox");
-			sellbox.setAttribute("align", "center");
-
-			var qtyin = sbcd.createElement("textbox");
-			qtyin.setAttribute("type", "number");
-			qtyin.setAttribute("width", "50");
-			qtyin.setAttribute("id", "qtyin");
-			qtyin.setAttribute("max", qty);
-			qtyin.setAttribute("min", 0);
-
-			var pricein = sbcd.createElement("textbox");
-			// pricein.setAttribute("value",prn);
-			pricein.setAttribute("id", "pricein");
-			pricein.setAttribute("wdith", "70");
-
-			var hiddenid = sbcd.createElement("textbox");
-			hiddenid.setAttribute("value", id);
-			hiddenid.setAttribute("id", "item_id");
-			hiddenid.setAttribute("type", "hide");
-
-			var pricelabel = sbcd.createElement("label");
-			pricelabel.setAttribute("value", " @ $");
-
-			var pricelabel2 = sbcd.createElement("label");
-			pricelabel2.setAttribute("value", " each");
-
-			var totalbox = sbcd.createElement("hbox");
-			totalbox.setAttribute("align", "center");
-
-			var totallabel = sbcd.createElement("label");
-			totallabel.setAttribute("value", "Total: $");
-
-			var resultlabel = sbcd.createElement("label");
-			resultlabel.setAttribute("value", "0");
-			resultlabel.setAttribute("id", "result");
-
-			var buttonbox = sbcd.createElement("hbox");
-			buttonbox.setAttribute("align", "center");
-
-			var actionbutton = sbcd.createElement("button");
-			actionbutton.setAttribute("label", "Market");
-			actionbutton.setAttribute("id", "actionbutton");
-			actionbutton.setAttribute("maxwidth", "70");
-			actionbutton
-					.setAttribute(
-							"oncommand",
-							'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.marketitem()');
-
-			var cancelbutton = sbcd.createElement("button");
-			cancelbutton.setAttribute("label", "Cancel");
-			cancelbutton.setAttribute("id", "cancelbutton");
-			cancelbutton.setAttribute("maxwidth", "70");
-			cancelbutton.setAttribute("oncommand",
-					'piratequesting.Inventory.hideInventoryBox()');
-
-			// now put them in the doc
-			totalbox.appendChild(totallabel);
-			totalbox.appendChild(resultlabel);
-
-			sellbox.appendChild(qtyin);
-			sellbox.appendChild(pricelabel);
-			sellbox.appendChild(pricein);
-			sellbox.appendChild(pricelabel2);
-
-			invd.appendChild(hiddenid);
-			invd.appendChild(sellbox);
-			invd.appendChild(totalbox);
-
-			buttonbox.appendChild(actionbutton);
-			buttonbox.appendChild(cancelbutton);
-			invd.appendChild(buttonbox);
-
-			sbcd.getElementById("qtyin").addEventListener("change",
-					piratequesting.Inventory.giveResult, true);
-			sbcd.getElementById("qtyin").addEventListener("input",
-					piratequesting.Inventory.giveResult, true);
-			sbcd.getElementById('qtyin').addEventListener('keypress',
-					piratequesting.Inventory.HandleKeyPressItems, true);
-			sbcd.getElementById("pricein").addEventListener("input",
-					piratequesting.Inventory.giveResult, true);
-			sbcd.getElementById('pricein').addEventListener('keypress',
-					piratequesting.Inventory.HandleKeyPressItems, true);
-			sbcd.getElementById("qtyin").focus();
-		} else if (prn < 0) {
-			// checking prices
-			// note qty is treated at the category number for the item
-			// market here.
-			var cat = qty;
-			var msg1 = sbcd.createElement("description");
-			msg1.setAttribute("value", "Current market prices for:");
-			var msg2 = sbcd.createElement("description");
-			msg2.setAttribute("value", name);
-			msg2.setAttribute("style", "padding-left:20px;")
-
-			invd.appendChild(msg1);
-			invd.appendChild(msg2);
-
-			var buttonbox = sbcd.createElement("hbox");
-			buttonbox.setAttribute("align", "center");
-
-			var cancelbutton = sbcd.createElement("button");
-			cancelbutton.setAttribute("label", "Close");
-			cancelbutton.setAttribute("id", "cancelbutton");
-			cancelbutton.setAttribute("maxwidth", "70");
-			cancelbutton.setAttribute("oncommand",
-					'piratequesting.Inventory.hideInventoryBox()');
-
-			buttonbox.appendChild(cancelbutton);
-
-			var pricebox = sbcd.createElement("hbox");
-			var pricelist = sbcd.createElement("listbox");
-			pricelist.setAttribute("id", "pricelist");
-			var spacer = sbcd.createElement("box");
-			spacer.setAttribute("flex", "1");
-			// pricelist.setAttribute("style","");
-			// pricelist.setAttribute("max-height", "120");
-
-			pricebox.appendChild(pricelist);
-			pricebox.appendChild(spacer);
-			invd.appendChild(pricebox);
-			invd.appendChild(buttonbox);
-			piratequesting.Inventory.getPrices(cat, name);
+		var items = inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null); 
+		for (var i = 0, len=items.snapshotLength; i < len; ++i) {
+			inventoryList.appendChild(newInventoryItem(items.snapshotItem(i), items.snapshotItem(i).parentNode.getAttribute('id')));
 		}
 
 	}
-	
+		
 	function getPrices (cat, name) {
-		piratequesting.Inventory.disableInventory();
-		var http = new XMLHttpRequest();
-		piratequesting.AJAX.inventoryhttp = http;
-		if (cat == "points")
-			var url = piratequesting.baseurl
-					+ "/index.php?on=points_market";
-		else
-			var url = piratequesting.baseurl
-					+ "/index.php?ajax=item_market&category=" + cat;
-		http.open("GET", url, true);
-		http.onerror = function(e) {
-			onError(e);
-			piratequesting.Inventory.enableInventory();
-		}
-
-		http.onreadystatechange = function() {
-			sbcd.getElementById('invmeter').setAttribute(
-					'value',
-					Number(sbcd.getElementById('invmeter')
-							.getAttribute('value'))
-							+ 25);
-			if (http.readyState == 4) {
-				if (http.status == 200) {
-					if (cat == "points")
-						piratequesting.Player.parse(http.responseText);
-					piratequesting.Inventory.processPrices(name,
-							http.responseText);
-				} else {
-					alert("Price list request failed due to error");
-				}
-			}
-		}
-		http.send(null);
+		disable();
+		var url = (cat == "points") ? piratequesting.baseURL  + "/index.php?on=points_market" : piratequesting.baseURL 	+ "/index.php?ajax=item_market&category=" + cat;
+		var sbcd = sidebar.contentDocument;	
+		sbcd.getElementById('invmeter').setAttribute('value',0);
+		ajax = AjaxRequest(url, { 
+				onSuccess: function (http) { processPrices(name,http.responseText); }, 
+				onFailure: function() { enable(); alert('Failed to get prices from market.');}, 
+				onError: function() { enable(); alert('Error occurred when getting prices from market.');}, 
+				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); }
+		});
 	}
 
 	function processPrices(name, text) {
+		var sbcd = sidebar.contentDocument;	
 		var pricelist = sbcd.getElementById("pricelist");
-		var stripex;// = /<h2>Item Market<\/h2>[\s\S]*?(<table
-		// class=['"]one['"]>[\s\S]*?<\/table>)/;
-		// var stripex2 = /<h2>Points Market<\/h2><\/span>[\s\S]*?(<table
-		// class=['"]one['"]>[\s\S]*?<\/table>)/;
+		var stripex;
+		
 		if (name == "Points") {
 			stripex = /<h2>Points Market<\/h2><\/span>[\s\S]*?(<table class=['"]one['"]>[\s\S]*?<\/table>)/;
 			if (stripex.test(text)) {
@@ -564,16 +249,20 @@ piratequesting.Inventory = function() {
 				alert("Error retrieving prices. Page returned by server\nwas not the item market");
 		}
 
-		piratequesting.Inventory.enableInventory();
+		enable();
 	}
 
 	function disable() {
+		var sbcd = sidebar.contentDocument;	
+			
 		sbcd.getElementById('invdeck').setAttribute("type", "cover");
 		sbcd.getElementById('invcb').setAttribute("type", "cbox");
 		sbcd.getElementById('invmeter').setAttribute('value', '0');
 	}
 
 	function enable() {
+		var sbcd = sidebar.contentDocument;	
+			
 		sbcd.getElementById('invdeck').setAttribute("type", "");
 		sbcd.getElementById('invcb').setAttribute("type", "hide");
 	}
@@ -588,7 +277,7 @@ piratequesting.Inventory = function() {
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=return&id=" + id, { 
-					onSuccess: checkInventory, 
+					onSuccess: enable, 
 					onFailure: function() { enable(); alert('Failed to return item.');}, 
 					onError: function() { enable(); alert('Error occurred when returning item.');}, 
 					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); }
@@ -596,59 +285,270 @@ piratequesting.Inventory = function() {
 		},
 
 		process : function () {
+			dump("Updating Inventory List");
 			inventory = piratequesting.InventoryManager.getInventory();
-			dump("\nEvent received; process launched\n");
+			try {
+				updateInventoryList(true);
+			}catch(e) { dumpError(e); }
+		},
+		
+		showInventoryBox : function(id, price, name, qty) {
+			try {
+				/**
+				 * @type {Document}
+				 */
+			var sbcd = sidebar.contentDocument;	
+			
+			sbcd.getElementById("invdeck").setAttribute("selectedIndex",
+					"1");
+			var invd = sbcd.getElementById("invdetails");
+	
+			// clear the details
+			while (invd.hasChildNodes())
+				invd.removeChild(invd.firstChild);
+	
+			var prn = String(price).toNumber();
+			if (prn > 0) {
+				// selling
+				var msg1 = sbcd.createElement("description");
+				msg1
+						.setAttribute("value", "You have " + qty + " " + name
+										+ ".");
+				var msg3 = sbcd.createElement("description");
+				msg3.setAttribute("value", "How many would you like to sell?");
+				invd.appendChild(msg1);
+				invd.appendChild(msg3);
+	
+				var sellbox = sbcd.createElement("hbox");
+				sellbox.setAttribute("align", "center");
+	
+				var qtyin = sbcd.createElement("textbox");
+				qtyin.setAttribute("type", "number");
+				qtyin.setAttribute("width", "50");
+				qtyin.setAttribute("id", "qtyin");
+				qtyin.setAttribute("max", qty);
+				qtyin.setAttribute("min", 0);
+	
+				var hiddenpricein = sbcd.createElement("textbox");
+				hiddenpricein.setAttribute("value", prn);
+				hiddenpricein.setAttribute("id", "pricein");
+				hiddenpricein.setAttribute("type", "hide");
+	
+				var hiddenid = sbcd.createElement("textbox");
+				hiddenid.setAttribute("value", id);
+				hiddenid.setAttribute("id", "item_id");
+				hiddenid.setAttribute("type", "hide");
+	
+				var pricelabel = sbcd.createElement("label");
+				pricelabel.setAttribute("value", " @ " + price + " each");
+	
+				var totalbox = sbcd.createElement("hbox");
+				totalbox.setAttribute("align", "center");
+	
+				var totallabel = sbcd.createElement("label");
+				totallabel.setAttribute("value", "Total: $");
+	
+				var resultlabel = sbcd.createElement("label");
+				resultlabel.setAttribute("value", "0");
+				resultlabel.setAttribute("id", "result");
+	
+				var buttonbox = sbcd.createElement("hbox");
+				buttonbox.setAttribute("align", "center");
+	
+				var actionbutton = sbcd.createElement("button");
+				actionbutton.setAttribute("label", "Sell");
+				actionbutton.setAttribute("id", "actionbutton");
+				actionbutton.setAttribute("maxwidth", "70");
+				actionbutton
+						.setAttribute(
+								"oncommand",
+								'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.sellitem()');
+	
+				var cancelbutton = sbcd.createElement("button");
+				cancelbutton.setAttribute("label", "Cancel");
+				cancelbutton.setAttribute("id", "cancelbutton");
+				cancelbutton.setAttribute("maxwidth", "70");
+				cancelbutton.addEventListener("command",hideInventoryBox,false);
+	
+				// now put them in the doc
+				totalbox.appendChild(totallabel);
+				totalbox.appendChild(resultlabel);
+	
+				sellbox.appendChild(qtyin);
+				sellbox.appendChild(pricelabel);
+				sellbox.appendChild(hiddenpricein);
+	
+				invd.appendChild(hiddenid);
+				invd.appendChild(sellbox);
+				invd.appendChild(totalbox);
+	
+				buttonbox.appendChild(actionbutton);
+				buttonbox.appendChild(cancelbutton);
+				invd.appendChild(buttonbox);
+				sbcd.getElementById("qtyin").addEventListener("change",
+						piratequesting.Inventory.giveResult, true);
+				sbcd.getElementById("qtyin").addEventListener("input",
+						piratequesting.Inventory.giveResult, true);
+				sbcd.getElementById('qtyin').addEventListener('keypress',
+						piratequesting.Inventory.HandleKeyPressItems, true);
+				sbcd.getElementById("qtyin").focus();
+				// sbcd.getElementById("qtyin").addEventListener("command",
+				// function () {
+				// sbcd.getElementById("sellbutton").doCommand(); }, true);
+	
+			} else if (prn == 0) {
+				// marketing
+	
+				var msg1 = sbcd.createElement("description");
+				msg1
+						.setAttribute("value", "You have " + qty + " " + name
+										+ ".");
+				var msg2 = sbcd.createElementNS("http://www.w3.org/1999/xhtml","html:div");
+				msg2.appendChild(sbcd.createTextNode("How many would you like to put on the market? And for how much?"));
+				invd.appendChild(msg1);
+				invd.appendChild(msg2);
+				
+				var sellbox = sbcd.createElement("hbox");
+				sellbox.setAttribute("align", "center");
+	
+				var qtyin = sbcd.createElement("textbox");
+				qtyin.setAttribute("type", "number");
+				qtyin.setAttribute("width", "50");
+				qtyin.setAttribute("id", "qtyin");
+				qtyin.setAttribute("max", qty);
+				qtyin.setAttribute("min", 0);
+	
+				var pricein = sbcd.createElement("textbox");
+				// pricein.setAttribute("value",prn);
+				pricein.setAttribute("id", "pricein");
+				pricein.setAttribute("width", "70");
+	
+				var hiddenid = sbcd.createElement("textbox");
+				hiddenid.setAttribute("value", id);
+				hiddenid.setAttribute("id", "item_id");
+				hiddenid.setAttribute("type", "hide");
+	
+				var pricelabel = sbcd.createElement("label");
+				pricelabel.setAttribute("value", " @ $");
+	
+				var pricelabel2 = sbcd.createElement("label");
+				pricelabel2.setAttribute("value", " each");
+	
+				var totalbox = sbcd.createElement("hbox");
+				totalbox.setAttribute("align", "center");
+	
+				var totallabel = sbcd.createElement("label");
+				totallabel.setAttribute("value", "Total: $");
+	
+				var resultlabel = sbcd.createElement("label");
+				resultlabel.setAttribute("value", "0");
+				resultlabel.setAttribute("id", "result");
+	
+				var buttonbox = sbcd.createElement("hbox");
+				buttonbox.setAttribute("align", "center");
+	
+				var actionbutton = sbcd.createElement("button");
+				actionbutton.setAttribute("label", "Market");
+				actionbutton.setAttribute("id", "actionbutton");
+				actionbutton.setAttribute("maxwidth", "70");
+				actionbutton
+						.setAttribute(
+								"oncommand",
+								'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.marketitem()');
+	
+				var cancelbutton = sbcd.createElement("button");
+				cancelbutton.setAttribute("label", "Cancel");
+				cancelbutton.setAttribute("id", "cancelbutton");
+				cancelbutton.setAttribute("maxwidth", "70");
+				cancelbutton.addEventListener("command",hideInventoryBox,false);
+	
+				// now put them in the doc
+				totalbox.appendChild(totallabel);
+				totalbox.appendChild(resultlabel);
+	
+				sellbox.appendChild(qtyin);
+				sellbox.appendChild(pricelabel);
+				sellbox.appendChild(pricein);
+				sellbox.appendChild(pricelabel2);
+	
+				invd.appendChild(hiddenid);
+				invd.appendChild(sellbox);
+				invd.appendChild(totalbox);
+	
+				buttonbox.appendChild(actionbutton);
+				buttonbox.appendChild(cancelbutton);
+				invd.appendChild(buttonbox);
+	
+				sbcd.getElementById("qtyin").addEventListener("change",
+						piratequesting.Inventory.giveResult, true);
+				sbcd.getElementById("qtyin").addEventListener("input",
+						piratequesting.Inventory.giveResult, true);
+				sbcd.getElementById('qtyin').addEventListener('keypress',
+						piratequesting.Inventory.HandleKeyPressItems, true);
+				sbcd.getElementById("pricein").addEventListener("input",
+						piratequesting.Inventory.giveResult, true);
+				sbcd.getElementById('pricein').addEventListener('keypress',
+						piratequesting.Inventory.HandleKeyPressItems, true);
+				sbcd.getElementById("qtyin").focus();
+			} else if (prn < 0) {
+				// checking prices
+				// note qty is treated at the category number for the item
+				// market here.
+				var cat = qty;
+				var msg1 = sbcd.createElement("description");
+				msg1.setAttribute("value", "Current market prices for:");
+				var msg2 = sbcd.createElement("description");
+				msg2.setAttribute("value", name);
+				msg2.setAttribute("style", "padding-left:20px;")
+	
+				invd.appendChild(msg1);
+				invd.appendChild(msg2);
+	
+				var buttonbox = sbcd.createElement("hbox");
+				buttonbox.setAttribute("align", "center");
+	
+				var cancelbutton = sbcd.createElement("button");
+				cancelbutton.setAttribute("label", "Close");
+				cancelbutton.setAttribute("id", "cancelbutton");
+				cancelbutton.setAttribute("maxwidth", "70");
+				cancelbutton.addEventListener("command",hideInventoryBox,false);
+	
+				buttonbox.appendChild(cancelbutton);
+	
+				var pricebox = sbcd.createElement("hbox");
+				var pricelist = sbcd.createElement("listbox");
+				pricelist.setAttribute("id", "pricelist");
+				var spacer = sbcd.createElement("box");
+				spacer.setAttribute("flex", "1");
+				// pricelist.setAttribute("style","");
+				// pricelist.setAttribute("max-height", "120");
+	
+				pricebox.appendChild(pricelist);
+				pricebox.appendChild(spacer);
+				invd.appendChild(pricebox);
+				invd.appendChild(buttonbox);
+				getPrices(cat, name);
+			}
+			}catch(e) { dumpError(e); }
 		},
 		
 		useItem : function(id) {
-			piratequesting.Inventory.disableInventory();
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl + "/index.php?ajax=items";
-
-			var params = 'useamount=1&action=use&id=' + id;
-			http.open("post", url, true);
-			http.setRequestHeader("Content-type",
-					"application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-			piratequesting.AJAX.inventoryhttp = http;
-			http.onreadystatechange = function() {
-				sbcd.getElementById('invmeter').setAttribute(
-						'value',
-						Number(sbcd.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						var xmlRes = http.responseXML;
-						var item = piratequesting.Inventory.edibles
-								.GetItemById(id);
-						if (item != null) {
-							item
-									.setQuantity(xmlRes
-											.getElementsByTagName('left')[0].firstChild.nodeValue);
-							piratequesting.Inventory.updateInventoryList();
-							piratequesting.Inventory.updateEdiblesList();
-							piratequesting.Inventory.write();
-						}
-
-						piratequesting.Inventory.enableInventory();
-					} else {
-						alert("Returning failed due to error");
-					}
-				}
-			}
-			http.send(params);
+			disable();
+			var sbcd = sidebar.contentDocument;	
+			sbcd.getElementById('invmeter').setAttribute('value',0);
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items", { 
+						protocol: "post",
+						onSuccess: function() { enable(); AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory"); }, 
+						onFailure: function() { enable(); alert('Failed to use item.');}, 
+						onError: function() { enable(); alert('Error occurred when using item.');}, 
+						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
+						params: "action=use&useamount=1&id=" + id
+						
+				});
 		},
 		
-		
-		//TODO Move to Inventory Module
 		HandleKeyPressItems : function(e) {
+			var sbcd = sidebar.contentDocument;	
 			switch (e.keyCode) {
 				case e.DOM_VK_RETURN :
 				case e.DOM_VK_ENTER :
@@ -659,104 +559,58 @@ piratequesting.Inventory = function() {
 			}
 		},
 
-		//TODO Move to Inventory Module
 		giveResult : function() {
-			var qty = Number(sbcd.getElementById("qtyin").value);
-			var price = Number(sbcd.getElementById("pricein").value);
-			var result = addCommas(String(qty * price));
+			var sbcd = sidebar.contentDocument;	
+			
+			var qty = sbcd.getElementById("qtyin").value.toNumber();
+			var price = sbcd.getElementById("pricein").value.toNumber();
+			var result = String(qty * price).addCommas();
 
 			sbcd.getElementById("result").setAttribute("value", result);
 		},
 
-		//TODO Move to Inventory Module
 		sellitem : function() {
-			piratequesting.Inventory.disableInventory();
+			disable();
+			var sbcd = sidebar.contentDocument;	
+			sbcd.getElementById('invmeter').setAttribute('value',0);
 			var qty = sbcd.getElementById("qtyin").value;
 			var id = sbcd.getElementById("item_id").value;
 
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseurl
-					+ "/index.php?on=inventory&action=sell&id=" + id;;
-			var params = "quantity=" + qty + "&sell=Sell";
-			http.open("POST", url, true);
-
-			// Send the proper header information along with the request
-			http.setRequestHeader("Content-type",
-					"application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-			piratequesting.AJAX.inventoryhttp = http;
-			http.onreadystatechange = function() {
-				sbcd.getElementById('invmeter').setAttribute(
-						'value',
-						Number(sbcd.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Inventory
-								.checkInventory("piratequesting.Inventory.hideInventoryBox(); piratequesting.Inventory.enableInventory();");
-					} else {
-						alert("Sale failed due to error");
-					}
-				}
-			}
-			http.send(params);
-			// hideInvBox();
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=sell&id=" + id, { 
+						protocol: "post",
+						onSuccess: function() { enable(); hideInventoryBox(); AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory"); }, 
+						onFailure: function() { enable(); hideInventoryBox(); alert('Failed to sell item.');}, 
+						onError: function() { enable(); hideInventoryBox(); alert('Error occurred when attempting to sell item.');}, 
+						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
+						params: "quantity=" + qty + "&sell=Sell"
+						
+				});
 		},
 
-		//TODO Move to Inventory Module
 		marketitem : function() {
-			piratequesting.Inventory.disableInventory();
+			disable();
+			var sbcd = sidebar.contentDocument;	
+			sbcd.getElementById('invmeter').setAttribute('value',0);
 			var qty = sbcd.getElementById("qtyin").value;
 			var id = sbcd.getElementById("item_id").value;
 			var price = sbcd.getElementById("pricein").value;
-			var url;
-			var http = new XMLHttpRequest();
-			if (id != "points")
-				url = piratequesting.baseurl
-						+ "/index.php?on=inventory&action=market&id=" + id;
-			else
-				url = piratequesting.baseurl + "/index.php?on=points_market";
-			var params = "quantity=" + qty + "&cost=" + price + "&market=Add";
-			http.open("POST", url, true);
-			http.onerror = function(e) {
-				onError(e);
-				piratequesting.Inventory.enableInventory();
-			}
-			piratequesting.AJAX.inventoryhttp = http;
-			// Send the proper header information along with the request
-			http.setRequestHeader("Content-type",
-					"application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
+			var url = (id != "points") ? piratequesting.baseURL + "/index.php?on=inventory&action=market&id=" + id : piratequesting.baseURL + "/index.php?on=points_market";   
 
-			http.onreadystatechange = function() {
-				sbcd.getElementById('invmeter').setAttribute(
-						'value',
-						Number(sbcd.getElementById('invmeter')
-								.getAttribute('value'))
-								+ 25);
-				if (http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Inventory
-								.checkInventory("piratequesting.Inventory.hideInventoryBox(); piratequesting.Inventory.enableInventory();");
-					} else {
-						alert("Marketing failed due to error");
-					}
-				}
-			}
-			http.send(params);
-			// hideInvBox();
+			ajax = AjaxRequest(url, { 
+						protocol: "post",
+						onSuccess: function() { enable(); hideInventoryBox(); AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory"); }, 
+						onFailure: function() { enable(); hideInventoryBox(); alert('Failed to sell item.');}, 
+						onError: function() { enable(); hideInventoryBox(); alert('Error occurred when attempting to sell item.');}, 
+						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
+						params: "quantity=" + qty + "&cost=" + price + "&market=Add"
+						
+				});
 		},
 
 			
 		abort : function() {
 			enable();
+			ajax.abort();
 		}
 	
 	}

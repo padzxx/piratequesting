@@ -4,7 +4,7 @@
 <?xml-stylesheet href="chrome://piratequesting/skin/piratequesting.css" type="text/css"?>
 
 <!DOCTYPE window SYSTEM "chrome://piratequesting/locale/piratequesting.dtd">
-<window id="piratequesting-sidebar" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+<window id="piratequesting-sidebar" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 	xmlns:html="http://www.w3.org/1999/xhtml" >
 	<script src="chrome://global/content/nsDragAndDrop.js"/>
 	<script type="application/x-javascript" src="chrome://piratequesting/content/sidebar-main.js"/>
 	<script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>

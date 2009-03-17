@@ -232,8 +232,9 @@ function toggleSBStyle() {
  */
 function hasClassName(element, className) {
 	if ((element instanceof XULElement)||(element instanceof HTMLElement)) {
-		var test = new RegExp(className,"i");
-		return test.test(element.className);
+		var cls = " " + element.className + " ";
+		return  (cls.indexOf(" " + className + " ") > -1)
+		//return test.test(element.className);
 	} else throw "Not a valid XUL or HTML element";
 }
 
@@ -355,6 +356,19 @@ function getChildrenByClassName(element, className) {
 	}
 	return matches;	
 }
+
+
+Node.prototype.getChildrenByClassName = function (className) {
+	var result = this.ownerDocument.evaluate("descendant::*[contains(concat(' ',@class,' '), ' " + className + " ')]",this,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+	var matches = [];
+	for (var i = 0, len = result.snapshotLength; i< len; ++i) {
+		matches.push(result.snapshotItem(i));
+	}
+	return matches;	
+}
+
+
+
 
 function clearResponse(box) {
 	while (box.hasChildNodes()) { 
@@ -601,12 +615,12 @@ function AjaxRequest(url, options) {
 					piratequesting.ProcessResponse(url,http.responseText)
 				} catch (e) { dumpError(e) }
 				try {
-					onSuccess();
+					onSuccess(http);
 				} catch (e) { dumpError(e) }
 				
 			} else {
 				try {
-					onFailure();
+					onFailure(http);
 				} catch (e) { dumpError(e) }
 			}
 		}
