@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
- xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-  <Description about="urn:mozilla:install-manifest">
-    <em:id>{96ef5663-f9b6-b7e8-fc3f-a601af7c72}</em:id>
-    <em:name>PirateQuesting</em:name>
-    <em:version>2.0b1</em:version>
-    <em:creator>Jonathan Fingland</em:creator>
-    <em:description>Unofficial add-on for the browser game Pirate Quest found at www.piratequest.net</em:description>
-    <em:homepageURL>http://pq.ashita.org</em:homepageURL>
-    <em:aboutURL>chrome://piratequesting/content/about.xul</em:aboutURL>
-    <em:optionsURL>chrome://piratequesting/content/options.xul</em:optionsURL>
-    <em:updateURL>http://pq.ashita.org/update.rdf</em:updateURL>
-    <em:targetApplication>
-      <Description>
-        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- firefox -->
-        <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>3.1b3</em:maxVersion>
-      </Description>
-    </em:targetApplication>
-  </Description>
-</RDF>
+<?xml version="1.0"?>
+<RDF:RDF xmlns:em="http://www.mozilla.org/2004/em-rdf#"
+         xmlns:NC="http://home.netscape.com/NC-rdf#"
+         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <RDF:Description RDF:about="urn:mozilla:install-manifest"
+                   em:id="{D71839DC-FCB4-436e-8D2C-690D2C742153}"
+                   em:name="PirateQuesting"
+                   em:version="2.0b1"
+                   em:creator="Jonathan Fingland"
+                   em:description="Unofficial add-on for the browser game Pirate Quest found at www.piratequest.net"
+                   em:homepageURL="http://pq.ashita.org"
+                   em:aboutURL="chrome://piratequesting/content/about.xul"
+                   em:optionsURL="chrome://piratequesting/content/options.xul"
+                   em:updateURL="http://pq.ashita.org/update.rdf"
+                   em:updateKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaCCOGApuCE+SNMw9VlrpEQPEmL+/ZDSDH5y7ULTYaq6sKPYz0WF8ig3n3X5P1aAj7TarNDq0nBNl4M2y9pC5hg478u1STAL4nO4fsTeoPe7j+Zo/aZqdzEE51A3aoy9NhxgHW8Mo1cgKGU8jKMlSKznHQh2+CfptqBL+RuBKxxwIDAQAB">
+    <em:targetApplication RDF:resource="rdf:#$NQa4k"/>
+  </RDF:Description>
+  <RDF:Description RDF:about="rdf:#$NQa4k"
+                   em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+                   em:minVersion="3.0"
+                   em:maxVersion="3.1b3" />
+</RDF:RDF>
