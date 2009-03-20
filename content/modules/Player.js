@@ -78,7 +78,7 @@ function Stat(currentValue, maxValue) {
 		 * 
 		 */
 		this.setCurrent = function(aValue) {
-			current = Number(aValue) || 0;
+			current = Number(String(aValue).toNumber()) || 0;
 		}
 		/**
 		 * @param {Number}
@@ -86,7 +86,7 @@ function Stat(currentValue, maxValue) {
 		 * 
 		 */
 		this.setMax = function(aValue) {
-			max = Number(aValue) || 0;
+			max = Number(String(aValue).toNumber()) || 0;
 		}
 		/**
 		 * @returns {Number}
