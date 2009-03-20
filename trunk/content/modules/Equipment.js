@@ -142,7 +142,6 @@ piratequesting.Equipment = function() {
 	}
 	
 	function checkInventory() {
-		dump("\nChecking inventory.\n")
 		var sbcd = sidebar.contentDocument;	
 		sbcd.getElementById('eqmeter').setAttribute('value',0);
 		ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&m=1", { 
@@ -157,20 +156,16 @@ piratequesting.Equipment = function() {
 	function update (fromEvent) {
 		if (!fromEvent) {
 			++forced_update_count;
-			if (forced_update_count >= 3) return;
+			if (forced_update_count >= 2) return;
 		} else {
 			forced_update_count = 0;
 		}
 		
-		
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd) return;
 		
-		
 		if ( !sbcd.getElementById("weapons_menu") ||  !sbcd.getElementById("head_menu") || !sbcd.getElementById("armour_menu") || !sbcd.getElementById("offhand_menu")) {
-			//if stuff isn't loaded yet, wait a second and try again
-			dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
-			setTimeout(update,2000);
+			setTimeout(update,3000);
 			return;
 		}
 		
@@ -178,9 +173,8 @@ piratequesting.Equipment = function() {
 			while (item = equipped_items.iterateNext()) {
 				dump("\n"+item.parentNode.getAttribute("name")+ ": " + item.getAttribute("name")+"\n");
 			}
-
 			//re-get the item guide info if any of the items are missing a description
-		if (inventory.evaluate("boolean(//item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+		if (inventory.evaluate("boolean(/inventory/category[@id=1 or @id=2 or @id=5 or @id=11]/item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 			var cur_time = (new Date()).getTime();  
 			if (cur_time - last_check > 5000) {
 				last_check = cur_time;

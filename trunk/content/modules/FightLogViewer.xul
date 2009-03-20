@@ -43,7 +43,7 @@
 				</hbox>
 			</vbox>
 		</hbox>
-		<button id="update" label="Update" oncommand="log.showResults();" height="23" />
+		<button id="update" label="Update" oncommand="fightLog.showResults();" height="23" />
 	</hbox> 
 
 		<tree id="log" flex="1" 

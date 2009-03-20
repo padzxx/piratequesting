@@ -33,131 +33,172 @@ piratequesting.Inventory = function() {
 			invd.removeChild(invd.firstChild);
 	}
 	
+	/**
+	 * @param {Element} item
+	 * @param {Element} cat
+	 */
+	function newInventoryItem (item, cat) {
+		var sbcd = sidebar.contentDocument;	
+	
+		var actions = item.getAttribute("actions");
+		var canUse = actions & USE,
+			canSell = actions & SELL,
+			canMarket = actions & MARKET,
+			canReturn = actions & RETURN;
+			
+		
+		// start by creating all of the elements and setting their
+		// attributes.
+		var container = sbcd.createElement("hbox");
+		container.setAttribute("align", "center");
+		container.setAttribute("id", "IL" + item.getAttribute("action_id"));
+		var img_src = item.getAttribute("image");
+		if (img_src.indexOf("chrome://") < 0 )
+			img_src = piratequesting.baseURL + img_src;
+		var image = sbcd.createElement("image");
+		image.setAttribute("src",  img_src);
+		image.setAttribute("height", "50");
+		image.setAttribute("width", "50");
+
+		var labelbox = sbcd.createElement("vbox");
+		labelbox.setAttribute("flex", "1");
+
+		var itemlabel = sbcd.createElement("label");
+		itemlabel.setAttribute("type", "bold");
+		itemlabel.setAttribute("value", item.getAttribute('name') + "  [x"
+						+ item.getAttribute("quantity") + "]");
+
+		var actioncontainer = sbcd.createElement("hbox");
+		actioncontainer.setAttribute("flex", "1");
+
+		if (canUse) {
+			var uselink = sbcd.createElement("label");
+			uselink.setAttribute("value", "Use");
+			uselink.setAttribute("type", "link");
+			uselink.setAttribute("flex", "1");
+			uselink.setAttribute("onclick",
+					'piratequesting.Inventory.useItem("' + item.getAttribute("action_id")
+							+ '");');
+			actioncontainer.appendChild(uselink);
+		}
+
+		if (canSell) {
+			var selllink = sbcd.createElement("label");
+			selllink.setAttribute("value", "Sell");
+			selllink.setAttribute("type", "link");
+			selllink.setAttribute("flex", "1");
+			selllink
+					.setAttribute("onclick",
+							'piratequesting.Inventory.showInventoryBox("'
+									+ item.getAttribute("action_id") + '","' + item.getAttribute("value")
+									+ '","' + item.getAttribute("name") + '","'
+									+ item.getAttribute('quantity') + '");');
+			actioncontainer.appendChild(selllink);
+		}
+
+		if (canMarket) {
+			var marketlink = sbcd.createElement("label");
+			marketlink.setAttribute("value", "Market");
+			marketlink.setAttribute("type", "link");
+			marketlink.setAttribute("flex", "1");
+			marketlink.setAttribute("number", item.getAttribute("action_id"));
+			marketlink.setAttribute("onclick",
+					'piratequesting.Inventory.showInventoryBox("'
+							+ item.getAttribute("action_id") + '",0,"' 
+							+ item.getAttribute("name") + '","'
+							+ item.getAttribute('quantity') + '");');
+			actioncontainer.appendChild(marketlink);
+		}
+
+		if (canMarket || canSell) {
+			var checklink = sbcd.createElement("label");
+			checklink.setAttribute("value", "Check Prices");
+			checklink.setAttribute("type", "link");
+			checklink.setAttribute("flex", "1");
+			checklink.setAttribute("onclick",
+					'piratequesting.Inventory.showInventoryBox("'
+							+ item.getAttribute("action_id") + '",-1,"' 
+							+ item.getAttribute("name") + '","'
+							+ cat + '");');
+			actioncontainer.appendChild(checklink);
+		}
+
+		if (canReturn) {
+			var returnlink = sbcd.createElement("label");
+			returnlink.setAttribute("value", "Return");
+			returnlink.setAttribute("type", "link");
+			returnlink.setAttribute("flex", "1");
+			returnlink.setAttribute("onclick",
+					'piratequesting.Inventory.returnItem("' + item.getAttribute('action_id') + '");');
+			actioncontainer.appendChild(returnlink);
+		}
+
+		// put the item info and actions together
+		labelbox.appendChild(itemlabel);
+		labelbox.appendChild(actioncontainer);
+
+		// put the image and various labels together
+		container.appendChild(image);
+		container.appendChild(labelbox);
+
+		// return our happy new container
+		return container;
+	};
+	
+	var forced__points_update_count = 0;
+	function updateInventoryPoints(fromEvent) {
+		if (!fromEvent) {
+			if (++forced__points_update_count >= 2) return;
+		} else {
+			forced_points_update_count = 0;
+		}
+		
+		var sbcd = sidebar.contentDocument;
+		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait 3 seconds and try again
+			setTimeout(updateInventoryList,3000);
+			return;
+		}
+
+		
+		/**
+		 * @type {Element}
+		 */
+		var inventoryList = sbcd.getElementById("inventorylist");
+
+		//first check if it's empty,
+		//if it is, then pass this on to updateInventoryList because all of the data should be added first.
+		//if not, then find the points element (if it exists)　and delete it
+		//but, anyways, create a new one　and insert in the beginning of the list
+		
+		if (!inventoryList.hasChildNodes()) {
+			updateInventoryList(fromEvent);
+			return;
+		}
+		var pts = sbcd.getElementById("ILpoints");
+		var points = inventory.evaluate("/inventory/item[@id='points' and @quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+		if (points.snapshotLength > 0 ) {
+			var newpts = newInventoryItem(points.snapshotItem(0), "points");
+		} else return;
+		if (pts) inventoryList.replaceChild(newpts,pts);
+		else inventoryList.insertBefore(newpts,inventoryList.firstChild);
+	}
+	
 	
 	var forced_update_count = 0;
 	function updateInventoryList(fromEvent) {
 		if (!fromEvent) {
-			if (++forced_update_count >= 3) return;
+			if (++forced_update_count >= 2) return;
 		} else {
 			forced_update_count = 0;
 		}
 		
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait a second and try again
-			dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
-			setTimeout(updateInventoryList,2000);
+			setTimeout(updateInventoryList,3000);
 			return;
 		}
 
-		/**
-		 * @param {Element} item
-		 * @param {Element} cat
-		 */
-		function newInventoryItem (item, cat) {
-
-			var actions = item.getAttribute("actions");
-			var canUse = actions & USE,
-				canSell = actions & SELL,
-				canMarket = actions & MARKET,
-				canReturn = actions & RETURN;
-				
-			
-			// start by creating all of the elements and setting their
-			// attributes.
-			var container = sbcd.createElement("hbox");
-			container.setAttribute("align", "center");
-			var img_src = item.getAttribute("image");
-			if (img_src.indexOf("chrome://") < 0 )
-				img_src = piratequesting.baseURL + img_src;
-			var image = sbcd.createElement("image");
-			image.setAttribute("src",  img_src);
-			image.setAttribute("height", "50");
-			image.setAttribute("width", "50");
-
-			var labelbox = sbcd.createElement("vbox");
-			labelbox.setAttribute("flex", "1");
-
-			var itemlabel = sbcd.createElement("label");
-			itemlabel.setAttribute("type", "bold");
-			itemlabel.setAttribute("value", item.getAttribute('name') + "  [x"
-							+ item.getAttribute("quantity") + "]");
-
-			var actioncontainer = sbcd.createElement("hbox");
-			actioncontainer.setAttribute("flex", "1");
-
-			if (canUse) {
-				var uselink = sbcd.createElement("label");
-				uselink.setAttribute("value", "Use");
-				uselink.setAttribute("type", "link");
-				uselink.setAttribute("flex", "1");
-				uselink.setAttribute("onclick",
-						'piratequesting.Inventory.useItem("' + item.getAttribute("action_id")
-								+ '");');
-				actioncontainer.appendChild(uselink);
-			}
-
-			if (canSell) {
-				var selllink = sbcd.createElement("label");
-				selllink.setAttribute("value", "Sell");
-				selllink.setAttribute("type", "link");
-				selllink.setAttribute("flex", "1");
-				selllink
-						.setAttribute("onclick",
-								'piratequesting.Inventory.showInventoryBox("'
-										+ item.getAttribute("action_id") + '","' + item.getAttribute("value")
-										+ '","' + item.getAttribute("name") + '","'
-										+ item.getAttribute('quantity') + '");');
-				actioncontainer.appendChild(selllink);
-			}
-
-			if (canMarket) {
-				var marketlink = sbcd.createElement("label");
-				marketlink.setAttribute("value", "Market");
-				marketlink.setAttribute("type", "link");
-				marketlink.setAttribute("flex", "1");
-				marketlink.setAttribute("number", item.id);
-				marketlink.setAttribute("onclick",
-						'piratequesting.Inventory.showInventoryBox("'
-								+ item.getAttribute("action_id") + '",0,"' 
-								+ item.getAttribute("name") + '","'
-								+ item.getAttribute('quantity') + '");');
-				actioncontainer.appendChild(marketlink);
-			}
-
-			if (canMarket || canSell) {
-				var checklink = sbcd.createElement("label");
-				checklink.setAttribute("value", "Check Prices");
-				checklink.setAttribute("type", "link");
-				checklink.setAttribute("flex", "1");
-				checklink.setAttribute("onclick",
-						'piratequesting.Inventory.showInventoryBox("'
-								+ item.getAttribute("action_id") + '",-1,"' 
-								+ item.getAttribute("name") + '","'
-								+ cat + '");');
-				actioncontainer.appendChild(checklink);
-			}
-
-			if (canReturn) {
-				var returnlink = sbcd.createElement("label");
-				returnlink.setAttribute("value", "Return");
-				returnlink.setAttribute("type", "link");
-				returnlink.setAttribute("flex", "1");
-				returnlink.setAttribute("onclick",
-						'piratequesting.Inventory.returnItem("' + item.getAttribute('action_id') + '");');
-				actioncontainer.appendChild(returnlink);
-			}
-
-			// put the item info and actions together
-			labelbox.appendChild(itemlabel);
-			labelbox.appendChild(actioncontainer);
-
-			// put the image and various labels together
-			container.appendChild(image);
-			container.appendChild(labelbox);
-
-			// return our happy new container
-			return container;
-		};
+		
 
 		var inventoryList = sbcd.getElementById("inventorylist");
 
@@ -201,24 +242,19 @@ piratequesting.Inventory = function() {
 		var sbcd = sidebar.contentDocument;	
 		var pricelist = sbcd.getElementById("pricelist");
 		var stripex;
+		var doc = piratequesting.createDoc(text);
 		
 		if (name == "Points") {
-			stripex = /<h2>Points Market<\/h2><\/span>[\s\S]*?(<table class=['"]one['"]>[\s\S]*?<\/table>)/;
-			if (stripex.test(text)) {
-				text = stripex.exec(text)[1];
-				var itemex = new RegExp(
-						"<td class=['\"]textl[\"']>([,0-9]+)<\\/td>[\\s\\S]*?<td class=['\"]textl[\"']>(\\$[.,0-9]+)<\\/td>",
-						"g");
-				var match = itemex.exec(text);
-				var li;
-				var order = 0;
-				while (match != null) {
-					order++;
+			if (doc.evaluate("boolean(descendant::h2[. = 'Points Market'])", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+				//the following gets the quantity and price in one query so we have to account for that in the for-loop
+				var items = doc.evaluate("descendant::table[@class='utable']//tr[position() > 1]/td[position() = 1 or position() = 2]", doc, null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+				for (var i =0, len=items.snapshotLength;i<len;i+=2) {
+					
 					li = sbcd.createElement("listitem");
-					li.setAttribute("label", match[1] + "  " + match[2]);
-					li.setAttribute("order", (order % 2) ? "odd" : "even");
+					li.setAttribute("label",  items.snapshotItem(i).textContent + " @ " + items.snapshotItem(i+1).textContent);
+					li.setAttribute("order", (i % 4) ? "odd" : "even");
 					pricelist.appendChild(li);
-					match = itemex.exec(text);
+					
 				}
 			} else
 				alert("Error retrieving prices. Page returned by server\nwas not the points market.");
@@ -277,7 +313,7 @@ piratequesting.Inventory = function() {
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=return&id=" + id, { 
-					onSuccess: enable, 
+					onSuccess: checkInventory, 
 					onFailure: function() { enable(); alert('Failed to return item.');}, 
 					onError: function() { enable(); alert('Error occurred when returning item.');}, 
 					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); }
@@ -285,10 +321,16 @@ piratequesting.Inventory = function() {
 		},
 
 		process : function () {
-			dump("Updating Inventory List");
 			inventory = piratequesting.InventoryManager.getInventory();
 			try {
 				updateInventoryList(true);
+			}catch(e) { dumpError(e); }
+		},
+		
+		processPoints : function () {
+			inventory = piratequesting.InventoryManager.getInventory();
+			try {
+				updateInventoryPoints(true);
 			}catch(e) { dumpError(e); }
 		},
 		
@@ -615,5 +657,5 @@ piratequesting.Inventory = function() {
 	
 	}
 }();
-
+document.addEventListener("piratequesting:InventoryPointsUpdated",function(event){ piratequesting.Inventory.processPoints(); }, false);
 document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.Inventory.process(); }, false);
