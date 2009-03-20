@@ -119,13 +119,8 @@ var piratequesting = {
 			alert(getErrorString(e));
 		}
 	},
-	/**
-	 * Works in a similar way to PQPageLoad except that it creates an HTML DOM Document from<br>
-	 * text, and then goes through the PQLoadCollection.
-	 * @param {String} url The address of the page from which the htmlText was received 
-	 * @param {String} htmlText The text to be changed into an html document 
-	 */
-	ProcessResponse : function(url, htmlText) {
+	
+	createDoc : function (htmlText) {
 		var document = window.document;
 		var rootElement = document.documentElement;
 
@@ -149,20 +144,32 @@ var piratequesting = {
 		var strip = /<html[\s\S]*?>([\s\S]*?)<\/html>/i;
 		if (strip.test(htmlText)) {
 			doc.getElementsByTagName("html")[0].innerHTML = strip.exec(htmlText)[1];
-			if (!(doc.body && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
-				var curProc;
-				//first run the standard processors 
-				for (var i = 0, len = piratequesting.PQLoadCollection.length; i < len; i++) {
-					curProc = piratequesting.PQLoadCollection[i];
-					curProc.run(url, doc);
-				}
-				//then run the ajax response processors - at this time only the captcha code stuff 
-				for (var i = 0, len = piratequesting.PQResponseProcessorCollection.length; i < len; i++) {
-					curProc = piratequesting.PQResponseProcessorCollection[i];
-					curProc.run(url, doc);
-				}
+		}
+		return doc;
+	},
+	
+	/**
+	 * Works in a similar way to PQPageLoad except that it creates an HTML DOM Document from<br>
+	 * text, and then goes through the PQLoadCollection.
+	 * @param {String} url The address of the page from which the htmlText was received 
+	 * @param {String} htmlText The text to be changed into an html document 
+	 */
+	ProcessResponse : function(url, htmlText) {
+		var doc = piratequesting.createDoc(htmlText);
+		if (!(doc.body && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
+			var curProc;
+			//first run the standard processors 
+			for (var i = 0, len = piratequesting.PQLoadCollection.length; i < len; i++) {
+				curProc = piratequesting.PQLoadCollection[i];
+				curProc.run(url, doc);
+			}
+			//then run the ajax response processors - at this time only the captcha code stuff 
+			for (var i = 0, len = piratequesting.PQResponseProcessorCollection.length; i < len; i++) {
+				curProc = piratequesting.PQResponseProcessorCollection[i];
+				curProc.run(url, doc);
 			}
 		}
+		
 	},
 	/**
 	 * Checks if the event target is a PQ page, then

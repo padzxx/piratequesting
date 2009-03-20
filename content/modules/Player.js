@@ -43,6 +43,10 @@ function Attribute(aValue) {
 		this.getAdjusted = function(adjustment_modifier) {
 			return (value * adjustment_modifier);
 		}
+		
+		this.toString = function () {
+			return String(value).addCommas();
+		}
 
 	
 };
@@ -95,6 +99,10 @@ function Stat(currentValue, maxValue) {
 		 */
 		this.getMax = function() {
 			return max;
+		}
+		
+		this.toString = function () {
+			return String(current).addCommas() + "/" + String(max).addCommas();
 		}
 };
 
@@ -183,7 +191,7 @@ piratequesting.Player = function() {
 				var sname, value;
 				for (var i = 0, v = t[i]; i < t.length; i++, v = t[i]) {
 					sname = /(\S*?):/.exec(v.firstChild.firstChild.nodeValue)[1].toLowerCase();
-					value = /(\d+?)\/(\d+)/.exec(v.childNodes[1].nodeValue);
+					value = /([\d.,]+?)\/([\d.,]+)/.exec(v.childNodes[1].nodeValue);
 					stats[sname].setCurrent(value[1]);
 					stats[sname].setMax(value[2]);
 				}
@@ -211,6 +219,13 @@ piratequesting.Player = function() {
 		},
 		getLevel : function () {
 			return level;
+		},
+		
+		getStat : function(statName) {
+			return stats[statName]; 
+		},
+		getAttribute : function (attrName) {
+			return attributes[statName]; 
 		}
 		
 	}

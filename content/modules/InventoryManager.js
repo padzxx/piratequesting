@@ -364,7 +364,7 @@ piratequesting.InventoryManager = function() {
 
 				}
 				write();
-				document.fire('piratequesting:InventoryUpdated');
+				document.fire('piratequesting:InventoryPointsUpdated');
 			}
 
 		},

@@ -712,10 +712,29 @@ piratequesting.FightProcessor = function() {
 				table.appendChild(row);
 			}
 
+			function toggle(event) {
+				var element = battle;
+				if (element.style.display && element.style.display == "none") {
+					back.style.display = "none";
+					element.style.display = null;
+				} else  { 
+					back.style.display = null;
+					element.style.display = "none";
+				
+				}
+			}
+			var a = doc.createElement("a");
+			a.appendChild(doc.createTextNode("Show/Hide original report."))
 			battle.parentNode.insertBefore(table,battle);
+			battle.parentNode.insertBefore(a,battle);
+			a.setAttribute("onclick", "return false;");
+			a.setAttribute("href", "#");
+			a.addEventListener("click", toggle,false);
+			a.style.display = "block";
 			
 			battle.parentNode.appendChild(back);
-			battle.parentNode.removeChild(battle);
+			battle.style.display = "none";
+			//battle.parentNode.removeChild(battle);
 		},
 
 		output : function() {

@@ -65,7 +65,7 @@ piratequesting.TrainingLog = function() {
 					
 				if (piratequesting.DBConn.transactionInProgress) piratequesting.DBConn.commitTransaction();
 			}
-			var trainLogTab = findTab(piratequesting.TrainingLog.file);
+			var trainLogTab = findTab(file);
 			if (trainLogTab != null) {
 				trainLogTab.contentDocument.getElementById("update").doCommand();
 			}
