@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>PirateQuesting 2.0b2</title>
+</head>
+<body>
+<h1>PirateQuesting</h1>
+<h3>Version: 2.0b2</h3>
+<p>This is a beta! It will have bugs and it will quite possibly annoy you. It is also, however, the only option as the last version is crashing/freezing Firefox.</p>
+<p>Changes from beta 1</p>
+<ul>
+	<li>changes the loadOverlay observer to reveal the sidebar content  even in the event of a failure
+</li><li>refactored the ProcessResponse to remove the text-to-document conversion and make that a separate function, thus allowing for more specialized uses (in this case, processing prices from the item market)
+</li><li>fixes TrainingLog and FightLogViewer/FightLog so the update button/command works as expected
+</li><li>Changed the event that's fired when only updating points.
+</li><li>Inventory now only updates the points if that's the only part that changed.
+</li><li>Equipment no longer requests the item guide when there's missing info for anything other than equipment
+</li><li>Fixed Player info processing so stats over 1000 are processed correctly (failed to process correctly when there were commas)</li>
+</ul>
+</body>
+</html>

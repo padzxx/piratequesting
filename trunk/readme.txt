@@ -43,6 +43,15 @@ And of course, Happy Pirating!
 Version History
 ---------------
 
+v2.0b2
+- changes the loadOverlay observer to reveal the sidebar content  even in the event of a failure
+- refactored the ProcessResponse to remove the text-to-document conversion and make that a separate function, thus allowing for more specialized uses (in this case, processing prices from the item market)
+- fixes TrainingLog and FightLogViewer/FightLog so the update button/command works as expected
+- Changed the event that's fired when only updating points.
+- Inventory now only updates the points if that's the only part that changed.
+- Equipment no longer requests the item guide when there's missing info for anything other than equipment
+- Fixed Player info processing so stats over 1000 are processed correctly (failed to process correctly when there were commas)
+
 v2.0b1
 - Massive update. Essentially a complete rewrite.
 
