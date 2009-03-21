@@ -407,6 +407,14 @@ var mainWindow = window
 piratequesting.overlayRegistry = function() {
 	var overlays = [];
 	var index = 0;
+	
+	function conflicts(tabid, tabpanelid, overlayFile) {
+		for (var i = 0, len = overlays.length; i<len;++i) 
+			if ((tabid == overlays[i].getTabId() && tabid != null )  || (tabpanelid == overlays[i].getTabPanelId() && tabpanelid != null) || overlayFile == overlays[i].getOverlayFile())
+				return true;
+		return false;
+	}
+	
 	function overlay(tabid, tabpanelid, overlayFile) {
 
 		var nfunc = function(tabid, tabpanelid, overlayFile) {
@@ -454,7 +462,10 @@ piratequesting.overlayRegistry = function() {
 		 *            stringFile
 		 */
 		addOverlay : function(tabid, tabpanelid, stringFile) {
-			overlays.push(new overlay(tabid, tabpanelid, stringFile));
+			if (!conflicts(tabid, tabpanelid, stringFile))
+				overlays.push(new overlay(tabid, tabpanelid, stringFile));
+			else 
+				dump("\nOverlay conflict occurred on: " + tabid + ", " + tabpanelid + ", " + stringFile);
 		},
 		getOverlayByIndex : function(index) {
 			return overlays[index];
