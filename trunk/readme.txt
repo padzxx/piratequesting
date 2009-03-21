@@ -34,7 +34,7 @@ To enable the sidebar, go to the View menu->Sidebar->Pirate Questing. Or press C
 Notes
 -----
 
-The 2.0b release is a _beta_. It will have bugs. Please let me know what you find And I'll do my best to resolve them.
+The 2.0b3 release is a _beta_. It will have bugs. Please let me know what you find And I'll do my best to resolve them.
 
 And of course, Happy Pirating!
 
@@ -42,6 +42,9 @@ And of course, Happy Pirating!
 
 Version History
 ---------------
+
+v2.0b3
+- Should fix the problem with loading duplicate overlays. now check for duplicate non-null tab ids and tabpanel ids, as well as duplicate filenames
 
 v2.0b2
 - changes the loadOverlay observer to reveal the sidebar content  even in the event of a failure
