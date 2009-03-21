@@ -2,24 +2,24 @@
 <RDF:RDF xmlns:NS1="http://www.mozilla.org/2004/em-rdf#"
          xmlns:NC="http://home.netscape.com/NC-rdf#"
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Seq RDF:about="rdf:#$SQa4k">
-    <RDF:li RDF:resource="rdf:#$TQa4k"/>
-  </RDF:Seq>
+  <RDF:Description RDF:about="rdf:#$TQa4k"
+                   NS1:version="2.0b3">
+    <NS1:targetApplication RDF:resource="rdf:#$WQa4k"/>
+  </RDF:Description>
   <RDF:Description RDF:about="rdf:#$WQa4k"
                    NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    NS1:minVersion="3.0"
                    NS1:maxVersion="3.1b3"
-                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b2.xpi"
-                   NS1:updateInfoURL="http://pq.ashita.org/update2.0b2.xhtml"
-                   NS1:updateHash="sha1:6e8caa66c4185fade38b0a1c8d4cea0def492755" />
-  <RDF:Description RDF:about="rdf:#$TQa4k"
-                   NS1:version="2.0b2">
-    <NS1:targetApplication RDF:resource="rdf:#$WQa4k"/>
-  </RDF:Description>
+                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b3.xpi"
+                   NS1:updateInfoURL="http://pq.ashita.org/update2.0b3.xhtml"
+                   NS1:updateHash="sha1:E1C055C4CE4C8183170A4A73FE8FB967017D4B21" />
   <RDF:Description RDF:about="urn:mozilla:extension:{D71839DC-FCB4-436e-8D2C-690D2C742153}"
-                   NS1:version="2.0b2"
-                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b2.xpi"
-                   NS1:signature="MIGTMA0GCSqGSIb3DQEBDQUAA4GBADhd+XkRwtheS7xHOdhwb5altKoA5jPlRDrhs8oVHwRHbAt4Es/eOk8/lEewCXBNaQE21Z1XsYMoZHJlOEu4SxKYKrc4wJaEpTxxOyenh+TK1O6/h4fM3j7CSWIXOvPAxdzqH7POFd4wmcwCmcIzZ8hmmQY4PusdeKhQL8J8DAPK">
+                   NS1:version="2.0b3"
+                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b3.xpi"
+                   NS1:signature="MIGTMA0GCSqGSIb3DQEBDQUAA4GBAGf6iNKFGAk3MSjxZjtCOFHCrVghrDyPScyudBmnrp4sR6AxTFopg0jEqeBExaiDKuCKkXqgXnkpZWhAybAi02L1/SPZm9vaOTtUHVr9XDu3JmIwfxFzmkWdjQZaVfTkLYMoUqWk2Hw2kgDNhH7ubmY3douu/F9gcrvbTHVNPG2m">
     <NS1:updates RDF:resource="rdf:#$SQa4k"/>
   </RDF:Description>
+  <RDF:Seq RDF:about="rdf:#$SQa4k">
+    <RDF:li RDF:resource="rdf:#$TQa4k"/>
+  </RDF:Seq>
 </RDF:RDF>
