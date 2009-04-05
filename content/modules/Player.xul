@@ -6,35 +6,35 @@
 	<tab id="Player_tab" linkedpanel="Player_tabpanel" label="&piratequesting.Player.title;"/>
 	
 	<tabpanel id="Player_tabpanel">
-		<vbox pack="start">
-			<hbox style="margin-left: 10px; margin-right:10px;">
+		<vbox pack="start" flex="1" >
+			<hbox style="margin-left: 10px; margin-right:10px;" flex="1" >
 				<hbox crop="end" flex="1">
-					<label id="name" value="&piratequesting.Player.Name;: " />
-					<label id="nameval"  persist="value" crop="right"/>
+					<label id="name" crop="right" value="&piratequesting.Player.Name;: " />
+					<label id="nameval" persist="value" crop="right"/>
 				</hbox>
 				<hbox crop="end" flex="1">
 					<label id="level" value="&piratequesting.Player.Level;: " />
 					<label id="levelval"  persist="value" />
 				</hbox>
 			</hbox>
-			<hbox>
-				<groupbox >
+			<hbox flex="1" >
+				<groupbox flex="1" >
 					<caption label="&piratequesting.Player.Stats;" />
-					<grid id="statsgrid">
-						<rows>
+					<grid id="statsgrid" flex="1" >
+						<rows flex="1" >
 							<row flex="1"/>
 							<row flex="1"/>
 							<row flex="1"/>
 							<row flex="1"/>
 						</rows>
-						<columns>
-							<column pack="start">
+						<columns flex="1" >
+							<column pack="start" flex="1" >
 								<label id="hp" value="&piratequesting.Player.HP;: " crop="right"/>
-								<label id="energy" value="&piratequesting.Player.Energy;: " crop="right"/>
+								<label id="energy" value="&piratequesting.Player.Energy;: "  crop="right"/>
 								<label id="awake" value="&piratequesting.Player.Awake;: " crop="right"/>
 								<label id="nerve" value="&piratequesting.Player.Nerve;: " crop="right"/>
 							</column>
-							<column pack="end">
+							<column pack="end" flex="1" >
 								<hbox flex="1" pack="end">
 									<label id="curhpval"  persist="value" type="stat" />
 								</hbox>
@@ -48,13 +48,13 @@
 									<label id="curnerveval"  persist="value" type="stat" />
 								</hbox>
 							</column>
-							<column>
+							<column flex="1" >
 								<label value="/" />
 								<label value="/" />
 								<label value="/" />
 								<label value="/" />
 							</column>
-							<column pack="start">
+							<column pack="start" flex="10" >
 								<label id="maxhpval"  persist="value" type="stat" />
 								<label id="maxenergyval"  persist="value" type="stat" />
 								<label id="maxawakeval"  persist="value" type="stat" />
@@ -65,16 +65,16 @@
 				</groupbox>
 								
 
-				<groupbox id="attsbox">
+				<groupbox id="attsbox" flex="1" >
 					<caption label="&piratequesting.Player.Attributes;"/>
-					<hbox>
-						<vbox>
+					<hbox flex="1" >
+						<vbox flex="1" >
 							<label id="strength" value="&piratequesting.Player.Strength;: " crop="right"/>
 							<label id="defense" value="&piratequesting.Player.Defense;: " crop="right"/>
 							<label id="speed" value="&piratequesting.Player.Speed;: " crop="right"/>
 							<label id="total" value="&piratequesting.Player.Total;: " crop="right"/>
 						</vbox>
-						<vbox>
+						<vbox flex="1" >
 							<label id="strval"  persist="value" />
 							<label id="defval"  persist="value" />
 							<label id="speval"  persist="value" />

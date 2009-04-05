@@ -1,7 +1,7 @@
 Unofficial Pirate Quest Sidebar
-v2.0b1
+v2.0b5
 Created by Jonathan Fingland aka Gilgalad
-readme date: 2009-03-18
+readme date: 2009-04-04
 
 WARNING:This extension, although approved by PQ staff, is in no way an official Pirate Quest extension.
 This extension does not protect you from the PQ rules. If you would get frozen/banned for behaviour using 
@@ -34,7 +34,7 @@ To enable the sidebar, go to the View menu->Sidebar->Pirate Questing. Or press C
 Notes
 -----
 
-The 2.0b3 release is a _beta_. It will have bugs. Please let me know what you find And I'll do my best to resolve them.
+The 2.0b4 release is a _beta_. It will have bugs. Please let me know what you find And I'll do my best to resolve them.
 
 And of course, Happy Pirating!
 
@@ -42,6 +42,16 @@ And of course, Happy Pirating!
 
 Version History
 ---------------
+
+v2.0b5
+- Fixes bug which caused previous version to not open the sidebar
+- Adds options to the options dialog
+- Modifies styles slightly
+
+v2.0b4
+- Fixes Inventory, equipment, and edibles bug caused by FM changing the category identifiers
+- Adds forum module to reduce the size of people's signatures (adds scrollbars; viewable area is the height of two unadjusted images)
+- Modifies sizes and improves auto-adjustment of many elements to help reduce overall sidebar screen-space
 
 v2.0b3
 - Should fix the problem with loading duplicate overlays. now check for duplicate non-null tab ids and tabpanel ids, as well as duplicate filenames

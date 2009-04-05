@@ -169,10 +169,10 @@ piratequesting.Equipment = function() {
 			return;
 		}
 		
-			var equipped_items = inventory.evaluate("descendant::item[@equipped=1]", inventory, null, XPathResult.ANY_TYPE,null);
-			while (item = equipped_items.iterateNext()) {
+		//var equipped_items = inventory.evaluate("descendant::item[@equipped=1]", inventory, null, XPathResult.ANY_TYPE,null);
+/*			while (item = equipped_items.iterateNext()) {
 				dump("\n"+item.parentNode.getAttribute("name")+ ": " + item.getAttribute("name")+"\n");
-			}
+			}*/
 			//re-get the item guide info if any of the items are missing a description
 		if (inventory.evaluate("boolean(/inventory/category[@id=1 or @id=2 or @id=5 or @id=11]/item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 			var cur_time = (new Date()).getTime();  
@@ -198,7 +198,6 @@ piratequesting.Equipment = function() {
 
 		
 		unequip : function(id) {
-			dump("\nunequipping " + id +"\n");
 			disable();
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
@@ -213,7 +212,6 @@ piratequesting.Equipment = function() {
 		},
 
 		equip : function(id) {
-			dump("\nequipping " + id +"\n");
 			disable();
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);

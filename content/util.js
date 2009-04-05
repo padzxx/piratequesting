@@ -101,6 +101,9 @@ var findTab = function(url) {
 	var tab = null;
 	// Check each browser instance for our URL
 	while (browserEnumerator.hasMoreElements()) {
+		/**
+		 * @type {Browser}
+		 */
 		var browserInstance = browserEnumerator.getNext().getBrowser();
 
 		// Check each tab of this browser instance
@@ -590,41 +593,63 @@ function dumpError(error) {
 	
 }
 
-function AjaxRequest(url, options) {
-	var options = options || {}; 
-	var http = new XMLHttpRequest();
-	var protocol = (options.protocol || "get").toLowerCase();
-	var params = options.params;
-	var async = options.async || true;
-	var onFailure = options.onFailure || function () { dump('\nAjax request to '+url+' failed.\n'); };
-	var onSuccess = options.onSuccess || function () { dump('\nAjax request to '+url+' succeeded.\n'); };
-	var onStateChange = options.onStateChange;
-	http.open(protocol, url, async);
-	http.setRequestHeader("Cache-Control","no-cache");
-		if (protocol == "post") {
-			http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-	}
-	http.onerror = options.onError;
-	http.onreadystatechange = function() {
-		if (onStateChange) onStateChange(http);
-		if (http.readyState == 4) {
-			if (http.status == 200) {
-				try {
-					piratequesting.ProcessResponse(url,http.responseText)
-				} catch (e) { dumpError(e) }
-				try {
-					onSuccess(http);
-				} catch (e) { dumpError(e) }
-				
-			} else {
-				try {
-					onFailure(http);
-				} catch (e) { dumpError(e) }
+if (typeof AjaxRequest == "undefined") {
+	
+
+	function AjaxRequest(url, options) {
+		var requestNumber = ++AjaxRequest.requestNumber;
+		var options = options || {}; 
+		var http = new XMLHttpRequest();
+		var protocol = (options.protocol || "get").toLowerCase();
+		var params = options.params;
+		var async = options.async || true;
+		var onFailure = options.onFailure || function () { dump('\nAjax request to '+url+' failed.\n'); };
+		var onSuccess = options.onSuccess || function () { dump('\nAjax request to '+url+' succeeded.\n'); };
+		var onStateChange = options.onStateChange;
+		http.open(protocol, url, async);
+		http.setRequestHeader("Cache-Control","no-cache");
+			if (protocol == "post") {
+				http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+				http.setRequestHeader("Content-length", params.length);
+				http.setRequestHeader("Connection", "close");
+		}
+		http.onerror = options.onError;
+		http.onreadystatechange = function() {
+			if (onStateChange) onStateChange(http, requestNumber);
+			if (http.readyState == 4) {
+				if (http.status == 200) {
+					try {
+						//uncomment the next line to dump all headers from the request
+						//http.channel.visitResponseHeaders(HeaderVisitor);
+						piratequesting.ProcessResponse(url,http.responseText, requestNumber, Date.parse(http.getResponseHeader("Date")));
+					} catch (e) { dumpError(e) }
+					try {
+						onSuccess(http, requestNumber);
+					} catch (e) { dumpError(e) }
+					
+				} else {
+					try {
+						onFailure(http, requestNumber);
+					} catch (e) { dumpError(e) }
+				}
 			}
 		}
+		http.send(params);
+		return http;
 	}
-	http.send(params);
-	return http;
+	
+	 
+	AjaxRequest.requestNumber = 0;
+	
 }
+
+/**
+ * Implements the nsIHeaderVisitor Interface 
+ */
+var HeaderVisitor = function () {
+	return { 
+		visitHeader: function(aHeader, aValue ) {
+			dump(aHeader + ": " + aValue + "\n");
+		}
+	}
+}();
