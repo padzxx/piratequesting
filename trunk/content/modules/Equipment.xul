@@ -11,22 +11,22 @@
 	<tab id="Equipment_tab" linkedpanel="Equipment_tabpanel" label="&piratequesting.Equipment.title;" />
 	
 	<tabpanel id="Equipment_tabpanel">
-		<stack flex="1" minheight="210">
-			<vbox id="equiplist" flex="1" minheight="210">
+		<stack flex="1" height="168">
+			<vbox id="equiplist" flex="1" height="168">
 				<hbox align="center" popup="head_menu" flex="1" tooltiptext="Click to change" >
-					<image id="head_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
+					<image id="head_image" persist="src" tooltiptext="Click to change"/>
 					<label id="head_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
 				<hbox align="center" popup="armour_menu" flex="1" tooltiptext="Click to change">
-					<image id="armour_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
+					<image id="armour_image" persist="src" tooltiptext="Click to change"/>
 					<label id="armour_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
 				<hbox align="center" popup="weapons_menu" flex="1" tooltiptext="Click to change">
-					<image id="weapons_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
+					<image id="weapons_image" persist="src" tooltiptext="Click to change"/>
 					<label id="weapons_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
 				<hbox align="center" popup="offhand_menu" flex="1" tooltiptext="Click to change">
-					<image id="offhand_image" height="50" width="50"  persist="src" tooltiptext="Click to change"/>
+					<image id="offhand_image" persist="src" tooltiptext="Click to change"/>
 					<label id="offhand_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
 

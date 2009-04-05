@@ -57,14 +57,15 @@ piratequesting.Inventory = function() {
 			img_src = piratequesting.baseURL + img_src;
 		var image = sbcd.createElement("image");
 		image.setAttribute("src",  img_src);
-		image.setAttribute("height", "50");
-		image.setAttribute("width", "50");
+		//image.setAttribute("height", "50");
+		//image.setAttribute("width", "50");
 
 		var labelbox = sbcd.createElement("vbox");
 		labelbox.setAttribute("flex", "1");
 
 		var itemlabel = sbcd.createElement("label");
 		itemlabel.setAttribute("type", "bold");
+		itemlabel.setAttribute("crop", "center");
 		itemlabel.setAttribute("value", item.getAttribute('name') + "  [x"
 						+ item.getAttribute("quantity") + "]");
 
@@ -147,15 +148,15 @@ piratequesting.Inventory = function() {
 	
 	var forced__points_update_count = 0;
 	function updateInventoryPoints(fromEvent) {
-		if (!fromEvent) {
+/*		if (!fromEvent) {
 			if (++forced__points_update_count >= 2) return;
 		} else {
 			forced_points_update_count = 0;
 		}
-		
+	*/	
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait 3 seconds and try again
-			setTimeout(updateInventoryList,3000);
+		//	setTimeout(updateInventoryList,3000);
 			return;
 		}
 
@@ -184,17 +185,17 @@ piratequesting.Inventory = function() {
 	}
 	
 	
-	var forced_update_count = 0;
+	//var forced_update_count = 0;
 	function updateInventoryList(fromEvent) {
-		if (!fromEvent) {
+		/*if (!fromEvent) {
 			if (++forced_update_count >= 2) return;
 		} else {
 			forced_update_count = 0;
-		}
+		}*/
 		
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait a second and try again
-			setTimeout(updateInventoryList,3000);
+//			setTimeout(updateInventoryList,3000);
 			return;
 		}
 

@@ -115,7 +115,7 @@ piratequesting.Training = function() {
 
 	function doTraining(params) {
 		var trainresult = sidebar.contentDocument.getElementById("trainresult");
-		createResponse(trainresult, new Array("Training"));
+		createResponse(trainresult, new Array("Training"), 1);
 
 		try {
 			disable();
@@ -296,7 +296,7 @@ try {
 				} else if (data.codesrc) {
 					createResponse(trainresult, new Array("Enter code and try again"),1,"ffaeb9");
 					//alert(piratequesting.baseURL + data.codesrc);
-				} else clearResponse(trainresult);
+				} else createResponse(trainresult, new Array(""),1);
 			}
 			} catch (error) { alert(getErrorString(error)); }
 		},

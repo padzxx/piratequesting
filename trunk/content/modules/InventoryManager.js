@@ -247,7 +247,7 @@ piratequesting.InventoryManager = function() {
 				//this gem gets each item in a cateogory from the inventory page. It does not, however, ghet the equipped items which have to be acquired separately below
 				// (//div[@id='"+ category.getAttribute("name") +"'])[1] is used because FM adds each category twice (bug?) and we only want to add the items from one of them.
 				// tr[position() mod 2 = 1] is used because every second row is empty
-				items = doc.evaluate("(//div[@id='"+ category.getAttribute("name") +"'])[1]/table/tbody/tr[last()]/td/table/tbody/tr[position() mod 2 = 1]/td", doc, null, XPathResult.ANY_TYPE,null);
+				items = doc.evaluate("(//div[@id='itemsec_"+ category.getAttribute("id") +"'])[1]/table/tbody/tr[last()]/td/table/tbody/tr[position() mod 2 = 1]/td", doc, null, XPathResult.ANY_TYPE,null);
 				while (item = items.iterateNext()) {
 					addItem(category,item,0);
 				}
@@ -346,7 +346,6 @@ piratequesting.InventoryManager = function() {
 		},
 		
 		process:function(doc) {
-			dump('processing points\n');
 			var coinsnpts = doc.getElementById('coinsnpts');
 			// check to see if it exists
 			if (coinsnpts) {

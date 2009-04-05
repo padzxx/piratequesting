@@ -11,10 +11,10 @@
 	<tab id="Inventory_tab" linkedpanel="Inventory_tabpanel" label="&piratequesting.Inventory.title;" />
 	
 	<tabpanel id="Inventory_tabpanel">
-		<stack flex="1" minheight="210"> 
+		<stack flex="1" minheight="168"> 
 			<deck id="invdeck" selectedIndex="0" flex="1">
 
-				<vbox flex="1" maxheight="210" id="inventorylist">
+				<vbox flex="1" maxheight="168" id="inventorylist">
 
 				</vbox>
 				<hbox id="invbox" flex="1">

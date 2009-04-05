@@ -58,6 +58,7 @@
 				</box> 
 			</stack>
 			<vbox id="trainresult" flex="1" style="margin-top:5px;">
+				<textbox class="plain" multiline="true" rows="1" value="" type="response" />
 			</vbox>
 		</vbox>
 	</tabpanel>

@@ -20,12 +20,10 @@
 <prefwindow id="piratequestingPreferences" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" title="&prefwindow.title;">
   <prefpane id="pane1" label="&pane1.title;">
     <preferences>
-      <preference id="boolpref1" name="extensions.piratequesting.boolpref" type="bool"/>
-      <preference id="intpref1" name="extensions.piratequesting.intpref" type="int"/>
-      <preference id="stringpref1" name="extensions.piratequesting.stringpref" type="string"/> <!-- note that this is only an ASCII string - use unichar for unicode strings -->
+      <preference id="ForumSigsMaxSize" name="extensions.piratequesting.ForumSigsMaxSize" type="int"/>
+      <preference id="FormatFightReports" name="extensions.piratequesting.FormatFightReports" type="bool"/>
     </preferences>
-    <checkbox id="checkboolpref" preference="boolpref1" label="&checkboolpref.label;" accesskey="&checkboolpref.accesskey;"/>
-    <label accesskey="&intpref.accesskey;" control="textintpref">&intpref.label;</label><textbox id="textintpref" preference="intpref1"/>
-    <label accesskey="&stringpref.accesskey;" control="textstringpref">&stringpref.label;</label><textbox id="textstringpref" preference="stringpref1"/>
+    <label accesskey="&ForumSigsMaxSize.accesskey;" control="ForumSigsMaxSizepref">&ForumSigsMaxSize.label;</label><textbox id="ForumSigsMaxSizepref" preference="ForumSigsMaxSize" type="number"/>
+     <checkbox id="FormatFightReportspref" preference="FormatFightReports" label="&FormatFightReports.label;" accesskey="&FormatFightReports.accesskey;"/>
   </prefpane>
 </prefwindow>

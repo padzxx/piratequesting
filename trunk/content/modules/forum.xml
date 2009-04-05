@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<module>
+  <name>Forum</name>
+  <script>chrome://piratequesting/content/modules/forum.js</script>
+</module>

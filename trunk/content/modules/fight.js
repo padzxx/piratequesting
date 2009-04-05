@@ -6,7 +6,8 @@ piratequesting.Fight = function() {
 			// check if the fight has been changed since we last processed it
 			// (as we don't know who will process the fight first)
 			try {
-				piratequesting.FightProcessor.print(doc);
+				if (piratequesting.prefs.getBoolPref("extensions.piratequesting.FormatFightReports"))
+					piratequesting.FightProcessor.print(doc);
 
 			} catch (e) {
 				alert(getErrorString(e))

@@ -1,40 +1,30 @@
 #piratequesting-sidebar * {
 	-moz-appearance: none;
+	font-family: Arial, Verdana;
 }
 
-/**
-	Sidebar core properties
-*/
+
 #piratequesting-sidebar {
-	background-color: #FFFFFF !important;
-	background-image: url(chrome://piratequesting/content/mainback.jpg)
-		!important;
+	background-image: url(chrome://piratequesting/content/mainback.jpg)	!important;
 	background-repeat: repeat !important;
 	overflow: auto !important;
-	font-size: 11px !important;
+	font-size: 10px !important;
 }
 
-/**
-	loading screen in the deck
-*/
+
 #pqloadingbox {
-	font-size: 12px !important;
+	font-size: 1.1em !important;
 	font-weight: bold !important;
 	color: #4e462f !important;
 }
 
-/**
-	All of our tabboxes for modules should follow this
-*/
 #piratequesting-sidebar tabbox.moduleBox {
 	min-height: 50px !important;
 	margin: 0px 3px 10px 3px !important;
 	padding: 10px 5px 0px 5px !important;
-	background-image: url(chrome://piratequesting/content/darrow.png)
-		!important;
+	background-image: url(chrome://piratequesting/content/darrow.png) !important;
 	background-repeat: no-repeat !important;
 	background-position: -100px 0px;
-	overflow-x: visible !important;
 }
 
 #piratequesting-sidebar>#pqmain_deck>#pqmain_box>#moduleContainer>tabbox.moduleBox>tabpanels
@@ -48,7 +38,6 @@
 #piratequesting-sidebar>#pqmain_deck>#pqmain_box>#moduleContainer>tabbox.moduleBox>tabpanels>tabpanel
 	{
 	background-color: #ebe5cb !important;
-	/*border-width: 0px !important;*/
 	margin: 0px !important;
 }
 
@@ -76,9 +65,7 @@
 	overflow: auto !important;
 }
 
-/**
-	For the add tabbox button
-*/
+
 #piratequesting-sidebar vbox#moduleContainer>hbox#plusTabboxBox>toolbarbutton
 	{
 	list-style-image: url(chrome://piratequesting/skin/tabcontrols.png)
@@ -86,9 +73,7 @@
 	-moz-image-region: rect(0px, 32px, 16px, 16px) !important;
 }
 
-/**
-	For the close buttons on tabboxes
-*/
+
 #piratequesting-sidebar tabbox.moduleBox>tabs>toolbarbutton {
 	list-style-image: url(chrome://piratequesting/skin/tabcontrols.png)
 		!important;
@@ -100,19 +85,16 @@
 	visibility: hidden;
 }
 
-/**
-	For the main menu
-*/
 #piratequesting-sidebar toolbox#pqtoolbox>toolbar {
 	background-color: #f5efd3 !important;
 	border-bottom: 1px solid black;
+	font-size: 1.1em ;
 }
 
 #piratequesting-sidebar toolbox#pqtoolbox>toolbar>toolbaritem>label,#piratequesting-sidebar toolbox#pqtoolbox>toolbar>toolbaritem>menubar>menu,#piratequesting-sidebar toolbox#pqtoolbox>toolbar>toolbaritem>menubar>menu>menupopup>menuitem
 	{
-	font-size: 12px !important;
-	font-weight: bold !important;
-	color: #4e462f !important;
+	font-weight: bold ;
+	color: #4e462f ;
 }
 
 #piratequesting-sidebar toolbox#pqtoolbox,#piratequesting-sidebar toolbox#pqtoolbox>toolbar,#piratequesting-sidebar toolbox#pqtoolbox>toolbar>toolbaritem,#piratequesting-sidebar toolbox#pqtoolbox>toolbar>toolbaritem>menubar,#piratequesting-sidebar toolbox#pqtoolbox>toolbar>toolbaritem>menubar>menu,#piratequesting-sidebar toolbox#pqtoolbox>toolbar>toolbaritem>menubar>menu>label
@@ -125,6 +107,8 @@
 	border: 0px !important;
 	padding: 2px 5px 2px 7px !important;
 	margin: 0px 0px 0px 0px !important;
+	-moz-appearance:menu;
+	
 }
 
 #piratequesting-sidebar menubar>menu[_moz-menuactive="true"],#piratequesting-sidebar menubar>menu>menupopup>menuitem[_moz-menuactive="true"]
@@ -136,6 +120,10 @@
 
 #piratequesting-sidebar menubar>menu>menupopup {
 	background-color: #f5efd3 !important;
+}
+
+#piratequesting-sidebar menulist menupopup {
+	font-size: 10px;	
 }
 
 label[type="boldstat"] {
@@ -151,7 +139,7 @@ label[type="stat"] {
 }
 
 label {
-	margin: 1px 1px 4px 4px;
+	margin: 1px 1px 2px 4px;
 }
 
 textbox[type="response"] {
@@ -164,10 +152,10 @@ textbox {
 
 #trainresult {
 	margin-left: 10px;
-	font-size: 11px;
+	font-size: 1em;
 }
 
-/*button { color: #4e462f; font-weight: bold; -moz-appearance: tabpanels;}*/
+
 label[type="bold"] {
 	font-weight: bold;
 	color: #4e462f;
@@ -185,21 +173,12 @@ label[type="link"],label[type="link"]:hover,label[type="link"]:active,label[type
 	cursor: pointer;
 }
 
-/*tabpanel { border-width: 5px; background-color: #ebe5cb; padding:0 0 0 0; }
-tabbox { margin: 0px 5px 5px 5px; border-width: 5px; }
-tabpanel *[type="cover"] { background-color: #ebe5cb; }*/
+
 dialog {
 	border: 5px double #63422f;
 }
 
-/*
-tab:hover { border-top-color:#33D0D0; }
 
-tabs { }
-tabpanels {  }
-
-tabpanels[type="closed"] { display: none; }
-tabpanels[type="closed"] > tabpanel { display: none;}*/
 *[type="hide"] {
 	display: none;
 }
@@ -208,10 +187,7 @@ tabpanels[type="closed"] > tabpanel { display: none;}*/
 	
 }
 
-/*hbox.menu { background-color: #63422f; color: #ffff99; height:20px; max-height:20px; padding:0px 0px 0px 0px; }
-.menutitle { background-color: #63422f; color: #ffff99; font-weight: bold; padding: 2px 10px 2px 10px; margin:0px 0px 0px 0px;}
-.menutitle:hover { background-color: #ebe5cb; color: #4e462f; font-weight: bold; padding: 2px 10px 2px 10px; margin:0px 0px 0px 0px;}
-*/
+
 groupbox,groupbox *[type="cover"] {
 	background-color: #f5efd3;
 	margin: 5px;
@@ -230,6 +206,8 @@ caption {
 	font-weight: bold;
 	color: #4e462f;
 	border: 1px solid black;
+	margin: 0px 6px;
+	padding: 0px 10px; 
 }
 
 treechildren: :-moz-tree-row {
@@ -260,7 +238,7 @@ treechildren: :-moz-tree-cell-text(selected) {
 	font-weight: bold;
 }
 
-/*
+
 menulist > menupopup > menuitem { background-color: #ebe5cb; color: #4e462f; font-weight: bold; }
 menulist, .menulist-label, .menulist-menupopup, .menulist-label-box, menulist > menupopup > menuitem:hover { background-color: #63422f; color: #ffff99; font-weight: bold; }
 
@@ -268,7 +246,7 @@ menupopup[type="equipment"] { background-color: #f5efd3; width: 250px; }
 menupopup[type="equipment"] > menuitem { background-color: #f5efd3; width: 250px;}
 menupopup[type="equipment"] > menuitem:hover { background-color: #63422f; color: #ffff99; font-weight: bold; width: 250px;}
 menupopup[type="equipment"] > menuseparator { background-color: #f5efd3; color: #4e462f; width: 250px; }
-*/
+
 #peren {
 	margin-top: 3px;
 	margin-bottom: 10px;
@@ -282,7 +260,10 @@ richlistitem:focus {
 #inventorylist,#equiplist {
 	overflow-y: auto;
 }
-
+#inventorylist image,#equiplist image {
+	width:40px;
+	height:40px;
+}
 #inventorylist>hbox,#equiplist>hbox {
 	border-width: 1px;
 	border-style: outset;
@@ -327,9 +308,9 @@ tab[status="updated"] {
 
 #pricelist {
 	overflow: auto;
-	max-height: 120px;
+	max-height: 110px;
 	min-height: 20px;
-	margin-bottom: 10px;
+	margin-bottom: 5px;
 }
 
 #pricelist>listitem {
@@ -347,13 +328,7 @@ tab[status="updated"] {
 	color: #4e462f;
 }
 
-/*
-#pc label { font-size: 7pt; margin-left:5px;margin-bottom:2px;}
-#pc { display:none;}
-#statsgrid * { padding: 0px 0px 0px 0px; margin: 0px 0px 0px 0px; }
-#attsbtn { max-height: 8px; max-width:8px; padding-top:8px;margin:0px 0px 0px 0px; }
-#attsbtn hbox { display:none; }
-*/
+
 #delete_events {
 	border: 1px solid black;
 	font-weight: bold;

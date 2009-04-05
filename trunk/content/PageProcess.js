@@ -16,6 +16,8 @@ function PageProcess(pattern, func) {
 	 * @type Function 
 	 */
 	var _func = func; 
+	_func.lastRequest = 0;
+	_func.lastRequestTime = 0;
   if (pattern instanceof RegExp) {
     _pattern = pattern;
   }
@@ -37,12 +39,21 @@ function PageProcess(pattern, func) {
 	   * @param {string} input
 	   * @param {mixed} param
 	   */
-	  run: function(input, param) {
-	    if (this.test(input))
-	      _func(param,input);
+	  run: function(input, param, requestNumber, requestTime) {
+	  	var lr = _func.lastRequest;
+	  	var lrt = _func.lastRequestTime;
+	  	if (typeof lr == "undefined") _func.lastRequest = 0;
+	  	if (typeof lrt == "undefined") _func.lastRequestTime = 0;
+	  	if (this.test(input)) {
+	    	if (!requestNumber || requestTime > _func.lastRequestTime || requestNumber > _func.lastRequest) {
+	    		if (requestNumber) _func.lastRequest = requestNumber;
+	    		if (requestTime) _func.lastRequestTime = requestTime;
+	    		_func(param,input);
+	    	} 
+	    }
 	  },
 	  /**
-	   * Forces the function to run without the test. (caution) this could have undesirable side-effects. Only use this  
+	   * Forces the function to run without the test. (caution) this could have undesirable side-effects. Only use this in exceptional cases
 	   * @param {string} input
 	   * @param {mixed} param
 	   */

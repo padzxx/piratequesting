@@ -9,7 +9,7 @@
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="{D71839DC-FCB4-436e-8D2C-690D2C742153}"
                    em:name="PirateQuesting"
-                   em:version="2.0b3"
+                   em:version="2.0b5"
                    em:creator="Jonathan Fingland"
                    em:description="Unofficial add-on for the browser game Pirate Quest found at www.piratequest.net"
                    em:homepageURL="http://pq.ashita.org"
