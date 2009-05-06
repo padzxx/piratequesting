@@ -57,7 +57,15 @@ piratequesting.Equipment = function() {
 			mi.setAttribute("oncommand", "piratequesting.Equipment.unequip(this.value)");
 			wm.appendChild(mi);
 			
-			sbcd.getElementById(cat.getAttribute("name") + "_image").setAttribute("src", piratequesting.baseURL + eqi.getAttribute('image'));
+			var img_src = eqi.getAttribute('image');
+			switch (-1) {
+				case img_src.indexOf("chrome://"):
+				case img_src.indexOf("http://"):
+					break;
+				default:
+					img_src = piratequesting.baseURL + "/" + img_src;
+			}
+			sbcd.getElementById(cat.getAttribute("name") + "_image").setAttribute("src", img_src);
 			sbcd.getElementById(cat.getAttribute("name") + "_label").setAttribute("value", eqi.getAttribute('name'));
 		} else {
 		// add the unequipped items to the menu, create the associated

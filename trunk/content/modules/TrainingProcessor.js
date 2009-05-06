@@ -56,7 +56,7 @@ piratequesting.TrainingProcessor = function() {
 			}
 			level = doc.evaluate('substring-after(substring-before(string(id("profile_info")//div[@class="user_role"][last()])," ["),"lvl:")',doc,null,XPathResult.STRING_TYPE,null).stringValue.stripCommas();
 			
-			port = doc.evaluate('id("sidebar")//a[@href="index.php?on=city"]',doc,null,XPathResult.STRING_TYPE,null).stringValue; 
+			port = doc.evaluate('//title',doc,null,XPathResult.STRING_TYPE,null).stringValue.split(" | ")[1]; 
 			
 			failure = doc.evaluate('id("train")//h3[starts-with(.,"Failed")]',doc,null,XPathResult.STRING_TYPE,null).stringValue; 
 			
@@ -75,7 +75,8 @@ piratequesting.TrainingProcessor = function() {
 
 			document.dispatchEvent(evt);
 			} catch (error) {
-				alert(getErrorString(error));
+				dumpError(error);
+				
 			}
 			
 		}

@@ -39,33 +39,30 @@ piratequesting.InventoryManager = function() {
 	 * @type {Document}
 	 */
 	var inventory; 
-
-	function write() {
-		//write current data to the database
-		//replace into? insert on duplicate update?
-		
-		//2009/03/14 - replace into will lose data if our tree isn't complete 
-		
-	}
 	
 	function zeroItems() {
 		var items = inventory.evaluate("/inventory/category/item",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 		for (var i=0,len=items.snapshotLength;i<len;++i) {
 			items.snapshotItem(i).setAttribute("quantity",0);
+			items.snapshotItem(i).setAttribute("equipped",0);
 		}
 	}
 	
 	function write () {
-		var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
-                         .createInstance(Components.interfaces.nsIFileOutputStream);
-		// clear the file for writing the new doc
-		foStream.init(logfile, 0x02 | 0x08 | 0x20, 0666, 0); // write,
-															// create,
-															// truncate
-		var ser = new XMLSerializer();
-		// write the serialized XML to file
-		ser.serializeToStream(inventory, foStream, ""); 
-		foStream.close();	
+		try {
+			var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+	                         .createInstance(Components.interfaces.nsIFileOutputStream);
+			// clear the file for writing the new doc
+			foStream.init(logfile, 0x02 | 0x08 | 0x20, 0666, 0); // write,
+																// create,
+																// truncate
+			var ser = new XMLSerializer();
+			// write the serialized XML to file
+			ser.serializeToStream(inventory, foStream, ""); 
+			foStream.close();	
+		} catch (e) {
+			dumpError(e);
+		}
 	}
 	
 	function makeNewInventory () { 
@@ -138,6 +135,28 @@ piratequesting.InventoryManager = function() {
 		}
 		log.send(null);
 	}
+	
+	function setCoinsPoints (doc) {
+		var coinsnpts = doc.getElementById('coinsnpts');
+		// check to see if it exists
+		if (coinsnpts) {
+			// the first <a> should be the points, and since it has
+			// no id, we just have to hope it stays that way
+			var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
+			var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost: 0};
+			var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+			if (item_check.snapshotLength > 0 ) {
+				var item = item_check.snapshotItem(0); 
+				item.setAttributes(attributes);
+			} else {
+				var item = inventory.newElement("item",attributes);
+				inventory.documentElement.appendChild(item);
+
+			}
+			return true;					
+		} else { dumpError("Error getting points for inventory\n"); return false; }
+	}
+	
 	var ajax;
 	
 	if (logfile.exists())
@@ -171,14 +190,83 @@ piratequesting.InventoryManager = function() {
 		},
 
 		processInventory: function(doc){
+			var addItem, getItems, getEquip;
+			
 			//do nothing if the swapspace isn't there. That means the inventory page is in a different mode. 
 			//dump("\n\n"+ doc.evaluate("//div[@id='contentarea']/form/table[1]",doc,null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotItem(0).innerHTML + "\n\n");
 			if (doc.evaluate("not(boolean(descendant-or-self::div[@id='swapspace']))", doc, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {  return; }
+			//not the new or old system... something weird happened so bail.
 			
-						try{
-							zeroItems();
+			zeroItems();
+					
+			setCoinsPoints(doc);
+			
+			var categories = inventory.evaluate("/inventory/category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			var category,items,item;
+					
+			if (piratequesting.baseTheme == 'default') {   
+				//using the new system 
+				addItem = function (category, item, equipped) {
+					try {
+						var name;
+						//first need to check if the node actually has something equipped. The best way is to check if the equipment has a name associated with an item_view link. if there's no item_view then it's not a valid item
+						if (!item || !category) return;
+						if (name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null)) {
+							if (!name.stringValue) return;
+							name = name.stringValue;
+							var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
 							
-				function addItem(category,item,equipped) {
+							var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
+							
+							
+							var value = (/(\$[.,\d]+)/.exec(doc.evaluate("descendant-or-self::p[@class='price']", item, null, XPathResult.STRING_TYPE,null).stringValue));
+							if (value && value.length > 0) value = value[1].toNumber();
+							else value = 0;
+							
+							
+							var action_id = doc.evaluate("substring-after(descendant-or-self::a[starts-with(@href,'index.php?on=inventory&action=')]/@href,'id=')", item, null, XPathResult.STRING_TYPE,null).stringValue;
+							var quantity = doc.evaluate("substring-before(substring-after(.,'[x'),']')", item, null, XPathResult.STRING_TYPE,null).stringValue.toNumber();
+							//this will only get the non-'use' actions. If there's a way to do group_concat, I don't know it.
+							var action_list =  doc.evaluate(".//div[@class='links']/a/@class", item, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+							var actions = 0;
+							for (var j=0,alen = action_list.snapshotLength; j<alen;++j) {
+								actions = actions | Number(ACTIONS[action_list.snapshotItem(j).nodeValue]);
+							}
+							var attributes = {name:name, id:id, action_id: action_id, image:image, quantity:quantity, value:value,actions:actions, equipped:((equipped)?equipped:0)};
+						
+							var item_check = inventory.evaluate("./item[@id='"+id+"']", category, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+							if (item_check.snapshotLength > 0 ) {
+								var item = item_check.snapshotItem(0); 
+								item.setAttributes(attributes);
+							} else {
+								var item = inventory.newElement("item",attributes);
+								category.insertBefore(item,category.firstChild);
+			
+							}
+						}
+					}catch (error) { dump("\n" + getErrorString(error) + "\n");}
+				}
+				getItems = function (category) {
+					return doc.evaluate("(//div[@id='itemsec_"+ category.getAttribute("id") +"'])[1]/div[@class='box']", doc, null, XPathResult.ANY_TYPE,null);
+					
+				}
+				
+				getEquip = function () {
+					//currently the id is 'equiped' which is a retarded spelling mistake.... amongst many. 
+					return doc.evaluate("//div[@id='equipped' or @id='equiped'][1]/div",doc,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+				}
+				
+				
+			} else if (piratequesting.baseTheme == 'classic') {
+			
+				getEquip = function () {
+					return doc.evaluate("//div[@id='contentarea']/form//table[1]/tbody[contains(tr[1]/td[last()],'Equipped')]/tr[2]/td//td[not(@align)]",doc,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+				}
+							
+				getItems = function (category) {
+					return doc.evaluate("(//div[@id='itemsec_"+ category.getAttribute("id") +"'])[1]/table/tbody/tr[last()]/td/table/tbody/tr[position() mod 2 = 1]/td", doc, null, XPathResult.ANY_TYPE,null);
+				}
+				addItem = function (category,item,equipped) {
 					try {
 					var name;
 					//first need to check if the node actually has something equipped. The best way is to check if the equipment has a name associated with an item_view link. if there's no item_view then it's not a valid item
@@ -186,7 +274,7 @@ piratequesting.InventoryManager = function() {
 					if (name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null)) {
 						if (!name.stringValue) return;
 						name = name.stringValue;
-						var image = "/" + doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
 						
 						var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
 						
@@ -199,7 +287,7 @@ piratequesting.InventoryManager = function() {
 						var action_id = doc.evaluate("substring-after(descendant-or-self::a[starts-with(@href,'index.php?on=inventory&action=')]/@href,'id=')", item, null, XPathResult.STRING_TYPE,null).stringValue;
 						var quantity = doc.evaluate("substring-before(substring-after(.[a[@class='item_view']],'[x'),']')", item, null, XPathResult.STRING_TYPE,null).stringValue.toNumber();
 						//this will only get the non-'use' actions. If there's a way to do group_concat, I don't know it.
-						var action_list =  doc.evaluate("descendant-or-self::a[starts-with(@href,'index.php?on=inventory&action=')]/text()", item, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+						var action_list =  doc.evaluate(".//a[starts-with(@href,'index.php?on=inventory&action=')]/text()|.//input/@value", item, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 						var actions = 0;
 						for (var j=0,alen = action_list.snapshotLength; j<alen;++j) {
 							actions = actions | Number(ACTIONS[action_list.snapshotItem(j).nodeValue]);
@@ -215,67 +303,53 @@ piratequesting.InventoryManager = function() {
 							category.insertBefore(item,category.firstChild);
 		
 						}
-					}
+					} 
 					}catch (error) { dump("\n" + getErrorString(error) + "\n");}
 				}
+					
+			} else {
+				dump('Theme check failure: Not Default or Classic.\n');
+			}
 			
-			var coinsnpts = doc.getElementById('coinsnpts');
-			// check to see if it exists
-			if (coinsnpts) {
-				// the first <a> should be the points, and since it has
-				// no id, we just have to hope it stays that way
-				var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
-				var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost: 0};
-				var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
-				if (item_check.snapshotLength > 0 ) {
-					var item = item_check.snapshotItem(0); 
-					item.setAttributes(attributes);
-				} else {
-					var item = inventory.newElement("item",attributes);
-					inventory.documentElement.appendChild(item);
-
-				}
-									
-			}
-			var categories = inventory.evaluate("/inventory/category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-			var category,items,item;
-			for (var i = 0, len=categories.snapshotLength; i<len;++i){
-				/**
-				 * @type {Node}
-				 */
-				category = categories.snapshotItem(i);
-				//this gem gets each item in a cateogory from the inventory page. It does not, however, ghet the equipped items which have to be acquired separately below
-				// (//div[@id='"+ category.getAttribute("name") +"'])[1] is used because FM adds each category twice (bug?) and we only want to add the items from one of them.
-				// tr[position() mod 2 = 1] is used because every second row is empty
-				items = doc.evaluate("(//div[@id='itemsec_"+ category.getAttribute("id") +"'])[1]/table/tbody/tr[last()]/td/table/tbody/tr[position() mod 2 = 1]/td", doc, null, XPathResult.ANY_TYPE,null);
-				while (item = items.iterateNext()) {
-					addItem(category,item,0);
-				}
-				
-								
-			}
-			//now to get the equipped items
-			//tbody[contains(tr[1]/td[last()],'Equipped')] is used to find the correct table. -- deprecated. there was enough specificity in other areas that this was unnecessary given its cost
-			////td[not(@align)] is used because FM puts out 4 empty columns, carrying the align attribute, then 4 columns with the data we want.
-			items = doc.evaluate("//div[@id='contentarea']/form//table[1]/tbody[contains(tr[1]/td[last()],'Equipped')]/tr[2]/td//td[not(@align)]",doc,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-			//There will be exactly 4 results unless FM adds a new category to the equipment... in which case bigger changes need to happen.
-			//There should also be 4 categories selected so we'll just use the same index and need to be careful that the order is the same 
-			categories = inventory.evaluate("/inventory/category[@id='5' or @id='2' or @id='1' or @id='11'] ", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 			try {
-			for (var i = 0, len=categories.snapshotLength; i<len;++i){
-				/**
-				 * @type {Node}
-				 */
-				category = categories.snapshotItem(i);
-				item = items.snapshotItem(i);
-				addItem(category,item,1);
-			}
+			
+				for (var i = 0, len=categories.snapshotLength; i<len;++i){
+					/**
+					 * @type {Node}
+					 */
+					category = categories.snapshotItem(i);
+					//this gem gets each item in a cateogory from the inventory page. It does not, however, ghet the equipped items which have to be acquired separately below
+					// (//div[@id='"+ category.getAttribute("name") +"'])[1] is used because FM adds each category twice (bug?) and we only want to add the items from one of them.
+					// tr[position() mod 2 = 1] is used because every second row is empty
+					items = getItems(category);
+					while (item = items.iterateNext()) {
+						addItem(category,item,0);
+					}
+					
+									
+				}
+				//now to get the equipped items
+				//tbody[contains(tr[1]/td[last()],'Equipped')] is used to find the correct table. -- deprecated. there was enough specificity in other areas that this was unnecessary given its cost
+				////td[not(@align)] is used because FM puts out 4 empty columns, carrying the align attribute, then 4 columns with the data we want.
+				items = getEquip();
+				//There will be exactly 4 results unless FM adds a new category to the equipment... in which case bigger changes need to happen.
+				//There should also be 4 categories selected so we'll just use the same index and need to be careful that the order is the same 
+				categories = inventory.evaluate("/inventory/category[@id='5' or @id='2' or @id='1' or @id='11'] ", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+				for (var i = 0, len=categories.snapshotLength; i<len;++i){
+					/**
+					 * @type {Node}
+					 */
+					category = categories.snapshotItem(i);
+					item = items.snapshotItem(i);
+					addItem(category,item,1);
+				}
 			} catch(e) {
 				dumpError(e);
 			}
+			dump(piratequesting.InventoryManager);
 			write();
 			document.fire('piratequesting:InventoryUpdated');
-			}catch(error) { alert(getErrorString(error)); }
+			
 		},
 		
 		processItemGuide: function (doc) {
@@ -346,26 +420,10 @@ piratequesting.InventoryManager = function() {
 		},
 		
 		process:function(doc) {
-			var coinsnpts = doc.getElementById('coinsnpts');
-			// check to see if it exists
-			if (coinsnpts) {
-				// the first <a> should be the points, and since it has
-				// no id, we just have to hope it stays that way
-				var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
-				var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost: 0};
-				var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
-				if (item_check.snapshotLength > 0 ) {
-					var item = item_check.snapshotItem(0); 
-					item.setAttributes(attributes);
-				} else {
-					var item = inventory.newElement("item",attributes);
-					inventory.documentElement.appendChild(item);
-
-				}
+			if (setCoinsPoints(doc)) {	
 				write();
 				document.fire('piratequesting:InventoryPointsUpdated');
-			}
-
+			} 
 		},
 		
 		toString:function() {
