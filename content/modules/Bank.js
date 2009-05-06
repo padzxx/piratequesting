@@ -182,7 +182,7 @@ createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid In
 		},
 		
 		parseBankResponse: function(text){
-			var regex = /You have (withdrawn|deposited) (\$[,0-9]+) successfully/i;
+			var regex = /Ye have (withdrawn|deposited) (\$[,0-9]+) successfully/i;
 			var fregex = /(withdraw|deposit) more than you have/i;
 			var url = piratequesting.baseURL + "/index.php?on=bank";
 			var match;

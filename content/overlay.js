@@ -46,6 +46,7 @@ var piratequesting = function () {
 		PQResponseProcessorCollection : [],
 		scripts : [],
 		baseURL : "",
+		baseTheme: null,
 	
 		/**
 		 * Database connection for the extension. Stored for re-use to cut down on repitition
@@ -90,7 +91,8 @@ var piratequesting = function () {
 					this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
 					this.baseURL = this.prefs
 							.getCharPref("extensions.piratequesting.baseurl");
-	
+					this.baseTheme = this.prefs
+							.getCharPref("extensions.piratequesting.basetheme");
 					// initialization code
 					this.initialized = true;
 					this.strings.core = document
@@ -208,15 +210,29 @@ var piratequesting = function () {
 										"extensions.piratequesting.baseurl",
 										top.piratequesting.baseURL);
 							} catch (error) {
-								alert("Getting: \n" + getErrorString(error));
+								dumpError(error);
 							}
 	
 						}
+						
 						// we're on a piratequest page. yay!
 						
 						//check if it's reset time
 						if (!(doc.body && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
-						// now run all of the added test-function pairs
+							
+							//theme test: classic has a wrapper around all of the content with id 'outer', default has id 'skull' for the talking head
+							if (doc.evaluate("boolean(id('skull'))", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+								//using default theme
+								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme","default");
+							}
+							//can't guarantee that the page will have either marker so don't use else
+							if (doc.evaluate("boolean(id('outer'))", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+								//using default theme
+								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme","classic");
+							}
+							//if neither of the above matches, the preference won't change.
+							
+							// now run all of the added test-function pairs
 							var curProc;
 							for (var i = 0; i < top.piratequesting.PQLoadCollection.length; i++) {
 								curProc = top.piratequesting.PQLoadCollection[i];

@@ -53,8 +53,13 @@ piratequesting.Inventory = function() {
 		container.setAttribute("align", "center");
 		container.setAttribute("id", "IL" + item.getAttribute("action_id"));
 		var img_src = item.getAttribute("image");
-		if (img_src.indexOf("chrome://") < 0 )
-			img_src = piratequesting.baseURL + img_src;
+		switch (-1) {
+			case img_src.indexOf("chrome://"):
+			case img_src.indexOf("http://"):
+				break;
+			default:
+				img_src = piratequesting.baseURL + "/" + img_src;
+		}
 		var image = sbcd.createElement("image");
 		image.setAttribute("src",  img_src);
 		//image.setAttribute("height", "50");
@@ -200,7 +205,6 @@ piratequesting.Inventory = function() {
 		}
 
 		
-
 		var inventoryList = sbcd.getElementById("inventorylist");
 
 		// clear the list
@@ -218,7 +222,8 @@ piratequesting.Inventory = function() {
 		if (points.snapshotLength > 0 ) {
 			inventoryList.appendChild(newInventoryItem(points.snapshotItem(0), "points"));
 		}
-
+		/*dump(inventory.evaluate("/inventory/category/item[@quantity=0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");
+		dump(inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");*/
 		var items = inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null); 
 		for (var i = 0, len=items.snapshotLength; i < len; ++i) {
 			inventoryList.appendChild(newInventoryItem(items.snapshotItem(i), items.snapshotItem(i).parentNode.getAttribute('id')));
@@ -323,6 +328,7 @@ piratequesting.Inventory = function() {
 
 		process : function () {
 			inventory = piratequesting.InventoryManager.getInventory();
+			dump("updating inventory list");
 			try {
 				updateInventoryList(true);
 			}catch(e) { dumpError(e); }
