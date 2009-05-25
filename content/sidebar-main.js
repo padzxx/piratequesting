@@ -266,5 +266,3 @@ overlayObserver.prototype = {
     observerService.removeObserver(this, "xul-overlay-merged");
   }
 }
-
-

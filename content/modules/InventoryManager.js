@@ -346,8 +346,10 @@ piratequesting.InventoryManager = function() {
 			} catch(e) {
 				dumpError(e);
 			}
-			dump(piratequesting.InventoryManager);
+			dump("\n\nCurrent Inventory:\n"+piratequesting.InventoryManager+"\nTotal Number of items:");
+			dump(inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");
 			write();
+			dump("firing event");
 			document.fire('piratequesting:InventoryUpdated');
 			
 		},
