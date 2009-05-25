@@ -251,9 +251,9 @@ piratequesting.Inventory = function() {
 		var doc = piratequesting.createDoc(text);
 		
 		if (name == "Points") {
-			if (doc.evaluate("boolean(descendant::h2[. = 'Points Market'])", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+			if (doc.evaluate("boolean(descendant::h2[. = 'Points Market']|descendant::h1[. = 'Points Market'])", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 				//the following gets the quantity and price in one query so we have to account for that in the for-loop
-				var items = doc.evaluate("descendant::table[@class='utable']//tr[position() > 1]/td[position() = 1 or position() = 2]", doc, null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+				var items = doc.evaluate("descendant::table[@class='utable' or @class='dark_utable']//tr[position() > 1]/td[position() = 1 or position() = 2]", doc, null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 				for (var i =0, len=items.snapshotLength;i<len;i+=2) {
 					
 					li = sbcd.createElement("listitem");
@@ -262,8 +262,9 @@ piratequesting.Inventory = function() {
 					pricelist.appendChild(li);
 					
 				}
-			} else
-				alert("Error retrieving prices. Page returned by server\nwas not the points market.");
+				} else
+					alert("Error retrieving prices. Page returned by server\nwas not the points market.");
+
 		} else {
 			stripex = /<div id=['"]citemmkt['"]>[\s\S]*?(<table[\s\S]*?<\/table>)/;
 			if (stripex.test(text)) {

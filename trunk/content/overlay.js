@@ -20,6 +20,16 @@ Object.extend = function(destination, source) {
 };
 
 /**
+ * Reference to browser window
+ */ 
+var mainWindow = window
+		.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+		.getInterface(Components.interfaces.nsIWebNavigation)
+		.QueryInterface(Components.interfaces.nsIDocShellTreeItem).rootTreeItem
+		.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+		.getInterface(Components.interfaces.nsIDOMWindow);
+		
+/**
  * Primary object for the extension Everything shoud fit under this namespace
  * except for utility functions
  * 
@@ -53,7 +63,6 @@ var piratequesting = function () {
 		 * @type mozIStorageConnection
 		 */
 		DBConn : function() {
-	
 			var file = Components.classes["@mozilla.org/file/directory_service;1"]
 					.getService(Components.interfaces.nsIProperties).get("ProfD",
 							Components.interfaces.nsIFile);
@@ -224,11 +233,13 @@ var piratequesting = function () {
 							if (doc.evaluate("boolean(id('skull'))", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 								//using default theme
 								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme","default");
+								piratequesting.baseTheme = "default";
 							}
 							//can't guarantee that the page will have either marker so don't use else
 							if (doc.evaluate("boolean(id('outer'))", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 								//using default theme
 								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme","classic");
+								piratequesting.baseTheme = "classic";
 							}
 							//if neither of the above matches, the preference won't change.
 							
@@ -418,12 +429,7 @@ piratequesting.onToolbarButtonCommand = function(e) {
 	piratequesting.onMenuItemCommand(e);
 }
 
-var mainWindow = window
-		.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-		.getInterface(Components.interfaces.nsIWebNavigation)
-		.QueryInterface(Components.interfaces.nsIDocShellTreeItem).rootTreeItem
-		.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-		.getInterface(Components.interfaces.nsIDOMWindow);
+
 
 /**
  * @namespace
@@ -529,3 +535,119 @@ piratequesting.overlayRegistry = function() {
 
 	}
 }();
+
+function httpRequestObserver() {
+	try {
+		this.register();
+	} catch (e) {
+		dump("failed in registration\n");
+		dumpError(e);
+	}
+}
+const Cc = Components.classes;
+const Ci = Components.interfaces; 
+
+httpRequestObserver.prototype = {
+    observe: function(aSubject, aTopic, aData)
+    {
+	    if (aTopic == "http-on-examine-response") {
+	    	try {
+		        var newListener = new TracingListener();
+		        aSubject.QueryInterface(Ci.nsITraceableChannel);
+		        newListener.originalListener = aSubject.setNewListener(newListener);
+	    	} catch (e) {
+				dump("failed in making new listener\n");
+				dumpError(e);
+			}
+	    }
+    },
+    register: function() {
+        var observerService = Components.classes["@mozilla.org/observer-service;1"]
+                              .getService(Components.interfaces.nsIObserverService);
+        observerService.addObserver(this, "http-on-examine-response", false);
+    },  
+    unregister: function() {
+    	var observerService = Components.classes["@mozilla.org/observer-service;1"]
+    	                      .getService(Components.interfaces.nsIObserverService);
+    	observerService.removeObserver(this, "http-on-examine-response");
+    },
+    QueryInterface : function (aIID)
+    {
+        if (aIID.equals(Ci.nsIObserver) ||
+            aIID.equals(Ci.nsISupports))
+        {
+            return this;
+        }
+
+        throw Components.results.NS_NOINTERFACE;
+
+    }
+};
+
+//Helper function for XPCOM instanciation (from Firebug)
+function CCIN(cName, ifaceName) {
+    return Cc[cName].createInstance(Ci[ifaceName]);
+}
+
+// Copy response listener implementation.
+function TracingListener() {
+}
+
+TracingListener.prototype =
+{
+    originalListener: null,
+    receivedData: [],   // array for incoming data.
+
+    onDataAvailable: function(request, context, inputStream, offset, count)
+    {
+    	try {
+        var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1",
+                "nsIBinaryInputStream");
+        var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
+        var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1",
+                "nsIBinaryOutputStream");
+           
+        binaryInputStream.setInputStream(inputStream);
+        storageStream.init(8192, count, null);
+        binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
+
+        // Copy received data as they come.
+        var data = binaryInputStream.readBytes(count);
+        this.receivedData.push(data);
+
+        binaryOutputStream.writeBytes(data, count);
+
+        this.originalListener.onDataAvailable(request, context,
+            storageStream.newInputStream(0), offset, count);
+    	} catch (e) {
+			dump("failed in processing data\n");
+			dumpError(e);
+		}
+    },
+
+    onStartRequest: function(request, context) {
+        this.originalListener.onStartRequest(request, context);
+    },
+
+    onStopRequest: function(request, context, statusCode)
+    {
+        // Get entire response
+        var responseSource = this.receivedData.join();
+        dump(responseSource);
+        this.originalListener.onStopRequest(request, context, statusCode);
+    },
+
+    QueryInterface: function (aIID) {
+        if (aIID.equals(Ci.nsIStreamListener) ||
+            aIID.equals(Ci.nsISupports)) {
+            return this;
+        }
+        throw Components.results.NS_NOINTERFACE;
+    }
+}
+//var hro = new httpRequestObserver();
+
+/*if (hro) {
+	hro.unregister();
+	hro = null;
+}*/

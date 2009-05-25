@@ -61,7 +61,10 @@ piratequesting.Ship = function() {
 	 */
 	var cannons = 0;
 
-	
+	/**
+	 * publishes the ship data to the sidebar. data comes from info stored by scraper/other sources 
+	 * @private
+	 */
 	var publish = function () {
 		try {
 		var sbcd = sidebar.contentDocument; 		

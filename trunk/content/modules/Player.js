@@ -111,7 +111,6 @@ function Stat(currentValue, maxValue) {
  * @namespace
  */
 piratequesting.Player = function() {
-
 	var name = "";
 	var level = 0;
 	var progress = 0;
@@ -179,43 +178,80 @@ piratequesting.Player = function() {
 		 */
 		process : function(doc) {
 			try {
-				//exit if the section doesn't exist
-				if (!doc.getElementById("TabbedPanels2")) return;
-				var char_group = doc.getElementById("TabbedPanels2").getElementsByTagName('div'); //Why is this called TabPanels2? Surely theycould have come up with a better id
-				//char_group 0 = stats, 1 = attributes, 2 = treasure, 3 = abilities
-				var stat_group = char_group[1];
-				var attr_group = char_group[2];
-				
-				//inside each group is a ul with li inside
-				var t = stat_group.getElementsByTagName('li');
-				var sname, value;
-				for (var i = 0, v = t[i]; i < t.length; i++, v = t[i]) {
-					sname = /(\S*?):/.exec(v.firstChild.firstChild.nodeValue)[1].toLowerCase();
-					value = /([\d.,]+?)\/([\d.,]+)/.exec(v.childNodes[1].nodeValue);
-					stats[sname].setCurrent(value[1]);
-					stats[sname].setMax(value[2]);
+				if (piratequesting.baseTheme == "classic") {
+					//exit if the section doesn't exist
+					if (!doc.getElementById("TabbedPanels2")) 
+						return;
+					var char_group = doc.evaluate("id('TabbedPanels2')//ul[not(@class)]", doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+					//var char_group = doc.getElementById("").getElementsByTagName('div'); //Why is this called TabPanels2? Surely theycould have come up with a better id
+					//char_group 0 = stats, 1 = attributes, 2 = treasure, 3 = abilities
+					var stat_group = char_group.snapshotItem(0);
+					var attr_group = char_group.snapshotItem(1);
+					//inside each group is a ul with li inside
+					var t = doc.evaluate(".//li//strong", stat_group, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+					var sname, value;
+					
+					for (var i = 0, v = t.snapshotItem(i); i < t.snapshotLength; i++, v = t.snapshotItem(i)) {
+						sname = /(\S*?):/.exec(v.firstChild.nodeValue)[1].toLowerCase();
+						value = /([\d.,]+?)\/([\d.,]+)/.exec(v.parentNode.lastChild.nodeValue);
+						stats[sname].setCurrent(value[1]);
+						stats[sname].setMax(value[2]);
+					}
+					var t = doc.evaluate(".//li//strong", attr_group, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+					for (var i = 0, v = t.snapshotItem(i); i < t.snapshotLength; i++, v = t.snapshotItem(i)) {
+						sname = /(\S*?):/.exec(v.firstChild.nodeValue)[1].toLowerCase();
+						value = /([\d.,]+)/.exec(v.parentNode.lastChild.nodeValue);
+						attributes[sname].setValue(value[1]);
+					}
+					//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role").length);
+					
+					
+					name = doc.evaluate('string(id("profile_info")//div[@class="user_role"][1]//a[last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role")[0].firstChild.nodeValue);
+					var lp = /lvl:\D+(\d+)\D+(\d+)/.exec(doc.evaluate('string(id("profile_info")//div[@class="user_role"][last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
+					level = lp[1];
+					progress = lp[2];
+					//*/
+					publish();
+				} else if(piratequesting.baseTheme == "default") {
+					//attributes are not available in the default theme, so they are omitted here.
+					var hpdata = doc.getElementById('prog-bar-hp').getAttribute('title').split(" / ");
+					var nervedata = doc.getElementById('prog-bar-nerve').getAttribute('title').split(" / ");
+					var awakedata = doc.getElementById('prog-bar-awake').getAttribute('title').split(" / ");
+					var energydata = doc.getElementById('prog-bar-energy').getAttribute('title').split(" / ");
+					stats.hp.setCurrent(hpdata[0]);
+					stats.hp.setMax(hpdata[1]);
+					stats.nerve.setCurrent(nervedata[0]);
+					stats.nerve.setMax(nervedata[1]);
+					stats.awake.setCurrent(awakedata[0]);
+					stats.awake.setMax(awakedata[1]);
+					stats.energy.setCurrent(energydata[0]);
+					stats.energy.setMax(energydata[1]);
+					name = doc.evaluate('string(id("profilebox")//div[@class="user_role"][1]//a[last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role")[0].firstChild.nodeValue);
+					//var lp = /lvl:\D+(\d+)\D+(\d+)/.exec(doc.evaluate('string(id("profile_info")//div[@class="user_role"][last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
+					level = doc.evaluate('substring-after(string(id("header_user_level")),"Level ")', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+					//lp[1];
+					progress = Math.round(eval(doc.evaluate('string(id("header_user_level_container")/@title)', doc, null, XPathResult.STRING_TYPE, null).stringValue) * 1000) / 10; 
+					//lp[2];
+					//*/
+					publish();
 				}
-				var t = attr_group.getElementsByTagName('li');
-				for (var i = 0, v = t[i]; i < t.length; i++, v = t[i]) {
-					sname = /(\S*?):/.exec(v.firstChild.firstChild.nodeValue)[1].toLowerCase();
-					value = /([\d.,]+)/.exec(v.childNodes[1].nodeValue);
-					attributes[sname].setValue(value[1]);
-				}
-				//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role").length);
 				
-				
-				name = doc.evaluate('string(id("profile_info")//div[@class="user_role"][1]//a[last()])',doc,null,XPathResult.STRING_TYPE,null).stringValue;
-				//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role")[0].firstChild.nodeValue);
-				var lp = /lvl:\D+(\d+)\D+(\d+)/.exec(doc.evaluate('string(id("profile_info")//div[@class="user_role"][last()])',doc,null,XPathResult.STRING_TYPE,null).stringValue.stripCommas());
-				level = lp[1];
-				progress = lp[2];
-				//*/
-				publish();
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(getErrorString(e));
 			}
 			
 			
+		},
+		processTrainPage: function (doc) {
+			if (piratequesting.baseTheme == "default") {
+				attributes.strength.setValue(doc.evaluate('string(id("str_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
+				attributes.defense.setValue(doc.evaluate('string(id("def_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
+				attributes.speed.setValue(doc.evaluate('string(id("spd_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
+				publish();
+			}
+
 		},
 		getLevel : function () {
 			return level;
@@ -232,3 +268,4 @@ piratequesting.Player = function() {
 }();
 
 piratequesting.addLoadProcess("", piratequesting.Player.process);
+piratequesting.addLoadProcess(/index.php?on=train$index.php?on=train&|/, piratequesting.Player.processTrainPage);
