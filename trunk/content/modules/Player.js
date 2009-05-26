@@ -23,30 +23,30 @@ function Attribute(aValue) {
 	 */
 	var value = aValue || 0;
 	
-		/**
-		 * @param {Number}
-		 *            aValue
-		 * 
-		 */
-		this.setValue = function(aValue) {
-			value = Number(String(aValue).toNumber()) || 0;
-		}
-		/**
-		 * @returns {Number}
-		 */
-		this.getValue = function() {
-			return value;
-		},
-		/**
-		 * @returns {Number}
-		 */
-		this.getAdjusted = function(adjustment_modifier) {
-			return (value * adjustment_modifier);
-		}
-		
-		this.toString = function () {
-			return String(value).addCommas();
-		}
+	/**
+	 * @param {Number}
+	 *            aValue
+	 * 
+	 */
+	this.setValue = function(aValue) {
+		value = Number(String(aValue).toNumber()) || 0;
+	}
+	/**
+	 * @returns {Number}
+	 */
+	this.getValue = function() {
+		return value;
+	},
+	/**
+	 * @returns {Number}
+	 */
+	this.getAdjusted = function(adjustment_modifier) {
+		return (value * adjustment_modifier);
+	}
+	
+	this.toString = function () {
+		return String(value).addCommas();
+	}
 
 	
 };
@@ -72,38 +72,38 @@ function Stat(currentValue, maxValue) {
 	 * @private
 	 */
 	var max = maxValue || currentValue || 0;	
-		/**
-		 * @param {Number}
-		 *            aValue
-		 * 
-		 */
-		this.setCurrent = function(aValue) {
-			current = Number(String(aValue).toNumber()) || 0;
-		}
-		/**
-		 * @param {Number}
-		 *            aValue
-		 * 
-		 */
-		this.setMax = function(aValue) {
-			max = Number(String(aValue).toNumber()) || 0;
-		}
-		/**
-		 * @returns {Number}
-		 */
-		this.getCurrent = function() {
-			return current;
-		}
-		/**
-		 * @returns {Number}
-		 */
-		this.getMax = function() {
-			return max;
-		}
-		
-		this.toString = function () {
-			return String(current).addCommas() + "/" + String(max).addCommas();
-		}
+	/**
+	 * @param {Number}
+	 *            aValue
+	 * 
+	 */
+	this.setCurrent = function(aValue) {
+		current = Number(String(aValue).toNumber()) || 0;
+	}
+	/**
+	 * @param {Number}
+	 *            aValue
+	 * 
+	 */
+	this.setMax = function(aValue) {
+		max = Number(String(aValue).toNumber()) || 0;
+	}
+	/**
+	 * @returns {Number}
+	 */
+	this.getCurrent = function() {
+		return current;
+	}
+	/**
+	 * @returns {Number}
+	 */
+	this.getMax = function() {
+		return max;
+	}
+	
+	this.toString = function () {
+		return String(current).addCommas() + "/" + String(max).addCommas();
+	}
 };
 
 /**

@@ -54,6 +54,7 @@ var piratequesting = function () {
 		initialized : false,
 		PQLoadCollection : [],
 		PQResponseProcessorCollection : [],
+		PQRAWProcessorCollection : [],
 		scripts : [],
 		baseURL : "",
 		baseTheme: null,
@@ -145,6 +146,14 @@ var piratequesting = function () {
 			}
 		},
 		
+		addRAWProcessor : function (pattern, func) {
+			try {
+				this.PQRAWProcessorCollection.push(new PageProcess(pattern, func));
+			} catch (e) {
+				alert(getErrorString(e));
+			}
+		},
+		
 		createDoc : function (htmlText) {
 			/*  
 			 * The following section is here only because docShell doesn't seem to exist at init time'
@@ -188,6 +197,18 @@ var piratequesting = function () {
 			}
 			
 		},
+		
+		ProcessRAWResponse :  function(url, htmlText, requestTime) {
+			dump("processing raw processors");
+			var curProc;
+			//then run the ajax response processors - at this time only the captcha code stuff 
+			for (var i = 0, len = piratequesting.PQRAWProcessorCollection.length; i < len; i++) {
+				curProc = piratequesting.PQRAWProcessorCollection[i];
+				curProc.run(url, doc,requestTime);
+			}
+		
+		},
+		
 		/**
 		 * Checks if the event target is a PQ page, then
 		 * Cycles through the elements of PQLoadCollection and runs them on the event target document
@@ -400,7 +421,7 @@ var piratequesting = function () {
 				openAndReuseOneTabPerURL(addr);
 		},
 		openAbout: function () {
-			var params = {in:mainWindow, out:null};       
+			var params = { in: mainWindow, out:null};       
 			window.openDialog("chrome://piratequesting/content/aboutDialog.xul", "",
 	    	"chrome, dialog, titlebar=no, close=no,centerscreen, resizable=no, status=no, height=270, width=430", params).focus();
 		}
@@ -535,119 +556,118 @@ piratequesting.overlayRegistry = function() {
 
 	}
 }();
+try {
 
-function httpRequestObserver() {
-	try {
-		this.register();
-	} catch (e) {
-		dump("failed in registration\n");
-		dumpError(e);
+	if (typeof Cc == "undefined") {
+		var Cc = Components.classes;
+		var Ci = Components.interfaces; 
 	}
-}
-const Cc = Components.classes;
-const Ci = Components.interfaces; 
+	if (typeof CCIN == "undefined") {
+	 	function CCIN(cName, ifaceName){
+	 		return Cc[cName].createInstance(Ci[ifaceName]);
+	 	}
+	 }
+	 
+	function TracingListener() {
+	}
+		
+	TracingListener.prototype =
+	{
+	    originalListener: null,
+	    receivedData: [],   // array for incoming data.
+	
+	    onDataAvailable: function(request, context, inputStream, offset, count)
+	    {
+	        var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1",
+	                "nsIBinaryInputStream");
+	        var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
+	        var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1",
+	                "nsIBinaryOutputStream");
+	           
+	        binaryInputStream.setInputStream(inputStream);
+	        storageStream.init(8192, count, null);
+	        binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
+	
+	        // Copy received data as they come.
+	        var data = binaryInputStream.readBytes(count);
+	        this.receivedData.push(data);
+	
+	        binaryOutputStream.writeBytes(data, count);
+	
+	        this.originalListener.onDataAvailable(request, context,
+	            storageStream.newInputStream(0), offset, count);
+	    },
+	
+	    onStartRequest: function(request, context) {
+	        this.originalListener.onStartRequest(request, context);
+	    },
+	
+	    onStopRequest: function(request, context, statusCode)
+	    {
+			try {
+				if (request.originalURI && piratequesting.baseURL == request.originalURI.prePath && request.originalURI.path.indexOf("/index.php?ajax=") == 0) {
+					// Get entire response
+					var date = request.getResponseHeader("Date");
+					var responseSource = this.receivedData.join();
+					piratequesting.ProcessRAWResponse(request.originalURI.spec, responseSource, date);
+					dump("\nProcessing: " + request.originalURI.spec + "\n");
+				}
+			} catch(e) { dumpError(e);}
+	        this.originalListener.onStopRequest(request, context, statusCode);
+	    },
+	
+	    QueryInterface: function (aIID) {
+	        if (aIID.equals(Ci.nsIStreamListener) ||
+	            aIID.equals(Ci.nsISupports)) {
+	            return this;
+	        }
+	        throw Components.results.NS_NOINTERFACE;
+	    }
+	}
 
-httpRequestObserver.prototype = {
-    observe: function(aSubject, aTopic, aData)
-    {
-	    if (aTopic == "http-on-examine-response") {
-	    	try {
-		        var newListener = new TracingListener();
-		        aSubject.QueryInterface(Ci.nsITraceableChannel);
-		        newListener.originalListener = aSubject.setNewListener(newListener);
-	    	} catch (e) {
+
+				hRO = {
+
+		observe: function(aSubject, aTopic, aData){
+			try {
+		    	if (aTopic == "http-on-examine-response") {
+        			var newListener = new TracingListener();
+        			aSubject.QueryInterface(Ci.nsITraceableChannel);
+        			newListener.originalListener = aSubject.setNewListener(newListener);
+    			}
+			} catch (e) {
 				dump("failed in making new listener\n");
 				dumpError(e);
+			
 			}
-	    }
-    },
-    register: function() {
-        var observerService = Components.classes["@mozilla.org/observer-service;1"]
-                              .getService(Components.interfaces.nsIObserverService);
-        observerService.addObserver(this, "http-on-examine-response", false);
-    },  
-    unregister: function() {
-    	var observerService = Components.classes["@mozilla.org/observer-service;1"]
-    	                      .getService(Components.interfaces.nsIObserverService);
-    	observerService.removeObserver(this, "http-on-examine-response");
-    },
-    QueryInterface : function (aIID)
-    {
-        if (aIID.equals(Ci.nsIObserver) ||
-            aIID.equals(Ci.nsISupports))
-        {
-            return this;
-        }
-
-        throw Components.results.NS_NOINTERFACE;
-
-    }
-};
-
-//Helper function for XPCOM instanciation (from Firebug)
-function CCIN(cName, ifaceName) {
-    return Cc[cName].createInstance(Ci[ifaceName]);
-}
-
-// Copy response listener implementation.
-function TracingListener() {
-}
-
-TracingListener.prototype =
-{
-    originalListener: null,
-    receivedData: [],   // array for incoming data.
-
-    onDataAvailable: function(request, context, inputStream, offset, count)
-    {
-    	try {
-        var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1",
-                "nsIBinaryInputStream");
-        var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
-        var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1",
-                "nsIBinaryOutputStream");
-           
-        binaryInputStream.setInputStream(inputStream);
-        storageStream.init(8192, count, null);
-        binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
-
-        // Copy received data as they come.
-        var data = binaryInputStream.readBytes(count);
-        this.receivedData.push(data);
-
-        binaryOutputStream.writeBytes(data, count);
-
-        this.originalListener.onDataAvailable(request, context,
-            storageStream.newInputStream(0), offset, count);
-    	} catch (e) {
-			dump("failed in processing data\n");
-			dumpError(e);
+		},
+		QueryInterface: function(aIID){
+			if (aIID.equals(Ci.nsIObserver) ||
+			aIID.equals(Ci.nsISupports)) {
+				return this;
+			}
+			
+			throw Components.results.NS_NOINTERFACE;
+			
 		}
-    },
+	};
+		
 
-    onStartRequest: function(request, context) {
-        this.originalListener.onStartRequest(request, context);
-    },
+var observerService = Cc["@mozilla.org/observer-service;1"]
+    .getService(Ci.nsIObserverService);
 
-    onStopRequest: function(request, context, statusCode)
-    {
-        // Get entire response
-        var responseSource = this.receivedData.join();
-        dump(responseSource);
-        this.originalListener.onStopRequest(request, context, statusCode);
-    },
+observerService.addObserver(hRO,
+    "http-on-examine-response", false);
 
-    QueryInterface: function (aIID) {
-        if (aIID.equals(Ci.nsIStreamListener) ||
-            aIID.equals(Ci.nsISupports)) {
-            return this;
-        }
-        throw Components.results.NS_NOINTERFACE;
-    }
-}
-//var hro = new httpRequestObserver();
+	//Helper function for XPCOM instanciation (from Firebug)
 
-/*if (hro) {
-	hro.unregister();
-	hro = null;
-}*/
+
+
+
+	//var hro = new httpRequestObserver();
+
+	/*if (hro) {
+	 hro.unregister();
+	 hro = null;
+	 }*/
+} catch (e) { dumpError(e);}
