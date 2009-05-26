@@ -12,17 +12,28 @@
 	<script type="application/x-javascript">
 		var observer;
 		showPQSBStyle();
+
 		window.addEventListener("load", function(e) {
-					observer = new overlayObserver();
+			try {
+
+		observer = new overlayObserver();
 					piratequesting.sidebar.loadOverlays(observer);
-				}, false);
+			} catch (e) {
+				dumpError(e);
+			
+			}
+		
+					}, false);
 		window.addEventListener("unload", function(e) {
 					try {
 						if (observer) {
 							observer.unregister();
 							observer = null;
 						}
-
+						/*if (hRO) {
+							var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+							observerService.removeObserver(hRO, "http-on-examine-response");
+						}*/
 						piratequesting.sidebar = null;
 
 						hidePQSBStyle();
