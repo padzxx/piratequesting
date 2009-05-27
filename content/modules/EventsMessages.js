@@ -7,6 +7,24 @@ var piratequesting = top.piratequesting;
 piratequesting.EventsMessages = function() {
 	var events = 0;
 	var messages = 0;
+	
+	function publish() {
+		var msg_num, events_num;
+		if (piratequesting.sidebar) {
+			if (msg_num = sidebar.contentDocument
+					.getElementById('msg_num')) {
+				msg_num.value = messages;
+				msg_num.setAttribute('value', messages);
+			}
+			if (events_num = sidebar.contentDocument
+					.getElementById('events_num')) {
+				events_num.value = events;
+				events_num.setAttribute('value', events);
+			}
+		}
+	
+	}
+	
 	return /** @lends piratequesting.EventsMessages */{
 		/**
 		 * 
@@ -27,25 +45,31 @@ piratequesting.EventsMessages = function() {
 					if (evts) {
 						events = evts.firstChild.firstChild.nodeValue.toNumber();
 					}
+					
 				}
-
-				var msg_num, events_num;
-				if (piratequesting.sidebar) {
-					if (msg_num = sidebar.contentDocument
-							.getElementById('msg_num')) {
-						msg_num.value = messages;
-						msg_num.setAttribute('value', messages);
-					}
-					if (events_num = sidebar.contentDocument
-							.getElementById('events_num')) {
-						events_num.value = events;
-						events_num.setAttribute('value', events);
-					}
-				}
+				publish();
 			} catch (error) {
-				alert(getErrorString(error));
+				dumpError(error);
 			}
 		},
+		
+		processRaw : function (text) {
+			try{
+				//expect xml doc here 
+				dump(text+"\n");
+				dump("\nProcessing Events and Messages");
+					var parser=new DOMParser();
+  					var doc=parser.parseFromString(text,"text/xml");
+					messages = doc.getElementsByTagName("user_messages")[0].childnodes[1].data;
+					events = doc.getElementsByTagName("user_events")[0].childnodes[1].data;
+					//events = doc.evaluate("//user_events", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).firstChild.data.toNumber();
+					dump("\nEvents: " + events + "\t\tMessages: "+ messages);
+				publish();
+			} catch (error) {
+				dumpError(error);
+			}
+		},
+		
 		openMessages: function() {
 			openAndReuseOneTabPerURL(piratequesting.baseURL+'/index.php?on=mailbox');
 		},
@@ -78,6 +102,8 @@ piratequesting.EventsMessages = function() {
 	}
 }();
 piratequesting.addLoadProcess("", piratequesting.EventsMessages.process);
+
+piratequesting.addRawProcessor(/index.php\?ajax=events_ajax&action=all_status_update/,piratequesting.EventsMessages.processRaw)
 
 if (!mainWindow)
 	var mainWindow = window
