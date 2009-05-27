@@ -146,7 +146,7 @@ var piratequesting = function () {
 			}
 		},
 		
-		addRAWProcessor : function (pattern, func) {
+		addRawProcessor : function (pattern, func) {
 			try {
 				this.PQRAWProcessorCollection.push(new PageProcess(pattern, func));
 			} catch (e) {
@@ -198,13 +198,14 @@ var piratequesting = function () {
 			
 		},
 		
-		ProcessRAWResponse :  function(url, htmlText, requestTime) {
-			dump("processing raw processors");
+		ProcessRawResponse :  function(url, text, requestTime) {
+			dump("\nprocessing raw processors\n");
 			var curProc;
 			//then run the ajax response processors - at this time only the captcha code stuff 
 			for (var i = 0, len = piratequesting.PQRAWProcessorCollection.length; i < len; i++) {
+				dump("Proc: " + i + "\n");
 				curProc = piratequesting.PQRAWProcessorCollection[i];
-				curProc.run(url, doc,requestTime);
+				curProc.run(url, text,null,requestTime);
 			}
 		
 		},
@@ -606,8 +607,8 @@ try {
 					// Get entire response
 					var date = request.getResponseHeader("Date");
 					var responseSource = this.receivedData.join();
-					piratequesting.ProcessRAWResponse(request.originalURI.spec, responseSource, date);
-					dump("\nProcessing: " + request.originalURI.spec + "\n");
+					piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date);
+					//dump("\nProcessing: " + request.originalURI.spec + "\n");
 				}
 			} catch(e) { dumpError(e);}
 	        this.originalListener.onStopRequest(request, context, statusCode);
@@ -635,7 +636,6 @@ hRO = {
         			//var context = TabWatcher.getContextByWindow(win);
     			}
 			} catch (e) {
-				dump("failed in making new listener\n");
 				dumpError(e);
 			
 			}
