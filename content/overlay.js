@@ -467,36 +467,33 @@ piratequesting.overlayRegistry = function() {
 	}
 	
 	function overlay(tabid, tabpanelid, overlayFile) {
+		var tabid = tabid;
+		var tabpanelid = tabpanelid;
+		var overlayFile = overlayFile;
+		var added = false;
 
-		var nfunc = function(tabid, tabpanelid, overlayFile) {
-			var tabid = tabid;
-			var tabpanelid = tabpanelid;
-			var overlayFile = overlayFile;
-			var added = false;
-
-			return {
-				toString : function() {
-					return "tabid: " + tabid + "\ntabpanelid: " + tabpanelid
-							+ "\noverlayFile: " + overlayFile;
-				},
-				getTabId : function() {
-					return tabid;
-				},
-				getTabPanelId : function() {
-					return tabpanelid;
-				},
-				getOverlayFile : function() {
-					return overlayFile;
-				},
-				getAdded : function() {
-					return added;
-				},
-				setAdded : function(val) {
-					added = !!val; // ensure boolean
-				}
+		return {
+			toString : function() {
+				return "tabid: " + tabid + "\ntabpanelid: " + tabpanelid
+						+ "\noverlayFile: " + overlayFile;
+			},
+			getTabId : function() {
+				return tabid;
+			},
+			getTabPanelId : function() {
+				return tabpanelid;
+			},
+			getOverlayFile : function() {
+				return overlayFile;
+			},
+			getAdded : function() {
+				return added;
+			},
+			setAdded : function(val) {
+				added = !!val; // ensure boolean
 			}
-		}(tabid, tabpanelid, overlayFile);
-		return nfunc;
+		}
+	
 
 	}
 
@@ -626,7 +623,7 @@ try {
 	}
 
 
-				hRO = {
+hRO = {
 
 		observe: function(aSubject, aTopic, aData){
 			try {
@@ -634,6 +631,8 @@ try {
         			var newListener = new TracingListener();
         			aSubject.QueryInterface(Ci.nsITraceableChannel);
         			newListener.originalListener = aSubject.setNewListener(newListener);
+        			//var tabId = Firebug.getTabIdForWindow(win);
+        			//var context = TabWatcher.getContextByWindow(win);
     			}
 			} catch (e) {
 				dump("failed in making new listener\n");
@@ -649,7 +648,82 @@ try {
 			
 			throw Components.results.NS_NOINTERFACE;
 			
-		}
+		},
+		/** following taken from firebug - slightly modified */
+		getWindowForRequest : function(request) 
+		{
+		    var webProgress = hRO.getRequestWebProgress(request);
+		    try {
+		        if (webProgress)
+		            return webProgress.DOMWindow;
+		    }
+		    catch (ex) {
+		    }
+
+		    return null;
+		},
+
+		getRequestWebProgress : function(request) 
+		{
+		    try
+		    {
+		        if (request.notificationCallbacks)
+		            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
+		    } catch (exc) {}
+
+		    try
+		    {
+		        if (request.loadGroup && request.loadGroup.groupObserver)
+		            return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
+		    } catch (exc) {}
+
+		    return null;
+		},
+		getRootWindow : function(win)
+		{
+		    for (; win; win = win.parent)
+		    {
+		        if (!win.parent || win == win.parent || !(win.parent instanceof Window) )
+		            return win;
+		    }
+		    return null;
+		},
+		getTabIdForWindow: function(aWindow)
+	    {
+	        aWindow = hRO.getRootWindow(aWindow);
+
+	        if (!aWindow || !this.tabBrowser.getBrowserIndexForDocument)
+	            return null;
+
+	        try {
+	            var targetDoc = aWindow.document;
+
+	            var tab = null;
+	            var targetBrowserIndex = this.tabBrowser.getBrowserIndexForDocument(targetDoc);
+
+	            if (targetBrowserIndex != -1)
+	            {
+	                tab = this.tabBrowser.tabContainer.childNodes[targetBrowserIndex];
+	                return tab.linkedPanel;
+	            }
+	        } catch (ex) {}
+
+	        return null;
+	    },
+		getContextByWindow: function(winIn)
+	    {
+	        var rootWindow = hRO.getRootWindow(winIn);
+
+	        if (rootWindow)
+	        {
+	            for (var i = 0; i < contexts.length; ++i)
+	            {
+	                var context = contexts[i];
+	                if (context.window == rootWindow)
+	                    return context;
+	            }
+	        }
+	    }
 	};
 		
 
