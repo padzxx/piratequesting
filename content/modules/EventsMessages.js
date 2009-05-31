@@ -56,13 +56,11 @@ piratequesting.EventsMessages = function() {
 		processRaw : function (text) {
 			try{
 				//expect xml doc here 
-				dump(text+"\n");
 				dump("\nProcessing Events and Messages");
 					var parser=new DOMParser();
   					var doc=parser.parseFromString(text,"text/xml");
-					messages = doc.getElementsByTagName("user_messages")[0].childnodes[1].data;
-					events = doc.getElementsByTagName("user_events")[0].childnodes[1].data;
-					//events = doc.evaluate("//user_events", doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).firstChild.data.toNumber();
+					messages = doc.evaluate("//user_messages", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					events = doc.evaluate("//user_events", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
 					dump("\nEvents: " + events + "\t\tMessages: "+ messages);
 				publish();
 			} catch (error) {
