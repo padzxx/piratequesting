@@ -555,6 +555,17 @@ piratequesting.overlayRegistry = function() {
 	}
 }();
 try {
+	
+	function isXHR(request)
+	{
+	    try {
+	        if (request.notificationCallbacks)
+	            return (request.notificationCallbacks instanceof XMLHttpRequest);
+	    }
+	    catch (exc) {
+	    }
+	    return false;
+	}
 
 	if (typeof Cc == "undefined") {
 		var Cc = Components.classes;
@@ -567,48 +578,51 @@ try {
 	 }
 	 
 	function TracingListener() {
+		//this.receivedData = [];
 	}
 		
 	TracingListener.prototype =
 	{
 	    originalListener: null,
-	    receivedData: [],   // array for incoming data.
+	    receivedData: null,   // array for incoming data.
 	
 	    onDataAvailable: function(request, context, inputStream, offset, count)
 	    {
-	        var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1",
+	       var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1",
 	                "nsIBinaryInputStream");
 	        var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
-	        var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1",
-	                "nsIBinaryOutputStream");
-	           
 	        binaryInputStream.setInputStream(inputStream);
 	        storageStream.init(8192, count, null);
+	        
+			var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1",
+	                "nsIBinaryOutputStream");
+	           
 	        binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
 	
-	        // Copy received data as they come.
+	        // Copy received data as they come.*/
 	        var data = binaryInputStream.readBytes(count);
+			//var data = inputStream.readBytes(count);
+			
 	        this.receivedData.push(data);
 	
 	        binaryOutputStream.writeBytes(data, count);
-	
-	        this.originalListener.onDataAvailable(request, context,
-	            storageStream.newInputStream(0), offset, count);
+	        this.originalListener.onDataAvailable(request, context,storageStream.newInputStream(0), offset, count);
 	    },
 	
 	    onStartRequest: function(request, context) {
-	        this.originalListener.onStartRequest(request, context);
+			this.receivedData = [];
+			this.originalListener.onStartRequest(request, context);
 	    },
 	
 	    onStopRequest: function(request, context, statusCode)
 	    {
 			try {
 				if (request.originalURI && piratequesting.baseURL == request.originalURI.prePath && request.originalURI.path.indexOf("/index.php?ajax=") == 0) {
-					// Get entire response
+					
+					dump("\nProcessing: " + request.originalURI.spec + "\n");
 					var date = request.getResponseHeader("Date");
 					var responseSource = this.receivedData.join();
 					piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date);
-					//dump("\nProcessing: " + request.originalURI.spec + "\n");
 				}
 			} catch(e) { dumpError(e);}
 	        this.originalListener.onStopRequest(request, context, statusCode);
@@ -624,22 +638,23 @@ try {
 	}
 
 
-hRO = {
+	hRO = {
 
 		observe: function(aSubject, aTopic, aData){
 			try {
 		    	if (aTopic == "http-on-examine-response") {
-        			var newListener = new TracingListener();
-        			aSubject.QueryInterface(Ci.nsITraceableChannel);
-        			newListener.originalListener = aSubject.setNewListener(newListener);
-        			//var tabId = Firebug.getTabIdForWindow(win);
-        			//var context = TabWatcher.getContextByWindow(win);
+					if (aSubject.originalURI && piratequesting.baseURL == aSubject.originalURI.prePath && aSubject.originalURI.path.indexOf("/index.php?ajax=") == 0) {
+						var newListener = new TracingListener();
+        				aSubject.QueryInterface(Ci.nsITraceableChannel);
+        				newListener.originalListener = aSubject.setNewListener(newListener);
+					}
     			}
 			} catch (e) {
 				dumpError(e);
 			
 			}
 		},
+		
 		QueryInterface: function(aIID){
 			if (aIID.equals(Ci.nsIObserver) ||
 			aIID.equals(Ci.nsISupports)) {
@@ -649,99 +664,14 @@ hRO = {
 			throw Components.results.NS_NOINTERFACE;
 			
 		},
-		/** following taken from firebug - slightly modified */
-		getWindowForRequest : function(request) 
-		{
-		    var webProgress = hRO.getRequestWebProgress(request);
-		    try {
-		        if (webProgress)
-		            return webProgress.DOMWindow;
-		    }
-		    catch (ex) {
-		    }
-
-		    return null;
-		},
-
-		getRequestWebProgress : function(request) 
-		{
-		    try
-		    {
-		        if (request.notificationCallbacks)
-		            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
-		    } catch (exc) {}
-
-		    try
-		    {
-		        if (request.loadGroup && request.loadGroup.groupObserver)
-		            return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
-		    } catch (exc) {}
-
-		    return null;
-		},
-		getRootWindow : function(win)
-		{
-		    for (; win; win = win.parent)
-		    {
-		        if (!win.parent || win == win.parent || !(win.parent instanceof Window) )
-		            return win;
-		    }
-		    return null;
-		},
-		getTabIdForWindow: function(aWindow)
-	    {
-	        aWindow = hRO.getRootWindow(aWindow);
-
-	        if (!aWindow || !this.tabBrowser.getBrowserIndexForDocument)
-	            return null;
-
-	        try {
-	            var targetDoc = aWindow.document;
-
-	            var tab = null;
-	            var targetBrowserIndex = this.tabBrowser.getBrowserIndexForDocument(targetDoc);
-
-	            if (targetBrowserIndex != -1)
-	            {
-	                tab = this.tabBrowser.tabContainer.childNodes[targetBrowserIndex];
-	                return tab.linkedPanel;
-	            }
-	        } catch (ex) {}
-
-	        return null;
-	    },
-		getContextByWindow: function(winIn)
-	    {
-	        var rootWindow = hRO.getRootWindow(winIn);
-
-	        if (rootWindow)
-	        {
-	            for (var i = 0; i < contexts.length; ++i)
-	            {
-	                var context = contexts[i];
-	                if (context.window == rootWindow)
-	                    return context;
-	            }
-	        }
-	    }
 	};
 		
 
-var observerService = Cc["@mozilla.org/observer-service;1"]
-    .getService(Ci.nsIObserverService);
-
-observerService.addObserver(hRO,
-    "http-on-examine-response", false);
-
-	//Helper function for XPCOM instanciation (from Firebug)
-
-
-
-
-	//var hro = new httpRequestObserver();
-
-	/*if (hro) {
-	 hro.unregister();
-	 hro = null;
-	 }*/
+	var observerService = Cc["@mozilla.org/observer-service;1"]
+	    .getService(Ci.nsIObserverService);
+	
+	observerService.addObserver(hRO,
+	    "http-on-examine-response", false);
+	
 } catch (e) { dumpError(e);}
+
