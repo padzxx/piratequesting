@@ -14,6 +14,7 @@ var sidebar = sidebar || mainWindow.document.getElementById("sidebar");
  */
 function Attribute(aValue) {
 
+	dump("\ncreating new attribute");
 	/**
 	 * Attribute value
 	 * 
@@ -58,6 +59,7 @@ function Attribute(aValue) {
  */
 function Stat(currentValue, maxValue) {
 
+	dump("\ncreating new stat");
 	/**
 	 * Current value of Stat
 	 * @type Number
@@ -150,6 +152,7 @@ piratequesting.Player = function() {
 		if (piratequesting.sidebar) {
 			if (sbcd.getElementById('Player_tabpanel') && sbcd.getElementById('curhpval') && sbcd.getElementById('totalval')) {
 				sbcd.getElementById('curhpval').value = String(stats.hp.getCurrent()).addCommas();
+				
 				sbcd.getElementById('maxhpval').value = String(stats.hp.getMax()).addCommas();
 				sbcd.getElementById('curawakeval').value = String(stats.awake.getCurrent()).addCommas();
 				sbcd.getElementById('maxawakeval').value = String(stats.awake.getMax()).addCommas();
@@ -203,15 +206,11 @@ piratequesting.Player = function() {
 						value = /([\d.,]+)/.exec(v.parentNode.lastChild.nodeValue);
 						attributes[sname].setValue(value[1]);
 					}
-					//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role").length);
-					
 					
 					name = doc.evaluate('string(id("profile_info")//div[@class="user_role"][1]//a[last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue;
-					//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role")[0].firstChild.nodeValue);
 					var lp = /lvl:\D+(\d+)\D+(\d+)/.exec(doc.evaluate('string(id("profile_info")//div[@class="user_role"][last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
 					level = lp[1];
 					progress = lp[2];
-					//*/
 					publish();
 				} else if(piratequesting.baseTheme == "default") {
 					//attributes are not available in the default theme, so they are omitted here.
@@ -228,13 +227,8 @@ piratequesting.Player = function() {
 					stats.energy.setCurrent(energydata[0]);
 					stats.energy.setMax(energydata[1]);
 					name = doc.evaluate('string(id("profilebox")//div[@class="user_role"][1]//a[last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue;
-					//alert(getChildrenByClassName(doc.getElementById("profile_info"),"user_role")[0].firstChild.nodeValue);
-					//var lp = /lvl:\D+(\d+)\D+(\d+)/.exec(doc.evaluate('string(id("profile_info")//div[@class="user_role"][last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
 					level = doc.evaluate('substring-after(string(id("header_user_level")),"Level ")', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
-					//lp[1];
 					progress = Math.round(eval(doc.evaluate('string(id("header_user_level_container")/@title)', doc, null, XPathResult.STRING_TYPE, null).stringValue) * 1000) / 10; 
-					//lp[2];
-					//*/
 					publish();
 				}
 				
@@ -246,10 +240,17 @@ piratequesting.Player = function() {
 		},
 		processTrainPage: function (doc) {
 			if (piratequesting.baseTheme == "default") {
-				attributes.strength.setValue(doc.evaluate('string(id("str_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
-				attributes.defense.setValue(doc.evaluate('string(id("def_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
-				attributes.speed.setValue(doc.evaluate('string(id("spd_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas());
-				publish();
+				var str = doc.evaluate('string(id("str_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+				var def = doc.evaluate('string(id("def_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+				var spe = doc.evaluate('string(id("spd_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+				
+				if (str && def && spe) { /* if all are non-zero/non-null */
+					attributes.strength.setValue(str);
+					attributes.defense.setValue(def);
+					attributes.speed.setValue(spe);
+					publish();
+				}
+				
 			}
 
 		},
@@ -262,10 +263,42 @@ piratequesting.Player = function() {
 		},
 		getAttribute : function (attrName) {
 			return attributes[statName]; 
+		},
+		processRawStatus : function (text) {
+			try{
+				//expect xml doc here 
+					var parser=new DOMParser();
+  					var doc=parser.parseFromString(text,"text/xml");
+					//messages = doc.evaluate("//user_messages", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					//events = doc.evaluate("//user_events", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					//dump("\nEvents: " + events + "\t\tMessages: "+ messages);
+					level = doc.evaluate("//user_level", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					progress = doc.evaluate("//xp", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					
+					
+				publish();
+			} catch (error) {
+				dumpError(error);
+			}
+		},
+		processRawTrain : function (text,url,data) {
+			/*try{
+				//expect xml doc here 
+				dump("\nProcessing Events and Messages");
+					var parser=new DOMParser();
+  					var doc=parser.parseFromString(text,"text/xml");
+					messages = doc.evaluate("//user_messages", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					events = doc.evaluate("//user_events", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					dump("\nEvents: " + events + "\t\tMessages: "+ messages);
+				publish();
+			} catch (error) {
+				dumpError(error);
+			}*/
 		}
-		
 	}
 }();
 
-piratequesting.addLoadProcess("", piratequesting.Player.process);
-piratequesting.addLoadProcess(/index.php?on=train$index.php?on=train&|/, piratequesting.Player.processTrainPage);
+piratequesting.addLoadProcess("", piratequesting.Player.process, piratequesting.Player);
+piratequesting.addLoadProcess(/index.php\?on=train/, piratequesting.Player.processTrainPage, piratequesting.Player);
+piratequesting.addRawProcessor(/index.php\?ajax=events_ajax&action=all_status_update/,piratequesting.Player.processRawStatus,piratequesting.Player);
+piratequesting.addRawProcessor(/index.php\?ajax=train/,piratequesting.Player.processRawTrain,piratequesting.Player);

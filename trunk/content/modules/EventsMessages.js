@@ -56,12 +56,12 @@ piratequesting.EventsMessages = function() {
 		processRaw : function (text) {
 			try{
 				//expect xml doc here 
-				dump("\nProcessing Events and Messages");
+				//dump("\nProcessing Events and Messages");
 					var parser=new DOMParser();
   					var doc=parser.parseFromString(text,"text/xml");
 					messages = doc.evaluate("//user_messages", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
 					events = doc.evaluate("//user_events", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
-					dump("\nEvents: " + events + "\t\tMessages: "+ messages);
+					//dump("\nEvents: " + events + "\t\tMessages: "+ messages);
 				publish();
 			} catch (error) {
 				dumpError(error);
@@ -101,7 +101,7 @@ piratequesting.EventsMessages = function() {
 }();
 piratequesting.addLoadProcess("", piratequesting.EventsMessages.process);
 
-piratequesting.addRawProcessor(/index.php\?ajax=events_ajax&action=all_status_update/,piratequesting.EventsMessages.processRaw)
+piratequesting.addRawProcessor(/index.php\?ajax=events_ajax&action=all_status_update/,piratequesting.EventsMessages.processRaw,piratequesting.EventsMessages);
 
 if (!mainWindow)
 	var mainWindow = window
