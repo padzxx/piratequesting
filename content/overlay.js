@@ -198,14 +198,12 @@ var piratequesting = function () {
 			
 		},
 		
-		ProcessRawResponse :  function(url, text, requestTime) {
-			dump("\nprocessing raw processors\n");
+		ProcessRawResponse :  function(url, text, requestTime, requestData) {
 			var curProc;
 			//then run the ajax response processors - at this time only the captcha code stuff 
 			for (var i = 0, len = piratequesting.PQRAWProcessorCollection.length; i < len; i++) {
-				dump("Proc: " + i + "\n");
 				curProc = piratequesting.PQRAWProcessorCollection[i];
-				curProc.run(url, text,null,requestTime);
+				curProc.run(url, text,null,requestTime,requestData);
 			}
 		
 		},
@@ -619,10 +617,21 @@ try {
 			try {
 				if (request.originalURI && piratequesting.baseURL == request.originalURI.prePath && request.originalURI.path.indexOf("/index.php?ajax=") == 0) {
 					
-					dump("\nProcessing: " + request.originalURI.spec + "\n");
+					//for(opt in request) {
+					//	dump("\nrequest."+opt);
+					//}
+					//dump(request.responseText);
+					
+					var data = null;
+					if(request.requestMethod.toLowerCase() == "post") {
+						data = ((String)(request.uploadStream.data)).parseQuery();
+							
+					}
+					
+					//dump("\nProcessing: " + request.originalURI.spec + "\n");
 					var date = request.getResponseHeader("Date");
 					var responseSource = this.receivedData.join();
-					piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date);
+					piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date, data);
 				}
 			} catch(e) { dumpError(e);}
 	        this.originalListener.onStopRequest(request, context, statusCode);

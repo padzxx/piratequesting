@@ -4,12 +4,19 @@
  * @param {RegExp} pattern
  * @param {Function} func
  */
-function PageProcess(pattern, func) {
+function PageProcess(pattern, func, context) {
 	/**
 	 * @private
 	 * @type RegExp
 	 */
 	var _pattern;
+	
+	var _context;
+	if (context) {
+		_context = context;
+	} else {
+		_context = this;
+	}
 	/**
 	 * callback function
 	 * @private 
@@ -40,6 +47,9 @@ function PageProcess(pattern, func) {
 	   * @param {mixed} param
 	   */
 	  run: function(input, param, requestNumber, requestTime) {
+	  	var args = Array.prototype.slice.call(arguments,4);
+	  	//dump("\n\ninput: " + input + "\nargs: " + args.length);
+
 	  	var lr = _func.lastRequest;
 	  	var lrt = _func.lastRequestTime;
 	  	if (typeof lr == "undefined") _func.lastRequest = 0;
@@ -48,7 +58,12 @@ function PageProcess(pattern, func) {
 	    	if (!requestNumber || requestTime > _func.lastRequestTime || requestNumber > _func.lastRequest) {
 	    		if (requestNumber) _func.lastRequest = requestNumber;
 	    		if (requestTime) _func.lastRequestTime = requestTime;
-	    		_func(param,input);
+	    		args.unshift(param,input);
+	    		/*for (part in args) {
+  					dump ("\nargs." + part + ":\t" + args[part]);
+  				}*/
+	  	
+	    		_func.apply(_context,args);
 	    	} 
 	    }
 	  },
@@ -58,7 +73,7 @@ function PageProcess(pattern, func) {
 	   * @param {mixed} param
 	   */
 	  force: function(input,param) {
-	    _func(param,input);
+	    _func.call(_context,param,input);
 	  }
   }
 }

@@ -346,10 +346,10 @@ piratequesting.InventoryManager = function() {
 			} catch(e) {
 				dumpError(e);
 			}
-			dump("\n\nCurrent Inventory:\n"+piratequesting.InventoryManager+"\nTotal Number of items:");
-			dump(inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");
+			//dump("\n\nCurrent Inventory:\n"+piratequesting.InventoryManager+"\nTotal Number of items:");
+			//dump(inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");
 			write();
-			dump("firing event");
+			//dump("firing event");
 			document.fire('piratequesting:InventoryUpdated');
 			
 		},
@@ -428,6 +428,33 @@ piratequesting.InventoryManager = function() {
 			} 
 		},
 		
+		processRaw:function(text, url, data) {
+			try{
+				var parser=new DOMParser();
+  				var doc=parser.parseFromString(text,"text/xml");
+  				//dump(text+"\n"+data+"\n");
+  				
+  				/*for (part in data) {
+  					dump ("\ndata." + part + ":\t" + data[part]);
+  				}*/
+  				if (data.action == 'use') {
+  					var itemID = data.id;
+  					var left = doc.evaluate("//left", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+  					var item_check = inventory.evaluate("//item[@action_id="+itemID+"]",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+					if (item_check.snapshotLength > 0 ) {
+						var item = item_check.snapshotItem(0); 
+						item.setAttribute("quantity",left);
+						document.fire('piratequesting:InventoryUpdated');
+					} else {
+							piratequesting.InventoryManager.checkInventory();
+	  				}
+				}
+  			} catch (error) {
+				dumpError(error);
+			}
+		
+		},
+		
 		toString:function() {
 			return ((new XMLSerializer()).serializeToString(inventory));
 		}
@@ -438,4 +465,5 @@ piratequesting.InventoryManager = function() {
 piratequesting.addLoadProcess(new RegExp("index.php\\?on=inventory",""),piratequesting.InventoryManager.processInventory);
 piratequesting.addLoadProcess(new RegExp("index.php\\?on=item_guide",""),piratequesting.InventoryManager.processItemGuide);
 piratequesting.addLoadProcess(new RegExp("index.php(?!\\?on=item_guide|\\?on=inventory)",""),piratequesting.InventoryManager.process);
+piratequesting.addRawProcessor(/index.php\?ajax=items/,piratequesting.InventoryManager.processRaw, piratequesting.InventoryManager);
 }
