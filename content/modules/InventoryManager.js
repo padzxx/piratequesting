@@ -145,15 +145,16 @@ piratequesting.InventoryManager = function() {
 			var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
 			var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost: 0};
 			var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+			var item;
 			if (item_check.snapshotLength > 0 ) {
-				var item = item_check.snapshotItem(0); 
+				item = item_check.snapshotItem(0); 
 				item.setAttributes(attributes);
 			} else {
-				var item = inventory.newElement("item",attributes);
+				item = inventory.newElement("item",attributes);
 				inventory.documentElement.appendChild(item);
 
 			}
-			return true;					
+			return item;					
 		} else { dumpError("Error getting points for inventory\n"); return false; }
 	}
 	
@@ -422,9 +423,10 @@ piratequesting.InventoryManager = function() {
 		},
 		
 		process:function(doc) {
-			if (setCoinsPoints(doc)) {	
+			var item;
+			if (item = setCoinsPoints(doc)) {	
 				write();
-				document.fire('piratequesting:InventoryPointsUpdated');
+				document.fire('piratequesting:InventoryPointsUpdated',item);
 			} 
 		},
 		
@@ -444,7 +446,7 @@ piratequesting.InventoryManager = function() {
 					if (item_check.snapshotLength > 0 ) {
 						var item = item_check.snapshotItem(0); 
 						item.setAttribute("quantity",left);
-						document.fire('piratequesting:InventoryUpdated');
+						document.fire('piratequesting:InventoryUpdated', item);
 					} else {
 							piratequesting.InventoryManager.checkInventory();
 	  				}
