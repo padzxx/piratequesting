@@ -526,12 +526,13 @@ Document.prototype.newElement = function (tag, attributes) {
  * 
  * @param {String} event_name
  */
-Document.prototype.fire = function (event_name,target) {
-		var evt = this.createEvent("MouseEvents");
-			evt.initMouseEvent(event_name,false,true, window,
-   				0, 0, 0, 0, 0, false, false, false, false, 0, target);
+Document.prototype.fire = function (event_name,target, detail) {
+	var detail = detail || 0; 
+	var evt = this.createEvent("MouseEvents");
+	evt.initMouseEvent(event_name,false,true, window,
+			detail, 0, 0, 0, 0, false, false, false, false, 0, target);
 
-			this.dispatchEvent(evt);
+	this.dispatchEvent(evt);
 }
 
 document.fire = Document.prototype.fire;

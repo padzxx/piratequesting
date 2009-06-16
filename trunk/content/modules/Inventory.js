@@ -12,7 +12,8 @@ piratequesting.Inventory = function() {
 	 * @function
 	 */
 	function checkInventory() {
-		var sbcd = sidebar.contentDocument;	
+		var sbcd = sidebar.contentDocument;
+		var ajax;
 		sbcd.getElementById('invmeter').setAttribute('value',0);
 		ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { 
 				onSuccess: enable, 
@@ -151,8 +152,8 @@ piratequesting.Inventory = function() {
 		return container;
 	};
 	
-	var forced__points_update_count = 0;
-	function updateInventoryPoints(fromEvent) {
+	//var forced__points_update_count = 0;
+	function updateInventoryItem(event) {
 /*		if (!fromEvent) {
 			if (++forced__points_update_count >= 2) return;
 		} else {
@@ -164,7 +165,12 @@ piratequesting.Inventory = function() {
 		//	setTimeout(updateInventoryList,3000);
 			return;
 		}
-
+		
+		if (!event || !event.relatedTarget){
+			dumpError("Failed to update inventory item. Related target not found.\n");
+			return false;
+		}
+		
 		
 		/**
 		 * @type {Element}
@@ -177,27 +183,41 @@ piratequesting.Inventory = function() {
 		//but, anyways, create a new one　and insert in the beginning of the list
 		
 		if (!inventoryList.hasChildNodes()) {
-			updateInventoryList(fromEvent);
-			return;
+			updateInventoryList();
+			return false;
 		}
-		var pts = sbcd.getElementById("ILpoints");
-		var points = inventory.evaluate("/inventory/item[@id='points' and @quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-		if (points.snapshotLength > 0 ) {
-			var newpts = newInventoryItem(points.snapshotItem(0), "points");
-		} else return;
-		if (pts) inventoryList.replaceChild(newpts,pts);
-		else inventoryList.insertBefore(newpts,inventoryList.firstChild);
+		
+		var item = event.relatedTarget;
+		
+		var ILitem = sbcd.getElementById("IL" + item.getAttribute('id'));
+		if (!ILitem) return false; //failed to find matching element
+		
+		var category = inventory.evaluate("ancestor::category", item, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+		var newItem;
+		if (category.snapshotLength > 0 ) {
+			newItem = newInventoryItem(item, category.snapshotItem(0).getAttribute("name"));
+			
+		} else { //this should be points. Might want to consider putting points in a points category and start treating it like everything else
+			newItem = newInventoryItem(item, "points");
+		}
+		inventoryList.replaceChild(newItem,ILitem);
+		//} else return;
+		
+		return true;
 	}
 	
 	
 	//var forced_update_count = 0;
-	function updateInventoryList(fromEvent) {
+	function updateInventoryList(event) {
 		/*if (!fromEvent) {
 			if (++forced_update_count >= 2) return;
 		} else {
 			forced_update_count = 0;
 		}*/
-		
+		if (event && event.relatedTarget) {
+			if (updateInventoryItem(event))
+				return;
+		}
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait a second and try again
 //			setTimeout(updateInventoryList,3000);
@@ -234,7 +254,8 @@ piratequesting.Inventory = function() {
 	function getPrices (cat, name) {
 		disable();
 		var url = (cat == "points") ? piratequesting.baseURL  + "/index.php?on=points_market" : piratequesting.baseURL 	+ "/index.php?ajax=item_market&category=" + cat;
-		var sbcd = sidebar.contentDocument;	
+		var sbcd = sidebar.contentDocument;
+		var ajax;
 		sbcd.getElementById('invmeter').setAttribute('value',0);
 		ajax = AjaxRequest(url, { 
 				onSuccess: function (http) { processPrices(name,http.responseText); }, 
@@ -249,7 +270,7 @@ piratequesting.Inventory = function() {
 		var pricelist = sbcd.getElementById("pricelist");
 		var stripex;
 		var doc = piratequesting.createDoc(text);
-		
+		var li;
 		if (name == "Points") {
 			if (doc.evaluate("boolean(descendant::h2[. = 'Points Market']|descendant::h1[. = 'Points Market'])", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 				//the following gets the quantity and price in one query so we have to account for that in the for-loop
@@ -317,7 +338,8 @@ piratequesting.Inventory = function() {
 		 */
 		returnItem : function(id) {
 			disable();
-			var sbcd = sidebar.contentDocument;	
+			var sbcd = sidebar.contentDocument;
+			var ajax;
 			sbcd.getElementById('invmeter').setAttribute('value',0);
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=return&id=" + id, { 
 					onSuccess: checkInventory, 
@@ -327,18 +349,18 @@ piratequesting.Inventory = function() {
 			});
 		},
 
-		process : function () {
+		process : function (event) {
 			inventory = piratequesting.InventoryManager.getInventory();
-			dump("updating inventory list");
+			//dump("updating inventory list");
 			try {
-				updateInventoryList(true);
+				updateInventoryList(event);
 			}catch(e) { dumpError(e); }
 		},
 		
-		processPoints : function () {
+		processPoints : function (event) {
 			inventory = piratequesting.InventoryManager.getInventory();
 			try {
-				updateInventoryPoints(true);
+				updateInventoryItem(event);
 			}catch(e) { dumpError(e); }
 		},
 		
@@ -586,9 +608,10 @@ piratequesting.Inventory = function() {
 			disable();
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
+			var ajax;
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items", { 
 						protocol: "post",
-						onSuccess: function() { enable(); AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory"); }, 
+						onSuccess: function() { enable(); /*AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory");*/ }, 
 						onFailure: function() { enable(); alert('Failed to use item.');}, 
 						onError: function() { enable(); alert('Error occurred when using item.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
@@ -625,6 +648,7 @@ piratequesting.Inventory = function() {
 			sbcd.getElementById('invmeter').setAttribute('value',0);
 			var qty = sbcd.getElementById("qtyin").value;
 			var id = sbcd.getElementById("item_id").value;
+			var ajax;
 
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=sell&id=" + id, { 
 						protocol: "post",
@@ -644,7 +668,8 @@ piratequesting.Inventory = function() {
 			var qty = sbcd.getElementById("qtyin").value;
 			var id = sbcd.getElementById("item_id").value;
 			var price = sbcd.getElementById("pricein").value;
-			var url = (id != "points") ? piratequesting.baseURL + "/index.php?on=inventory&action=market&id=" + id : piratequesting.baseURL + "/index.php?on=points_market";   
+			var url = (id != "points") ? piratequesting.baseURL + "/index.php?on=inventory&action=market&id=" + id : piratequesting.baseURL + "/index.php?on=points_market";
+			var ajax;
 
 			ajax = AjaxRequest(url, { 
 						protocol: "post",
@@ -665,5 +690,5 @@ piratequesting.Inventory = function() {
 	
 	}
 }();
-document.addEventListener("piratequesting:InventoryPointsUpdated",function(event){ piratequesting.Inventory.processPoints(); }, false);
-document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.Inventory.process(); }, false);
+document.addEventListener("piratequesting:InventoryPointsUpdated",function(event){ piratequesting.Inventory.processPoints(event); }, false);
+document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.Inventory.process(event); }, false);

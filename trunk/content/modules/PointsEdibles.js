@@ -137,7 +137,7 @@ piratequesting.PointsEdibles = function() {
 				var id = edilist.selectedItem.value;
 				ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items", { 
 						protocol: "post",
-						onSuccess: function() { --pending_edibles; enableEdibles(); AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory"); }, 
+						onSuccess: function() { --pending_edibles; enableEdibles(); /*AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory");*/ }, 
 						onFailure: function() { --pending_edibles; enableEdibles(); alert('Error returned by server.');}, 
 						onError: function() { --pending_edibles; enableEdibles(); alert('Error occurred when using Edibles.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('edimeter').setAttribute('value',http.readyState * 25); },
@@ -185,5 +185,5 @@ piratequesting.PointsEdibles = function() {
 	}
 }();
 
-document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.PointsEdibles.process(); }, false);
+document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.PointsEdibles.process(event); }, false);
 piratequesting.addLoadProcess(new RegExp("",""),piratequesting.PointsEdibles.processPoints);

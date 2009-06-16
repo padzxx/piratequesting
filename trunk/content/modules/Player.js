@@ -14,7 +14,6 @@ var sidebar = sidebar || mainWindow.document.getElementById("sidebar");
  */
 function Attribute(aValue) {
 
-	dump("\ncreating new attribute");
 	/**
 	 * Attribute value
 	 * 
@@ -59,7 +58,6 @@ function Attribute(aValue) {
  */
 function Stat(currentValue, maxValue) {
 
-	dump("\ncreating new stat");
 	/**
 	 * Current value of Stat
 	 * @type Number
