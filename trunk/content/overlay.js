@@ -553,27 +553,35 @@ piratequesting.overlayRegistry = function() {
 	}
 }();
 try {
-	
-	function isXHR(request)
-	{
-	    try {
-	        if (request.notificationCallbacks)
-	            return (request.notificationCallbacks instanceof XMLHttpRequest);
-	    }
-	    catch (exc) {
-	    }
-	    return false;
-	}
 
+	function isXHR(request){
+		try {
+			if (request.notificationCallbacks) 
+				return (request.notificationCallbacks instanceof XMLHttpRequest);
+		} 
+		catch (exc) {
+		}
+		return false;
+	}
+	
+	//largely from firebug. should refactor 
 	if (typeof Cc == "undefined") {
 		var Cc = Components.classes;
-		var Ci = Components.interfaces; 
+		var Ci = Components.interfaces;
 	}
 	if (typeof CCIN == "undefined") {
-	 	function CCIN(cName, ifaceName){
-	 		return Cc[cName].createInstance(Ci[ifaceName]);
-	 	}
-	 }
+		function CCIN(cName, ifaceName){
+			return Cc[cName].createInstance(Ci[ifaceName]);
+		}
+	}
+	if (typeof CCSV == "undefined") {
+		function CCSV(cName, ifaceName){
+			if (Cc[cName]) 
+				return Cc[cName].getService(Ci[ifaceName]); // if fbs fails to load, the error can be _CC[cName] has no properties
+			else 
+				dumpError("CCSV fails for cName:" + cName); 
+		};
+	}
 	 
 	function TracingListener() {
 		//this.receivedData = [];
@@ -624,7 +632,9 @@ try {
 					
 					var data = null;
 					if(request.requestMethod.toLowerCase() == "post") {
-						data = ((String)(request.uploadStream.data)).parseQuery();
+						var postText = this.readPostTextFromRequest(request,context);
+						if (postText)  
+							data = ((String)(postText)).parseQuery();
 							
 					}
 					
@@ -643,7 +653,59 @@ try {
 	            return this;
 	        }
 	        throw Components.results.NS_NOINTERFACE;
-	    }
+	    },
+		readPostTextFromRequest : function(request, context) {
+		    try
+		    {
+		        var is = request.QueryInterface(Ci.nsIUploadChannel).uploadStream;
+		        if (is)
+		        {
+		            var ss = is.QueryInterface(Ci.nsISeekableStream);
+		            var prevOffset;
+		            if (ss)
+		            {
+		                prevOffset = ss.tell();
+		                ss.seek(Ci.nsISeekableStream.NS_SEEK_SET, 0);
+		            }
+		
+		            // Read data from the stream..
+					var charset = "UTF-8";
+					var text = this.readFromStream(is, charset, true);
+		
+		            // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
+		            // since necko doesn't seek to 0 before reading (at lest not till 459384 is fixed).
+		            if (ss && prevOffset == 0) 
+		                ss.seek(Ci.nsISeekableStream.NS_SEEK_SET, 0);
+		
+		            return text;
+		        }
+				else {
+					dump("Failed to Query Interface for upload stream.\n");
+				}
+		    }
+		    catch(exc)
+		    {
+				dumpError(exc);
+		    }
+		
+		    return null;
+		},
+		readFromStream : function(stream, charset, noClose)	{
+			
+		    var sis = CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+		    sis.setInputStream(stream);
+		
+		    var segments = [];
+		    for (var count = stream.available(); count; count = stream.available())
+		        segments.push(sis.readBytes(count));
+		
+		    if (!noClose)
+		        sis.close();
+		
+		    var text = segments.join("");
+		    return text;
+		}
+		
 	}
 
 
@@ -657,7 +719,13 @@ try {
         				aSubject.QueryInterface(Ci.nsITraceableChannel);
         				newListener.originalListener = aSubject.setNewListener(newListener);
 					}
-    			}
+    			} /*else if(aTopic == "http-on-modify-request") {
+					if (aSubject.originalURI && piratequesting.baseURL == aSubject.originalURI.prePath && aSubject.originalURI.path.indexOf("/index.php?ajax=") == 0) {
+						var newListener = new TracingListener();
+						aSubject.QueryInterface(Ci.nsITraceableChannel);
+						newListener.originalListener = aSubject.setNewListener(newListener);
+					}
+				}*/
 			} catch (e) {
 				dumpError(e);
 			

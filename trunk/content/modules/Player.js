@@ -94,6 +94,12 @@ function Stat(currentValue, maxValue) {
 	this.getCurrent = function() {
 		return current;
 	}
+	
+	this.setPc = function(pcValue) {
+		var pc = pcValue/100;
+		//was Math.round but there were some cases where it would be 1 off... I can only assume they are doing ceil as well
+		current = Math.ceil(pc * max);
+	}
 	/**
 	 * @returns {Number}
 	 */
@@ -226,7 +232,7 @@ piratequesting.Player = function() {
 					stats.energy.setMax(energydata[1]);
 					name = doc.evaluate('string(id("profilebox")//div[@class="user_role"][1]//a[last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue;
 					level = doc.evaluate('substring-after(string(id("header_user_level")),"Level ")', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
-					progress = Math.round(eval(doc.evaluate('string(id("header_user_level_container")/@title)', doc, null, XPathResult.STRING_TYPE, null).stringValue) * 1000) / 10; 
+					progress = Math.round(eval(doc.evaluate('string(id("header_user_level_container")/@title)', doc, null, XPathResult.STRING_TYPE, null).stringValue) * 100); 
 					publish();
 				}
 				
@@ -273,6 +279,24 @@ piratequesting.Player = function() {
 					level = doc.evaluate("//user_level", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
 					progress = doc.evaluate("//xp", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
 					
+					function setAttrPc(val, stat) {
+						if (val !== null) {
+							val = val.toNumber();
+							stat.setPc(val);
+						}
+					}
+					var hp = doc.evaluate("//hp", doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					setAttrPc(hp, stats.hp);
+					
+					var awake = doc.evaluate("//awake", doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					setAttrPc(awake, stats.awake);
+					
+					var nerve = doc.evaluate("//nerve", doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					setAttrPc(nerve, stats.nerve);
+					
+					var energy = doc.evaluate("//energy", doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					setAttrPc(energy, stats.energy);
+					 
 					
 				publish();
 			} catch (error) {
