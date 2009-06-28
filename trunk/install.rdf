@@ -5,11 +5,11 @@
   <RDF:Description RDF:about="rdf:#$NQa4k"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    em:minVersion="3.0"
-                   em:maxVersion="3.5b4" />
+                   em:maxVersion="3.5rc3" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="{D71839DC-FCB4-436e-8D2C-690D2C742153}"
                    em:name="PirateQuesting"
-                   em:version="2.0b6"
+                   em:version="2.0b8"
                    em:creator="Jonathan Fingland"
                    em:description="Unofficial add-on for the browser game Pirate Quest found at www.piratequest.net"
                    em:homepageURL="http://pq.ashita.org"

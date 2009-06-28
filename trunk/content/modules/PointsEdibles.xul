@@ -60,7 +60,7 @@
 									</menulist>
 									<hbox align="center" pack="end">
 										<button type="A" label="Use" id="useedible1" maxwidth="40" onclick="piratequesting.PointsEdibles.useEdible(1);"/>
-										<button type="A" label="Use 5" id="useedible5" maxwidth="40" onclick="piratequesting.PointsEdibles.useEdible(5)"/>
+										<button type="A" label="Use Max" id="useediblemax" maxwidth="50" onclick="piratequesting.PointsEdibles.useEdible('max')"/>
 									</hbox>
 								</groupbox>
 								<box align="center" id="edicb" pack="center" type="hide" flex="1">
@@ -75,4 +75,7 @@
 							</stack>
 						</vbox>	
 					</tabpanel>
+						<script type="application/x-javascript">
+		piratequesting.PointsEdibles.process(true);	
+	</script> 
 </overlay>

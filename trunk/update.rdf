@@ -2,24 +2,24 @@
 <RDF:RDF xmlns:NS1="http://www.mozilla.org/2004/em-rdf#"
          xmlns:NC="http://home.netscape.com/NC-rdf#"
          xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Description RDF:about="rdf:#$TQa4k"
-                   NS1:version="2.0b5">
-    <NS1:targetApplication RDF:resource="rdf:#$WQa4k"/>
-  </RDF:Description>
   <RDF:Seq RDF:about="rdf:#$SQa4k">
     <RDF:li RDF:resource="rdf:#$TQa4k"/>
   </RDF:Seq>
   <RDF:Description RDF:about="urn:mozilla:extension:{D71839DC-FCB4-436e-8D2C-690D2C742153}"
-                   NS1:version="2.0b5"
-                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b5.xpi"
-                   NS1:signature="MIGTMA0GCSqGSIb3DQEBDQUAA4GBAAIwm65+5H5R0FmMsEHw6gH9w5LjriaRLa6aXB6fk5Ulix/fOvZbuaCN1vawNHP3TlPUqJ4dP1vgHnrkFg4zZWXX7oTBE8wB70LUVEh0XRVIjF06H1w2/AmZAIaIVMPI6GCZmj7hHmehc306+YREjCAIROaGwMII636f2FPT5h3L">
+                   NS1:version="2.0b7"
+                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b7.xpi"
+                   NS1:signature="MIGTMA0GCSqGSIb3DQEBDQUAA4GBAGwLP0ipo8ibS6YPyoF7gHeJIsZtz3Aq9kcuvizm7B9hYTTuC+3/KbaWlWtlKQMhhEnhcrvuoQ3bt5k5ptVh/qdk3cxQN69b9B+ltOQLJ3Dprpcnxyho+O/1uCwO0EoqR0unUp7syyENSNcWVLORFOzhxa4hlblJlBCSemiWYw8d">
     <NS1:updates RDF:resource="rdf:#$SQa4k"/>
+  </RDF:Description>
+  <RDF:Description RDF:about="rdf:#$TQa4k"
+                   NS1:version="2.0b7">
+    <NS1:targetApplication RDF:resource="rdf:#$WQa4k"/>
   </RDF:Description>
   <RDF:Description RDF:about="rdf:#$WQa4k"
                    NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    NS1:minVersion="3.0"
-                   NS1:maxVersion="3.1b3"
-                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b5.xpi"
-                   NS1:updateInfoURL="http://pq.ashita.org/update2.0b5.xhtml"
-                   NS1:updateHash="sha1:FF5C65C75BCF89AE735C539429138EA1B8011CE3" />
+                   NS1:maxVersion="3.5rc3"
+                   NS1:updateLink="http://pq.ashita.org/piratequesting2.0b7.xpi"
+                   NS1:updateInfoURL="http://pq.ashita.org/update2.0b7.xhtml"
+                   NS1:updateHash="sha1:D30A91DBB78199741890BA8B3C9BCD2D26BEBF93" />
 </RDF:RDF>

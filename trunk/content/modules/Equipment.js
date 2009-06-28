@@ -156,7 +156,8 @@ piratequesting.Equipment = function() {
 				onSuccess: function() { try { enable(); dump("\nInventory check succeeded.\n") } catch (error) {dump("\n" + getErrorString(error) + "\n");} }, 
 				onFailure: function() { enable(); alert('Failed to update Inventory.');}, 
 				onError: function() { enable(); alert('Error occurred when updating Inventory.');}, 
-				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); }
+				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); },
+					proc: true
 		});
 	}
 	
@@ -215,7 +216,8 @@ piratequesting.Equipment = function() {
 					onSuccess: enable, 
 					onFailure: function() { enable(); alert('Failed to unequip item.');}, 
 					onError: function() { enable(); alert('Error occurred when unequipping item.');}, 
-					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); }
+					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); },
+					proc: true
 			});
 		},
 
@@ -229,7 +231,8 @@ piratequesting.Equipment = function() {
 					onSuccess: enable, 
 					onFailure: function() { enable(); alert('Failed to equip item.');}, 
 					onError: function() { enable(); alert('Error occurred when equipping item.');}, 
-					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); }
+					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); },
+					proc: true
 			});
 		},
 

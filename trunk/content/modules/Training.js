@@ -18,30 +18,55 @@ piratequesting.Training = function() {
 	var ajax;
 
 	function getEnergy() {
-		disable();
-
-		// this one can't be async
-		// yes it can. pass the other function in as an argument
-
-		var url = piratequesting.baseURL + "/index.php?on=train";
-		var http = new XMLHttpRequest();
-		http.open("GET", url, false);
-		http.onerror = function(e) {
-			onError(e);
+		var energy = 0;
+		if (piratequesting.Player) {
+			energy = piratequesting.Player.getStat("energy").getCurrent();
+		
 		}
-		ajax = http;
-		// Send the proper header information along with the request
-		http.setRequestHeader("Connection", "close");
-		/*
-		 * http.onreadystatechange = function() { if (http.readyState == 4 &&
-		 * http.status == 200) { } }
-		 */
-		http.send(null);
-		var energyex = /<li id="EnergyAttrib"><strong>Energy:<\/strong> ([,0-9]+)\/[,0-9]+/;
-		var rt = http.responseText;
-		http = null;
-		enable();
-		return ((String)(energyex.exec(rt)[1])).stripCommas();
+		else {
+		
+			disable();
+			
+			// this one can't be async
+			// yes it can. pass the other function in as an argument
+			var energy, doc;
+			var url = piratequesting.baseURL + "/index.php?ajax=events_ajax&action=all_status_update";
+			ajax = AjaxRequest(url, {
+				protocol: "get",
+				onSuccess: function(http){
+					enable();
+					doc = http.responseXML;
+				},
+				onFailure: function(){
+					enable();
+					alert('Failed to get energy data.');
+				},
+				onError: function(){
+					enable();
+					alert('Error occurred when getting energy information.');
+				},
+				onStateChange: function(http){
+					var sbcd = sidebar.contentDocument;
+					sbcd.getElementById('trnmeter').setAttribute('value', http.readyState * 25);
+				},
+				params: params,
+				async: false
+			});
+			
+			// Send the proper header information along with the request
+			/*
+	 		* http.onreadystatechange = function() { if (http.readyState == 4 &&
+	 		* http.status == 200) { } }
+	 		*/
+			//http.send(null);
+			// = /<li id="EnergyAttrib"><strong>Energy:<\/strong> ([,0-9]+)\/[,0-9]+/;
+			//var rt = http.responseText;
+			//http = null;
+			energy = doc.evaluate("//energy", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+			
+			enable();
+		}
+		return energy;
 	}
 
 	function setChance(chance) {
@@ -70,6 +95,7 @@ piratequesting.Training = function() {
 	}
 
 	function disable() {
+		dump("Disabling training group...\n");
 		sidebar.contentDocument.getElementById('trngrp').setAttribute("type",
 				"cover");
 		sidebar.contentDocument.getElementById('trncb').setAttribute("type",
@@ -93,6 +119,7 @@ piratequesting.Training = function() {
 	}
 
 	function enable() {
+		dump("Enabling training group...\n");
 		sidebar.contentDocument.getElementById('trngrp').setAttribute("type",
 				"");
 		sidebar.contentDocument.getElementById('trncb').setAttribute("type",
@@ -116,21 +143,151 @@ piratequesting.Training = function() {
 	function doTraining(params) {
 		var trainresult = sidebar.contentDocument.getElementById("trainresult");
 		createResponse(trainresult, new Array("Training"), 1);
-
 		try {
-			disable();
-			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=train", { 	
-						protocol: "post", 
-						onSuccess: enable, 
-						onFailure: function() { enable(); alert('Failed to complete Training.');}, 
-						onError: function() { enable(); alert('Error occurred when Training.');}, 
-						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('trnmeter').setAttribute('value',http.readyState * 25); }, 
-						params: params
-			});
-		} catch (error) {
-			alert(getErrorString(error));
+			if (piratequesting.baseTheme == "classic") {
+				var url = piratequesting.baseURL + "/index.php?on=train";
+			} else if (piratequesting.baseTheme == "default") {
+				var url = piratequesting.baseURL + "/index.php?ajax=train";
+			}	
+				disable();
+				ajax = AjaxRequest(url, {
+					protocol: "post",
+					onSuccess: enable,
+					onFailure: function(){
+						enable();
+						alert('Failed to complete Training.');
+					},
+					onError: function(){
+						enable();
+						alert('Error occurred when Training.');
+					},
+					onStateChange: function(http){
+						var sbcd = sidebar.contentDocument;
+						sbcd.getElementById('trnmeter').setAttribute('value', http.readyState * 25);
+					},
+					params: params
+				});
+			
+			 
 		}
-
+		catch (error) {
+			dumpErro(error);
+		}
+	
+	}
+	
+	function trainPC(stramount,defamount,speamount) {
+		dump("Starting train by %\n");
+		dump("Strength: " + stramount + "\n");
+		dump("Defense: " + defamount + "\n");
+		dump("Speed: " + speamount + "\n");
+		
+		var energy = getEnergy();
+		dump("Energy: " + energy + "\n");
+		
+		// alert(energy);
+		// get how much energy they want to use.... maybe they don't
+		// want to use 100%? round to the nearest
+		energy = Math.round(((stramount + defamount + speamount) / 100)
+				* energy);
+		stren = energy * (stramount / 100);
+		defen = energy * (defamount / 100);
+		speen = energy * (speamount / 100);
+		dump("fractionally...\n");
+		dump("Strength: " + stren + "\n");
+		dump("Defense: " + defen + "\n");
+		dump("Speed: " + speen + "\n");
+		
+		// floor is used here because if we round it, they may go over
+		var strrem = stren - Math.floor(stren);
+		var defrem = defen - Math.floor(defen);
+		var sperem = speen - Math.floor(speen);
+		stren = Math.floor(stren);
+		defen = Math.floor(defen);
+		speen = Math.floor(speen);
+		var rand;
+		while (stren + defen + speen < energy) {
+			// as long as the three are still less than the energy we
+			// want to spend....
+			if ((strrem > defrem) && (strrem > sperem)) {
+				// strength is highest
+				stren++;
+				strrem = 0;
+			} else if ((defrem > strrem) && (defrem > sperem)) {
+				// defense is highest
+				defrem++;
+				defrem = 0;
+			} else if ((sperem > strrem) && (sperem > defrem)) {
+				// speed is highest
+				sperem++;
+				sperem = 0;
+			} else if ((strrem == defrem) && (strrem == sperem)) {
+				// all three are equal but the loop is still going....
+				// this should only ever run once per train if at all
+				// this will also run if they are all at zero and
+				// somehow there is still energy left... shouldn't
+				// happen really
+				rand = Math.random();
+				// fractions are used because they'll be more accurate..
+				// not that it really matters that much
+				if (rand > (2 / 3)) {
+					stren++;
+					strrem = 0;
+				} else if (rand < (1 / 3)) {
+					speen++;
+					sperem = 0;
+				} else {
+					defen++;
+					defrem = 0;
+				}
+			} else if (strrem == defrem) {
+				// strength and defense are equal amounts but not speed
+				rand = Math.random();
+				if (rand > 0.5) {
+					stren++;
+					strrem = 0;
+				} else {
+					defen++;
+					defrem = 0;
+				}
+			} else if (strrem == sperem) {
+				// strength and speed are equal but not defense
+				rand = Math.random();
+				if (rand > 0.5) {
+					stren++;
+					strrem = 0;
+				} else {
+					speen++;
+					sperem = 0;
+				}
+			} else if (defrem == sperem) {
+				// defense and speed are equal but not strength
+				rand = Math.random();
+				if (rand > 0.5) {
+					defen++;
+					defrem = 0;
+				} else {
+					speen++;
+					sperem = 0;
+				}
+			}
+		}
+		dump("when all is said and done...");
+		dump("Strength: " + stren + "\n");
+		dump("Defense: " + defen + "\n");
+		dump("Speed: " + speen + "\n");
+		
+		trainVal(stren,defen,speen);
+	}
+	
+	function trainVal(stren,defen,speen) {
+		dump("starting train by val\n");
+		dump("Strength: " + stren + "\n");
+		dump("Defense: " + defen + "\n");
+		dump("Speed: " + speen + "\n");
+		var params = "strength=" + stren + "&defense=" + defen + "&speed="
+					+ speen + "&train_x=1&train_y=1&train=Train";
+		doTraining(params);
 	}
 
 	return {
@@ -151,120 +308,47 @@ piratequesting.Training = function() {
 			}
 			if (sidebar.contentDocument.getElementById("peren")
 					.hasAttribute("checked")) {
-				var energy = getEnergy();
-				// alert(energy);
-				// get how much energy they want to use.... maybe they don't
-				// want to use 100%? round to the nearest
-				energy = Math.round(((stramount + defamount + speamount) / 100)
-						* energy);
-				stren = energy * (stramount / 100);
-				defen = energy * (defamount / 100);
-				speen = energy * (speamount / 100);
-
-				// floor is used here because if we round it, they may go over
-				var strrem = stren - Math.floor(stren);
-				var defrem = defen - Math.floor(defen);
-				var sperem = speen - Math.floor(speen);
-				stren = Math.floor(stren);
-				defen = Math.floor(defen);
-				speen = Math.floor(speen);
-				var rand;
-				while (stren + defen + speen < energy) {
-					// as long as the three are still less than the energy we
-					// want to spend....
-					if ((strrem > defrem) && (strrem > sperem)) {
-						// strength is highest
-						stren++;
-						strrem = 0;
-					} else if ((defrem > strrem) && (defrem > sperem)) {
-						// defense is highest
-						defrem++;
-						defrem = 0;
-					} else if ((sperem > strrem) && (sperem > defrem)) {
-						// speed is highest
-						sperem++;
-						sperem = 0;
-					} else if ((strrem == defrem) && (strrem == sperem)) {
-						// all three are equal but the loop is still going....
-						// this should only ever run once per train if at all
-						// this will also run if they are all at zero and
-						// somehow there is still energy left... shouldn't
-						// happen really
-						rand = Math.random();
-						// fractions are used because they'll be more accurate..
-						// not that it really matters that much
-						if (rand > (2 / 3)) {
-							stren++;
-							strrem = 0;
-						} else if (rand < (1 / 3)) {
-							speen++;
-							sperem = 0;
-						} else {
-							defen++;
-							defrem = 0;
-						}
-					} else if (strrem == defrem) {
-						// strength and defense are equal amounts but not speed
-						rand = Math.random();
-						if (rand > 0.5) {
-							stren++;
-							strrem = 0;
-						} else {
-							defen++;
-							defrem = 0;
-						}
-					} else if (strrem == sperem) {
-						// strength and speed are equal but not defense
-						rand = Math.random();
-						if (rand > 0.5) {
-							stren++;
-							strrem = 0;
-						} else {
-							speen++;
-							sperem = 0;
-						}
-					} else if (defrem == sperem) {
-						// defense and speed are equal but not strength
-						rand = Math.random();
-						if (rand > 0.5) {
-							defen++;
-							defrem = 0;
-						} else {
-							speen++;
-							sperem = 0;
-						}
-					}
-				}
-
+				trainPC(stramount,defamount,speamount);
 			} else {
-				stren = stramount;
-				defen = defamount;
-				speen = speamount;
+				trainVal(stramount,defamount,speamount);
 			}
 			// alert("strength: " + stren + "\nDefense: " +defen+"\nSpeed: "+
 			// speen);
-			var params = "strength=" + stren + "&defense=" + defen + "&speed="
-					+ speen + "&train_x=1&train_y=1&train=Train";
-			doTraining(params);
+			
 			}catch (error) { alert(getErrorString(error)); }
 		},
 
 		maxStrength : function() {
-
-			var params = "trainstrength=All%20Strength";
-			doTraining(params);
+			dump("Max Strength!\n");
+			if (piratequesting.baseTheme == "classic") {
+				var params = "trainstrength=All%20Strength";
+				doTraining(params);
+			} else if (piratequesting.baseTheme == "default") {
+				trainPC(100,0,0);
+			}
+			
 		},
 
 		maxDefense : function() {
-
-			var params = "traindefense=All%20Defense";
-			doTraining(params);
+			dump("Max Defense!\n");
+	
+			if (piratequesting.baseTheme == "classic") {
+				var params = "traindefense=All%20Defense";
+				doTraining(params);
+			} else if (piratequesting.baseTheme == "default") {
+				trainPC(0,100,0);
+			}
 		},
 
 		maxSpeed : function() {
-
-			var params = "trainspeed=All%20Speed";
-			doTraining(params);
+			dump("Max Speed!\n");
+	
+			if (piratequesting.baseTheme == "classic") {
+				var params = "trainspeed=All%20Speed";
+				doTraining(params);
+			} else if (piratequesting.baseTheme == "default") {
+				trainPC(0,0,100);
+			}
 		},
 
 		/**
@@ -321,6 +405,4 @@ try {
 
 // piratequesting.ProcessResponse(url,text);
 
-document.addEventListener("piratequesting:TrainingUpdated", function(event) {
-			piratequesting.Training.process();
-		}, false);
+document.addEventListener("piratequesting:TrainingUpdated", function(event) {piratequesting.Training.process();	}, false);

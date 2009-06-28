@@ -33,10 +33,15 @@ piratequesting.TrainingLog = function() {
 			insertPrimary.bindUTF8StringParameter(1,data.port); // port
 			var matches;
 			if (data.failure && (data.failure != "")) {
-				matches = ((String) (data.failure)).split(/\D+/);
-				
-				insertPrimary.bindInt32Parameter(2,matches[1]);
-				insertPrimary.bindInt32Parameter(3,matches[2]);
+				if (piratequesting.baseTheme == "classic") {
+					matches = ((String) (data.failure)).split(/\D+/);
+					
+					insertPrimary.bindInt32Parameter(2,matches[1]);
+					insertPrimary.bindInt32Parameter(3,matches[2]);
+				} else if (piratequesting.baseTheme == "default") {
+					insertPrimary.bindInt32Parameter(2,data.failure.toNumber());
+					insertPrimary.bindInt32Parameter(3,data.chance);
+				}
 				
 			} else {
 				insertPrimary.bindInt32Parameter(2,null);
@@ -55,7 +60,7 @@ piratequesting.TrainingLog = function() {
 				piratequesting.DBConn.beginTransaction();
 				
 					for (var i = 0, len = data.success.length; i<len; ++i)  {
-						matches =  data.success[i].match(/Trained ([,\d]+) times and gained ([,.\d]+) (Strength|Defense|Speed)./);
+						matches =  data.success[i].match(/Trained ([,\d]+) times and gained ([,.\d]+) (Strength|Defense|Speed)./i);
 						insertResult.bindInt32Parameter(0,lid);
 						insertResult.bindUTF8StringParameter(1,matches[3]);
 						insertResult.bindInt32Parameter(2,matches[1]);

@@ -1,127 +1,122 @@
 var piratequesting = top.piratequesting;
 
-
 /**
-	 * @inner
-	 * @class
-	 * @property {String} name
-	 * @property {Integer} hp
-	 * @property {Integer} strength
-	 * @property {Integer} defense
-	 * @property {Integer} speed
-	 * @property {String} using String representing what weapon and ofhand the
-	 *           fighter is using
-	 * @property {Array} adjustments Array of Strings for the additional
-	 *           adjustments
-	 * @property {Integer} id The user id of the fighter
-	 * @property {Boolean} banned True if the fighter is banned
-	 * @property {Boolean} frozen True if the fighter is frozen
-	 * @param {Number}
-	 *            id
-	 * @param {String}
-	 *            name
-	 * @param {Number}
-	 *            hp
-	 * @param {Number}
-	 *            strength
-	 * @param {Number}
-	 *            defense
-	 * @param {Number}
-	 *            speed
-	 * @param {String}
-	 *            using
-	 */
-	function Fighter(id, name, hp, strength, defense, speed, using) {
-		this.name = name;
-		this.hp = hp;
-		this.strength = strength;
-		this.defense = defense;
-		this.speed = speed;
-		this.using = using;
-		this.adjustments = new Array();
-		this.id = id;
-		this.banned = false;
-		this.frozen = false;
-		this.level = 0;
+ * @inner
+ * @class
+ * @property {String} name
+ * @property {Integer} hp
+ * @property {Integer} strength
+ * @property {Integer} defense
+ * @property {Integer} speed
+ * @property {String} using String representing what weapon and ofhand the
+ *           fighter is using
+ * @property {Array} adjustments Array of Strings for the additional adjustments
+ * @property {Integer} id The user id of the fighter
+ * @property {Boolean} banned True if the fighter is banned
+ * @property {Boolean} frozen True if the fighter is frozen
+ * @param {Number}
+ *            id
+ * @param {String}
+ *            name
+ * @param {Number}
+ *            hp
+ * @param {Number}
+ *            strength
+ * @param {Number}
+ *            defense
+ * @param {Number}
+ *            speed
+ * @param {String}
+ *            using
+ */
+function Fighter(id, name, hp, strength, defense, speed, using) {
+	this.name = name;
+	this.hp = hp;
+	this.strength = strength;
+	this.defense = defense;
+	this.speed = speed;
+	this.using = using;
+	this.adjustments = new Array();
+	this.id = id;
+	this.banned = false;
+	this.frozen = false;
+	this.level = 0;
 
-		this.print = function(doc, container, winner, disguise) {
-			container.setAttribute("valign", "top");
-			var namespan;
-			if (this.id != null) {
-				namespan = doc.createElement("a");
-				namespan.setAttribute("href", "/index.php?on=profile&user="
-								+ this.id);
-			} else {
-				namespan = doc.createElement("span");
-			}
-			if (this.banned || this.frozen) {
-				namespan
-						.setAttribute("style",
-								"font-size:large;font-weight:bold;text-decoration:line-through;");
-			} else {
-				namespan
-						.setAttribute("style",
-								"font-size:large;font-weight:bold;text-decoration:none;");
-			}
-			namespan.appendChild(doc.createTextNode(this.name));
-			container.appendChild(namespan);
-			container.appendChild(doc.createElement("br"));
+	this.print = function(doc, container, winner, disguise) {
+		container.setAttribute("valign", "top");
+		var namespan;
+		if (this.id != null) {
+			namespan = doc.createElement("a");
+			namespan.setAttribute("href", "/index.php?on=profile&user="
+							+ this.id);
+		} else {
+			namespan = doc.createElement("span");
+		}
+		if (this.banned || this.frozen) {
+			namespan
+					.setAttribute("style",
+							"font-size:large;font-weight:bold;text-decoration:line-through;");
+		} else {
+			namespan.setAttribute("style",
+					"font-size:large;font-weight:bold;text-decoration:none;");
+		}
+		namespan.appendChild(doc.createTextNode(this.name));
+		container.appendChild(namespan);
+		container.appendChild(doc.createElement("br"));
 
-			var status = doc.createElement("span");
-			if (winner == this) {
-				status.appendChild(doc.createTextNode("Winner"));
-			} else {
-				status.appendChild(doc.createTextNode("Loser"));
-			}
-			status.setAttribute("style",
-					"font-size:small;font-weight:bold;text-decoration:none;");
-			container.appendChild(status);
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createElement("br"));
-			if (disguise != null) {
-				container.appendChild(doc.createTextNode(disguise));
-				container.appendChild(doc.createElement("br"));
-				container.appendChild(doc.createElement("br"));
-			}
-			container.appendChild(doc.createTextNode("HP: " + this.hp));
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createTextNode("Adjusted Strength: "
-					+ this.strength));
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createTextNode("Adjusted Defense: "
-					+ this.defense));
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createTextNode("Adjusted Speed: "
-					+ this.speed));
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createElement("br"));
-			container
-					.appendChild(doc.createTextNode("Additional Adjustments:"));
-			var adjustment;
-			for (var i = 0; i < this.adjustments.length; i++) {
-				adjustment = this.adjustments[i];
-				container.appendChild(doc.createElement("br"));
-				container.appendChild(doc.createTextNode(adjustment));
-			}
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createTextNode("Using:"));
-			container.appendChild(doc.createElement("br"));
-			container.appendChild(doc.createTextNode(this.using));
+		var status = doc.createElement("span");
+		if (winner == this) {
+			status.appendChild(doc.createTextNode("Winner"));
+		} else {
+			status.appendChild(doc.createTextNode("Loser"));
+		}
+		status.setAttribute("style",
+				"font-size:small;font-weight:bold;text-decoration:none;");
+		container.appendChild(status);
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createElement("br"));
+		if (disguise != null) {
+			container.appendChild(doc.createTextNode(disguise));
 			container.appendChild(doc.createElement("br"));
 			container.appendChild(doc.createElement("br"));
 		}
+		container.appendChild(doc.createTextNode("HP: " + this.hp));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createTextNode("Adjusted Strength: "
+				+ this.strength));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createTextNode("Adjusted Defense: "
+				+ this.defense));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createTextNode("Adjusted Speed: "
+				+ this.speed));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createTextNode("Additional Adjustments:"));
+		var adjustment;
+		for (var i = 0; i < this.adjustments.length; i++) {
+			adjustment = this.adjustments[i];
+			container.appendChild(doc.createElement("br"));
+			container.appendChild(doc.createTextNode(adjustment));
+		}
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createTextNode("Using:"));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createTextNode(this.using));
+		container.appendChild(doc.createElement("br"));
+		container.appendChild(doc.createElement("br"));
 	}
+}
 
-		
-	function Attack(a_attacker, a_damage) {
-		this.attacker = a_attacker;
-		this.damage = a_damage;
-	}
+function Attack(a_attacker, a_damage) {
+	this.attacker = a_attacker;
+	this.damage = a_damage;
+}
 
-	function Misfire() {
-		this.misfire = true;
-	}
+function Misfire() {
+	this.misfire = true;
+}
 
 /**
  * Fight page processing helper<br>
@@ -129,8 +124,6 @@ var piratequesting = top.piratequesting;
  * @class
  */
 piratequesting.FightProcessor = function() {
-
-	
 
 	var attacks = new Array();
 	var me = new Fighter();
@@ -145,32 +138,34 @@ piratequesting.FightProcessor = function() {
 	var disguise;
 	var original;
 	var errors = new Array();
-	
-	function clear () {
+
+	function clear() {
 		attacks = new Array();
 		me = new Fighter();
 		opponent = new Fighter();
-		winner=null;
-		prizemoney=null;
-		prizeexp=null;
-		fleetmoney=null;
-		back=null;
-		adjustment=null;
+		winner = null;
+		prizemoney = null;
+		prizeexp = null;
+		fleetmoney = null;
+		back = null;
+		adjustment = null;
 		ambush = new Array();
-		disguise=null;
-		original=null;
+		disguise = null;
+		original = null;
 		errors = new Array();
-	
+
 	}
-	function addAttack (attacker, damage) {
+	function addAttack(attacker, damage) {
 		attacks.push(new Attack(attacker, damage));
 	}
 
 	function addMisfire() {
-			attacks.push(new Misfire());
+		attacks.push(new Misfire());
 	}
 
 	function parse(doc) {
+
+		if (piratequesting.baseTheme == "classic") {
 			// first make sure we're actually fighting someone
 			if (/You are in a fight with /.test(doc.body.innerHTML)) {
 				if (/You are in a fight with B:/.test(doc.body.innerHTML))
@@ -247,7 +242,7 @@ piratequesting.FightProcessor = function() {
 					battle.removeChild(battle.firstChild);// <br />
 					battle.removeChild(battle.firstChild);// <br />
 					// battle.removeChild(battle.firstChild);//<br />
-										try {
+					try {
 						// get the natural speeds.
 						battle.removeChild(battle.firstChild); // Your
 						// natural
@@ -269,7 +264,7 @@ piratequesting.FightProcessor = function() {
 					} catch (error) {
 						errors.push(getErrorString(error));
 					}
-										// remove all of the br tags following
+					// remove all of the br tags following
 					while (battle.firstChild.nodeName.toLowerCase() == "br") {
 						battle.removeChild(battle.firstChild);
 					}
@@ -294,7 +289,7 @@ piratequesting.FightProcessor = function() {
 					} catch (error) {
 						errors.push(getErrorString(error));
 					}
-										while (battle.firstChild.nodeName.toLowerCase() == "br") {
+					while (battle.firstChild.nodeName.toLowerCase() == "br") {
 						battle.removeChild(battle.firstChild);
 					}
 					try {
@@ -319,7 +314,7 @@ piratequesting.FightProcessor = function() {
 					while (battle.firstChild.nodeName.toLowerCase() == "br") {
 						battle.removeChild(battle.firstChild);
 					}
-										try {
+					try {
 						// then helm altered speeds.
 						battle.removeChild(battle.firstChild);
 						battle.removeChild(battle.firstChild);
@@ -337,7 +332,7 @@ piratequesting.FightProcessor = function() {
 					} catch (error) {
 						errors.push(getErrorString(error));
 					}
-										while (battle.firstChild.nodeName.toLowerCase() == "br") {
+					while (battle.firstChild.nodeName.toLowerCase() == "br") {
 						battle.removeChild(battle.firstChild);
 					}
 
@@ -352,9 +347,11 @@ piratequesting.FightProcessor = function() {
 						// ("+me.name+"|"+opponent.name+")";
 						var alterex = new RegExp(
 								"(alters|changes)\\s*[BF:\\s]*?("
-										+ RegExp.escape(me.name) + "|"
+										+ RegExp.escape(me.name)
+										+ "|"
 										+ RegExp.escape(opponent.name)
-										+ "|your|target's)\\s*(speed|strength|defense)[\\s\\S]*?:\\s*([-.,\\d]+)", "i");
+										+ "|your|target's)\\s*(speed|strength|defense)[\\s\\S]*?:\\s*([-.,\\d]+)",
+								"i");
 						var alters;
 						while (adjcol == null) {
 							i = 0;
@@ -374,17 +371,18 @@ piratequesting.FightProcessor = function() {
 							// now get the string without any links
 							adjcol = adjcol.join("");
 							if (alterex.test(adjcol)) {
-								var regresult = alterex.exec(adjcol); 
+								var regresult = alterex.exec(adjcol);
 								alters = regresult[2];
 								var stat = (regresult[3]).toLowerCase();
 								if ((alters == me.name) || (alters == "your")) {
-									if (stat == "speed"){
+									if (stat == "speed") {
 										me.speed = (regresult[4]).stripCommas();
 									}
 									me.adjustments.push(adjcol);
 								} else {
-									if (stat == "speed"){
-										opponent.speed = (regresult[4]).stripCommas();
+									if (stat == "speed") {
+										opponent.speed = (regresult[4])
+												.stripCommas();
 									}
 									opponent.adjustments.push(adjcol);
 								}
@@ -401,7 +399,7 @@ piratequesting.FightProcessor = function() {
 					} catch (error) {
 						errors.push(getErrorString(error));
 					}
-										// just in case
+					// just in case
 					while (!(/\[object Text\]/.test(curnode.toString()))) {
 						battle.removeChild(battle.firstChild);
 					}
@@ -549,26 +547,34 @@ piratequesting.FightProcessor = function() {
 							"i");
 					// alert(idregex.toString());
 					opponent.id = idregex.exec(battletext)[1];
-					
-					me.id = doc.evaluate('substring-after(string(id("profile_info")//a[starts-with(@href, "index.php?on=profile&user=")]/@href),"user=")',doc,null,XPathResult.NUMBER_TYPE,null).numberValue;
-					me.level = doc.evaluate('substring-after(substring-before(string(id("profile_info")//div[@class="user_role"][last()])," ["),"lvl:")',doc,null,XPathResult.STRING_TYPE,null).stringValue.stripCommas();
-			
+
+					me.id = doc
+							.evaluate(
+									'substring-after(string(id("profile_info")//a[starts-with(@href, "index.php?on=profile&user=")]/@href),"user=")',
+									doc, null, XPathResult.NUMBER_TYPE, null).numberValue;
+					me.level = doc
+							.evaluate(
+									'substring-after(substring-before(string(id("profile_info")//div[@class="user_role"][last()])," ["),"lvl:")',
+									doc, null, XPathResult.STRING_TYPE, null).stringValue
+							.stripCommas();
+
 					while (battle.hasChildNodes())
 						battle.removeChild(battle.firstChild);
-						
+
 				} catch (error) {
 					errors.push(getErrorString(error));
 				}
-				//original.parentNode.appendChild(original);
-				//original.parentNode.removeChild(battle);
+				// original.parentNode.appendChild(original);
+				// original.parentNode.removeChild(battle);
 				// debugResponse(doc.getElementById("insidecontent").innerHTML);
 			}
 		}
-		return {
-			print : function(doc) {
+	}
+	return {
+		print : function(doc) {
 			var battle = doc.getElementById("insidecontent")
 					.getElementsByTagName("table")[0];
-			
+
 			var table, row, cell, altcell, data, br;
 			table = doc.createElement("table");
 			table
@@ -717,49 +723,54 @@ piratequesting.FightProcessor = function() {
 				if (element.style.display && element.style.display == "none") {
 					back.style.display = "none";
 					element.style.display = null;
-				} else  { 
+				} else {
 					back.style.display = null;
 					element.style.display = "none";
-				
+
 				}
 			}
 			var a = doc.createElement("a");
 			a.appendChild(doc.createTextNode("Show/Hide original report."))
-			battle.parentNode.insertBefore(table,battle);
-			battle.parentNode.insertBefore(a,battle);
+			battle.parentNode.insertBefore(table, battle);
+			battle.parentNode.insertBefore(a, battle);
 			a.setAttribute("onclick", "return false;");
 			a.setAttribute("href", "#");
-			a.addEventListener("click", toggle,false);
+			a.addEventListener("click", toggle, false);
 			a.style.display = "block";
-			
+
 			battle.parentNode.appendChild(back);
 			battle.style.display = "none";
-			//battle.parentNode.removeChild(battle);
+			// battle.parentNode.removeChild(battle);
 		},
 
 		output : function() {
 			return {
-				opponent:opponent,
-				me:me,
-				winner:winner,
-				prize:prizemoney,
-				experience: prizeexp,
-				attacks: attacks,
-				ambush:ambush
+				opponent : opponent,
+				me : me,
+				winner : winner,
+				prize : prizemoney,
+				experience : prizeexp,
+				attacks : attacks,
+				ambush : ambush
 			}
-			/*return [opponent.name, winner.name, prizemoney, prizeexp,
-					me.strength, me.defense, me.speed, opponent.strength,
-					opponent.defense, opponent.speed];*/
+			/*
+			 * return [opponent.name, winner.name, prizemoney, prizeexp,
+			 * me.strength, me.defense, me.speed, opponent.strength,
+			 * opponent.defense, opponent.speed];
+			 */
 		},
-		process : function (doc) {
+		process : function(doc) {
 			clear();
 			parse(doc);
 			if (winner != null) {
-				var evt = document.createEvent("MouseEvents");
-				evt.initMouseEvent('piratequesting:FightUpdated',false,true, window,
-	   				0, 0, 0, 0, 0, false, false, false, false, 0, doc);
-	
-				document.dispatchEvent(evt);
+				document.fire("piratequesting:FightUpdated");
+				/*
+				 * var evt = document.createEvent("MouseEvents");
+				 * evt.initMouseEvent('piratequesting:FightUpdated',false,true,
+				 * window, 0, 0, 0, 0, 0, false, false, false, false, 0, doc);
+				 * 
+				 * document.dispatchEvent(evt);
+				 */
 			}
 
 		}

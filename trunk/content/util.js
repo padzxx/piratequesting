@@ -603,10 +603,11 @@ if (typeof AjaxRequest == "undefined") {
 		var http = new XMLHttpRequest();
 		var protocol = (options.protocol || "get").toLowerCase();
 		var params = options.params;
-		var async = options.async || true;
+		var async = (options.async === false) ? false : true;
 		var onFailure = options.onFailure || function () { dump('\nAjax request to '+url+' failed.\n'); };
 		var onSuccess = options.onSuccess || function () { dump('\nAjax request to '+url+' succeeded.\n'); };
 		var onStateChange = options.onStateChange;
+		var proc = !!options.proc
 		http.open(protocol, url, async);
 		http.setRequestHeader("Cache-Control","no-cache");
 			if (protocol == "post") {
@@ -620,9 +621,12 @@ if (typeof AjaxRequest == "undefined") {
 			if (http.readyState == 4) {
 				if (http.status == 200) {
 					try {
+						if (params) {
+							params = params.parseQuery();
+						}
 						//uncomment the next line to dump all headers from the request
 						//http.channel.visitResponseHeaders(HeaderVisitor);
-						piratequesting.ProcessResponse(url,http.responseText, requestNumber, Date.parse(http.getResponseHeader("Date")));
+						if (proc) piratequesting.ProcessResponse(url,http.responseText, requestNumber, Date.parse(http.getResponseHeader("Date"), params));
 					} catch (e) { dumpError(e) }
 					try {
 						onSuccess(http, requestNumber);
@@ -642,6 +646,26 @@ if (typeof AjaxRequest == "undefined") {
 	 
 	AjaxRequest.requestNumber = 0;
 	
+}
+
+Function.prototype.bind = function(){
+	if (arguments.length < 1) 
+		return this;
+	var __method = this, args = Array.prototype.slice.call(arguments, 0), object = args.shift();
+	return function(){
+		var largs = Array.prototype.slice.call(arguments, 0);
+		return __method.apply(object, args.concat(largs));
+	}
+}
+
+Function.prototype.curry = function () {
+	if (arguments.length < 1) 
+		return this;
+	var __method = this, args = Array.prototype.slice.call(arguments, 0);
+	return function(){
+		var largs = Array.prototype.slice.call(arguments, 0);
+		return __method.apply(window, args.concat(largs));
+	}
 }
 
 /**

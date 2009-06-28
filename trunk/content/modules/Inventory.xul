@@ -33,5 +33,9 @@
 				</groupbox>
 			</box>  
 		</stack> 
-	</tabpanel> 
+	</tabpanel>
+	<script type="application/x-javascript">
+		dump("running Inventory init");
+		piratequesting.Inventory.process(null,true);	
+	</script> 
 </overlay>

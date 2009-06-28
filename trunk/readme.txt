@@ -1,7 +1,7 @@
 Unofficial Pirate Quest Sidebar
-v2.0b5
+v2.0b7
 Created by Jonathan Fingland aka Gilgalad
-readme date: 2009-04-04
+readme date: 2009-006-28
 
 WARNING:This extension, although approved by PQ staff, is in no way an official Pirate Quest extension.
 This extension does not protect you from the PQ rules. If you would get frozen/banned for behaviour using 
@@ -42,6 +42,13 @@ And of course, Happy Pirating!
 
 Version History
 ---------------
+
+v2.0b7
+- skipped releaqse of 2.0b6 due to significant changes in PQ at the time
+- adds support for new theme
+- fixes numerous bugs due to new themeing system
+- Adds ajax listening support for training and item use
+- fixes ship data detection in classic theme 
 
 v2.0b5
 - Fixes bug which caused previous version to not open the sidebar
