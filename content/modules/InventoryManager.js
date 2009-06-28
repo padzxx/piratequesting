@@ -124,7 +124,6 @@ piratequesting.InventoryManager = function() {
 				var temp_inventory = log.responseXML;
 				//if there is a 'cat' element, then it belongs to the old system 
 				if (temp_inventory.evaluate("not(//cat)",temp_inventory,null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
-					dump("Importing Inventory from file.\n")
 					inventory = temp_inventory;
 					document.fire('piratequesting:InventoryUpdated');
 				} else {

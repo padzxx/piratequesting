@@ -19,7 +19,8 @@ piratequesting.Inventory = function() {
 				onSuccess: enable, 
 				onFailure: function() { enable(); alert('Failed to update Inventory.');}, 
 				onError: function() { enable(); alert('Error occurred when updating Inventory.');}, 
-				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); }
+				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
+				proc : true
 		});
 	}
 
@@ -153,16 +154,13 @@ piratequesting.Inventory = function() {
 	};
 	
 	//var forced__points_update_count = 0;
-	function updateInventoryItem(event) {
-/*		if (!fromEvent) {
-			if (++forced__points_update_count >= 2) return;
-		} else {
-			forced_points_update_count = 0;
-		}
-	*/	
+	function updateInventoryItem(event, repeat) {
+		
+		
 		var sbcd = sidebar.contentDocument;
-		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait 3 seconds and try again
-		//	setTimeout(updateInventoryList,3000);
+		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait 2 seconds and try again
+			if (repeat)
+				setTimeout(updateInventoryItem.bind(piratequesting.Inventory,event,true),2000);
 			return;
 		}
 		
@@ -208,19 +206,20 @@ piratequesting.Inventory = function() {
 	
 	
 	//var forced_update_count = 0;
-	function updateInventoryList(event) {
+	function updateInventoryList(event, repeat) {
 		/*if (!fromEvent) {
 			if (++forced_update_count >= 2) return;
 		} else {
 			forced_update_count = 0;
 		}*/
 		if (event && event.relatedTarget) {
-			if (updateInventoryItem(event))
+			if (updateInventoryItem(event, repeat))
 				return;
 		}
 		var sbcd = sidebar.contentDocument;
-		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait a second and try again
-//			setTimeout(updateInventoryList,3000);
+		if (!sbcd || !sbcd.getElementById('inventorylist') || !sbcd.getElementById('invdetails')) {			//if stuff isn't loaded yet, wait 2 seconds and try again
+			if (repeat)
+				setTimeout(updateInventoryList.bind(piratequesting.Inventory,event,true),2000);
 			return;
 		}
 
@@ -349,11 +348,11 @@ piratequesting.Inventory = function() {
 			});
 		},
 
-		process : function (event) {
+		process : function (event, repeat) {
 			inventory = piratequesting.InventoryManager.getInventory();
 			//dump("updating inventory list");
 			try {
-				updateInventoryList(event);
+				updateInventoryList(event, repeat);
 			}catch(e) { dumpError(e); }
 		},
 		

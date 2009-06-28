@@ -12,21 +12,15 @@ piratequesting.PointsEdibles = function() {
 	var pending_points = 0;
 	var pending_edibles = 0;
 	
-	//var forced_update_count = 0;
-	function updateEdiblesList(fromEvent) {
-	/*	if (!fromEvent) {
-			if (++forced_update_count >= 3) return;
-		} else {
-			forced_update_count = 0;
-		}
-		*/
+	function updateEdiblesList(repeat) {
+		
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd || !sbcd.getElementById('edibleitems') || !sbcd.getElementById('edibleslist')) {			//if stuff isn't loaded yet, wait a second and try again
-//			dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
-//			setTimeout(updateEdiblesList,2000);
+			//dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
+			if (repeat)
+				setTimeout(updateEdiblesList.bind(piratequesting.PointsEdibles,true),2000);
 			return;
 		}
-
 		var createEdible = function(label, value) {
 			var menuitem = sbcd.createElement('menuitem');
 			menuitem.setAttribute('label', label);
@@ -137,7 +131,7 @@ piratequesting.PointsEdibles = function() {
 				var id = edilist.selectedItem.value;
 				ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items", { 
 						protocol: "post",
-						onSuccess: function() { --pending_edibles; enableEdibles(); /*AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory");*/ }, 
+						onSuccess: function() { --pending_edibles; enableEdibles(); AjaxRequest(piratequesting.baseURL+"/index.php?ajax=events_ajax&action=all_status_update"); }, 
 						onFailure: function() { --pending_edibles; enableEdibles(); alert('Error returned by server.');}, 
 						onError: function() { --pending_edibles; enableEdibles(); alert('Error occurred when using Edibles.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('edimeter').setAttribute('value',http.readyState * 25); },
@@ -154,11 +148,11 @@ piratequesting.PointsEdibles = function() {
 			
 
 		},*/
-		process : function () {
+		process : function (repeat) {
 			//dump("Updating Edibles List");
 			try {
 			inventory = piratequesting.InventoryManager.getInventory();
-			updateEdiblesList(true);
+			updateEdiblesList(repeat);
 			} catch (e) { dumpError(e); }
 		},
 		
@@ -186,4 +180,4 @@ piratequesting.PointsEdibles = function() {
 }();
 
 document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.PointsEdibles.process(event); }, false);
-piratequesting.addLoadProcess(new RegExp("",""),piratequesting.PointsEdibles.processPoints);
+piratequesting.addLoadProcess(new RegExp("",""),piratequesting.PointsEdibles.processPoints,piratequesting.PointsEdibles);

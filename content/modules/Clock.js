@@ -55,15 +55,22 @@ piratequesting.Clock = function() {
 		 * Standard Module Page Processor
 		 */
 		process : function(doc) {
-
+			var regex, match, ltime;
 			try {
-				// regex for the time info on the page and get the match
-				var regex, match;
-				var ltime = doc.getElementsByClassName('time')[0];
-				if (!ltime)
-					return;
-				regex = /Time: ([0-9]{1,2}):([0-9]{1,2})([apm]{2})/;
-				match = regex.exec(ltime.firstChild.nodeValue);
+				if (piratequesting.baseTheme == "classic") {
+					// regex for the time info on the page and get the match
+					
+					ltime = doc.getElementsByClassName('time')[0];
+					if (!ltime)
+						return;
+					ltime = ltime.firstChild.nodeValue;
+					regex = /Time: ([0-9]{1,2}):([0-9]{1,2})([apm]{2})/;
+				} else if (piratequesting.baseTheme == "default") {
+					ltime = doc.evaluate("id('finalmotive')/div[@class='center']", doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					if (!ltime) return;
+					regex = /Game Time:\s*([0-9]{1,2}):([0-9]{1,2})\s*([apm]{2})/i;
+				}
+				match = regex.exec(ltime);
 
 				// create a new date and set our values
 				var somedate = new Date();
@@ -80,6 +87,7 @@ piratequesting.Clock = function() {
 					// get the number of milliseconds from somedate and assign
 					time = somedate.getTime();
 				}
+
 			} catch (error) {
 				alert(getErrorString(error));
 			}

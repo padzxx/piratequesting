@@ -182,7 +182,7 @@ var piratequesting = function () {
 		 */
 		ProcessResponse : function(url, htmlText, requestNumber, requestTime) {
 			var doc = piratequesting.createDoc(htmlText);
-			if (!(doc.body && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
+			if (!(doc.body  && (doc.body.firstChild) && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
 				var curProc;
 				//first run the standard processors 
 				for (var i = 0, len = piratequesting.PQLoadCollection.length; i < len; i++) {
@@ -247,7 +247,7 @@ var piratequesting = function () {
 						// we're on a piratequest page. yay!
 						
 						//check if it's reset time
-						if (!(doc.body && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
+						if (!(doc.body && (doc.body.firstChild) && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
 							
 							//theme test: classic has a wrapper around all of the content with id 'outer', default has id 'skull' for the talking head
 							if (doc.evaluate("boolean(id('skull'))", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
@@ -639,8 +639,11 @@ try {
 					}
 					
 					//dump("\nProcessing: " + request.originalURI.spec + "\n");
-					var date = request.getResponseHeader("Date");
+					var date = Date.parse(request.getResponseHeader("Date"));
 					var responseSource = this.receivedData.join();
+					//fix leading spaces bug
+					responseSource = responseSource.replace(/\s+(\S[\s\S]+)/,"$1");
+				
 					piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date, data);
 				}
 			} catch(e) { dumpError(e);}
