@@ -182,11 +182,11 @@ piratequesting.InventoryManager = function() {
 
 		
 		checkInventory : function() {
-			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { onError: function() { alert('Error occurred while updating inventory'); } });
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { onError: function() { dump("Error occurred while updating inventory\n"); } });
 		},
 
 		checkItemGuide : function() {
-			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=item_guide", { onError: function() { alert('Error occurred while updating item guide'); } });
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=item_guide", { onError: function() { dump("Error occurred while updating item guide\n"); } });
 		},
 
 		processInventory: function(doc){
@@ -418,7 +418,7 @@ piratequesting.InventoryManager = function() {
 
 			write();
 			document.fire('piratequesting:InventoryUpdated');
-			}catch(error) { alert(getErrorString(error)); }
+			}catch(error) { dumpError(error); }
 		},
 		
 		process:function(doc) {

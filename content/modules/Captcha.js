@@ -24,7 +24,7 @@ piratequesting.Captcha = function () {
 			var params = 'iv_check=' + code;
 			http.open("POST", url, true);
 			http.onerror = function (error) {
-				alert(getErrorString(error));
+				dumpError(error);
 			}
 			// Send the proper header information along with the request
 			http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -36,7 +36,7 @@ piratequesting.Captcha = function () {
 					if (http.status == 200) {
 						piratequesting.ProcessResponse(url, http.responseText);
 					} else {
-						alert("Code submission failed due to error");
+						dumpError("Code submission failed due to error\n");
 					}
 				}
 			}

@@ -10,7 +10,7 @@ piratequesting.Fight = function() {
 					piratequesting.FightProcessor.print(doc);
 
 			} catch (e) {
-				alert(getErrorString(e))
+				dumpError(e);
 			}
 
 		}

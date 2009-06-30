@@ -158,7 +158,7 @@ piratequesting.FightLog = function() {
 							.doCommand();
 				}
 			} catch (error) {
-				alert(getErrorString(error));
+				dumpError(error);
 			}
 		},
 		open : function() {

@@ -93,7 +93,7 @@ function LogViewer () {
 			try { // mozIStorageStatement
 				var stmt = this.DBConn.createStatement(this.query);
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 				return false;
 			}
 	
@@ -111,7 +111,7 @@ function LogViewer () {
 					this.aColumns.push(aTemp);
 				}
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 				return false;
 			}
 	
@@ -156,7 +156,7 @@ function LogViewer () {
 					bFirstRow = false;
 				}
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 				return false;
 			} finally {
 				// must be reset after executeStep
@@ -211,7 +211,7 @@ function LogViewer () {
 			if (this.selectQuery()) {
 				this.tree.view = new DatabaseTreeView(this.aTableData, this.aColumns);
 			} else {
-				alert("Error encountered querying database.");
+				dumpError("Error encountered querying database.");
 			}
 	
 		},
@@ -428,10 +428,3 @@ function DatabaseTreeView(aTableData, aColumns) {
 		table.sort(this.columnSort);
 	};
 }
- /*   try {
-      var myComponent = Components.classes['@pq.ashita.org/pqcom;1']
-         .getService().wrappedJSObject;
-      this.DBConn = myComponent.database;
-    } catch (error) {
-      alert(error);
-    }*/

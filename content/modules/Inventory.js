@@ -16,9 +16,10 @@ piratequesting.Inventory = function() {
 		var ajax;
 		sbcd.getElementById('invmeter').setAttribute('value',0);
 		ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { 
+				proc:true,
 				onSuccess: enable, 
-				onFailure: function() { enable(); alert('Failed to update Inventory.');}, 
-				onError: function() { enable(); alert('Error occurred when updating Inventory.');}, 
+				onFailure: function() { enable(); dumpError('Failed to update Inventory.');}, 
+				onError: function() { enable(); dumpError('Error occurred when updating Inventory.');}, 
 				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
 				proc : true
 		});
@@ -257,9 +258,10 @@ piratequesting.Inventory = function() {
 		var ajax;
 		sbcd.getElementById('invmeter').setAttribute('value',0);
 		ajax = AjaxRequest(url, { 
+				proc:true,
 				onSuccess: function (http) { processPrices(name,http.responseText); }, 
-				onFailure: function() { enable(); alert('Failed to get prices from market.');}, 
-				onError: function() { enable(); alert('Error occurred when getting prices from market.');}, 
+				onFailure: function() { enable(); dumpError('Failed to get prices from market.');}, 
+				onError: function() { enable(); dumpError('Error occurred when getting prices from market.');}, 
 				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); }
 		});
 	}
@@ -283,7 +285,7 @@ piratequesting.Inventory = function() {
 					
 				}
 				} else
-					alert("Error retrieving prices. Page returned by server\nwas not the points market.");
+					dumpError("Error retrieving prices. Page returned by server\nwas not the points market.");
 
 		} else {
 			stripex = /<div id=['"]citemmkt['"]>[\s\S]*?(<table[\s\S]*?<\/table>)/;
@@ -309,7 +311,7 @@ piratequesting.Inventory = function() {
 					match = itemex.exec(text);
 				}
 			} else
-				alert("Error retrieving prices. Page returned by server\nwas not the item market");
+				dumpError("Error retrieving prices. Page returned by server\nwas not the item market");
 		}
 
 		enable();
@@ -342,8 +344,8 @@ piratequesting.Inventory = function() {
 			sbcd.getElementById('invmeter').setAttribute('value',0);
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=return&id=" + id, { 
 					onSuccess: checkInventory, 
-					onFailure: function() { enable(); alert('Failed to return item.');}, 
-					onError: function() { enable(); alert('Error occurred when returning item.');}, 
+					onFailure: function() { enable(); dumpError('Failed to return item.');}, 
+					onError: function() { enable(); dumpError('Error occurred when returning item.');}, 
 					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); }
 			});
 		},
@@ -610,9 +612,10 @@ piratequesting.Inventory = function() {
 			var ajax;
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items", { 
 						protocol: "post",
+						proc:true,
 						onSuccess: function() { enable(); /*AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory");*/ }, 
-						onFailure: function() { enable(); alert('Failed to use item.');}, 
-						onError: function() { enable(); alert('Error occurred when using item.');}, 
+						onFailure: function() { enable(); dumpError('Failed to use item.');}, 
+						onError: function() { enable(); dumpError('Error occurred when using item.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
 						params: "action=use&useamount=1&id=" + id
 						
@@ -651,9 +654,10 @@ piratequesting.Inventory = function() {
 
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=sell&id=" + id, { 
 						protocol: "post",
+						proc:true,
 						onSuccess: function() { enable(); hideInventoryBox(); AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory"); }, 
-						onFailure: function() { enable(); hideInventoryBox(); alert('Failed to sell item.');}, 
-						onError: function() { enable(); hideInventoryBox(); alert('Error occurred when attempting to sell item.');}, 
+						onFailure: function() { enable(); hideInventoryBox(); dumpError('Failed to sell item.');}, 
+						onError: function() { enable(); hideInventoryBox(); dumpError('Error occurred when attempting to sell item.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
 						params: "quantity=" + qty + "&sell=Sell"
 						
@@ -672,9 +676,10 @@ piratequesting.Inventory = function() {
 
 			ajax = AjaxRequest(url, { 
 						protocol: "post",
+						proc:true,
 						onSuccess: function() { enable(); hideInventoryBox(); AjaxRequest(piratequesting.baseURL+"/index.php?on=inventory"); }, 
-						onFailure: function() { enable(); hideInventoryBox(); alert('Failed to sell item.');}, 
-						onError: function() { enable(); hideInventoryBox(); alert('Error occurred when attempting to sell item.');}, 
+						onFailure: function() { enable(); hideInventoryBox(); dumpError('Failed to sell item.');}, 
+						onError: function() { enable(); hideInventoryBox(); dumpError('Error occurred when attempting to sell item.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('invmeter').setAttribute('value',http.readyState * 25); },
 						params: "quantity=" + qty + "&cost=" + price + "&market=Add"
 						

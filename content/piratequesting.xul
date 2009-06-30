@@ -26,7 +26,7 @@
 
 						hidePQSBStyle();
 					} catch (error) {
-						alert(getErrorString(error));
+						dumpError(error);
 					}
 				}, false);
 	</script>
