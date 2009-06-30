@@ -154,8 +154,8 @@ piratequesting.Equipment = function() {
 		sbcd.getElementById('eqmeter').setAttribute('value',0);
 		ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&m=1", { 
 				onSuccess: function() { try { enable(); dump("\nInventory check succeeded.\n") } catch (error) {dump("\n" + getErrorString(error) + "\n");} }, 
-				onFailure: function() { enable(); alert('Failed to update Inventory.');}, 
-				onError: function() { enable(); alert('Error occurred when updating Inventory.');}, 
+				onFailure: function() { enable(); dumpError('Failed to update Inventory.');}, 
+				onError: function() { enable(); dumpError('Error occurred when updating Inventory.');}, 
 				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); },
 					proc: true
 		});
@@ -189,7 +189,7 @@ piratequesting.Equipment = function() {
 				last_check = cur_time;
 				piratequesting.InventoryManager.checkItemGuide();
 			} else {
-				alert("Error Processing Item Guide Data");
+				dumpError("Error Processing Item Guide Data in Equipment.js");
 			}
 			return; // item description not found. bail.
 		} else {
@@ -214,8 +214,8 @@ piratequesting.Equipment = function() {
 					
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=unequip&id=" + id, {
 					onSuccess: enable, 
-					onFailure: function() { enable(); alert('Failed to unequip item.');}, 
-					onError: function() { enable(); alert('Error occurred when unequipping item.');}, 
+					onFailure: function() { enable(); dumpError('Failed to unequip item.');}, 
+					onError: function() { enable(); dumpError('Error occurred when unequipping item.');}, 
 					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); },
 					proc: true
 			});
@@ -229,8 +229,8 @@ piratequesting.Equipment = function() {
 					
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=equip&id=" + id, { 
 					onSuccess: enable, 
-					onFailure: function() { enable(); alert('Failed to equip item.');}, 
-					onError: function() { enable(); alert('Error occurred when equipping item.');}, 
+					onFailure: function() { enable(); dumpError('Failed to equip item.');}, 
+					onError: function() { enable(); dumpError('Error occurred when equipping item.');}, 
 					onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); },
 					proc: true
 			});
@@ -245,7 +245,7 @@ piratequesting.Equipment = function() {
 			try {
 				inventory = piratequesting.InventoryManager.getInventory();
 				update(true);
-			} catch (error) { alert(getErrorString(error)); }
+			} catch (error) { dumpError(error); }
 
 		}
 	}

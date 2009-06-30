@@ -89,7 +89,7 @@ piratequesting.Clock = function() {
 				}
 
 			} catch (error) {
-				alert(getErrorString(error));
+				dumpError(error);
 			}
 
 		}

@@ -172,7 +172,7 @@ try {
 				}
 			} 
 			catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 			}
 		};
 		

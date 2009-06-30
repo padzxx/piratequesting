@@ -112,8 +112,8 @@ piratequesting.PointsEdibles = function() {
 				ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=point_shop", {
 						protocol: "post",
 						onSuccess: function() { --pending_points; enablePoints()}, 
-						onFailure: function() { --pending_points; enablePoints(); alert('Error returned by server.');}, 
-						onError: function() { --pending_points; enablePoints(); alert('Error occurred when using Points.');}, 
+						onFailure: function() { --pending_points; enablePoints(); dumpError('Error returned by server.');}, 
+						onError: function() { --pending_points; enablePoints(); dumpError('Error occurred when using Points.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('ptsmeter').setAttribute('value',http.readyState * 25); },
 						params: 'action=' + ptslist.selectedItem.value
 						
@@ -132,8 +132,8 @@ piratequesting.PointsEdibles = function() {
 				ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items", { 
 						protocol: "post",
 						onSuccess: function() { --pending_edibles; enableEdibles(); AjaxRequest(piratequesting.baseURL+"/index.php?ajax=events_ajax&action=all_status_update"); }, 
-						onFailure: function() { --pending_edibles; enableEdibles(); alert('Error returned by server.');}, 
-						onError: function() { --pending_edibles; enableEdibles(); alert('Error occurred when using Edibles.');}, 
+						onFailure: function() { --pending_edibles; enableEdibles(); dumpError('Error returned by server.');}, 
+						onError: function() { --pending_edibles; enableEdibles(); dumpError('Error occurred when using Edibles.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('edimeter').setAttribute('value',http.readyState * 25); },
 						params: 'id=' + id + "&action=use&useamount=" + amount
 						

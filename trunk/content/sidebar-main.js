@@ -117,7 +117,7 @@ piratequesting.sidebar = {
 			pqor.reset();
 			//do that magical addition
 			overlayObserver.observe(null,"xul-overlay-merged", null);
-		} catch (error) { alert(getErrorString(error)); }
+		} catch (error) { dumpError(error); }
 	},
 	
 	/**
@@ -196,7 +196,7 @@ piratequesting.sidebar.Tabbox = function() {
 			return _element;
 
 		}
-	} catch (error) { alert(getErrorString(error)); }
+	} catch (error) { dumpError(error); }
 	
 }
 
@@ -247,12 +247,13 @@ overlayObserver.prototype = {
   				sidebar.contentDocument.loadOverlay(nex.getOverlayFile(),this);
   			} catch (error) {
   				cleanUp();
-  				alert("Failed to load: " + nex.getOverlayFile() + "\nReported Error " + getErrorString(error));
+  				dumpError(error);
+  				dumpError("Failed to load: " + nex.getOverlayFile() + "\nReported Error " + getErrorString(error));
   			}
   		} else {
   			cleanUp()
   		}
-  		} catch (error) { alert(getErrorString(error)); }
+  		} catch (error) { dumpError(error); }
   	}
   },
   register: function() {

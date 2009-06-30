@@ -223,7 +223,7 @@ function toggleSBStyle() {
 	else
 		header.className = cur_style + " piratequesting";
 	header.className = header.className.replace(/\s\s/, " ");
-	}catch (e) { alert(getErrorString(e));}
+	}catch (e) { dumpError(e);}
 }
 
 /**
@@ -590,7 +590,10 @@ Node.prototype.update = function(text) {
 }
 
 function dumpError(error) {
-	dump("\n" + getErrorString(error)+ "\n");
+	if (typeof error == "String") 
+		dump ("\n" + error + "\n");
+	else
+		dump("\n" + getErrorString(error)+ "\n");
 	
 }
 

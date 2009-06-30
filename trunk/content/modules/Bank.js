@@ -143,7 +143,7 @@ createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid In
 							enable();
 						}
 					} else {
-						alert("Banking failed due to error");
+						dumpError("Banking failed due to error");
 						enable();
 					}
 				}	
@@ -173,7 +173,7 @@ createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid In
 					if (http.status == 200) {
 						piratequesting.Bank.parseBankResponse(http.responseText);
 					} else {
-						alert("Banking failed due to error");
+						dumpError("Banking failed due to error");
 						enable();
 					}
 				}

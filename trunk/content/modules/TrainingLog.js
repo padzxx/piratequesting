@@ -75,7 +75,7 @@ piratequesting.TrainingLog = function() {
 				trainLogTab.contentDocument.getElementById("update").doCommand();
 			}
 		
-		} catch (error) { alert(getErrorString(error)); }
+		} catch (error) { dumpError(error); }
 	}
 	
 	return {
@@ -101,7 +101,7 @@ piratequesting.TrainingLog = function() {
 			if (!data.injured && ((data.failure && (data.failure != "")) || (data.success.length > 0)) ) {
 				write(data);
 			}
-			} catch (error) { alert(getErrorString(error));}
+			} catch (error) { dumpError(error);}
 
 		},
 		open : function() {

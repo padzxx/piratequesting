@@ -82,7 +82,7 @@ piratequesting.Ship = function() {
 			}
 		}
 		} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 			}
 	};
 	
@@ -131,7 +131,7 @@ piratequesting.Ship = function() {
 					}	
 				publish();
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 			}
 			
 			

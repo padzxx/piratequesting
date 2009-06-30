@@ -39,11 +39,11 @@ piratequesting.Training = function() {
 				},
 				onFailure: function(){
 					enable();
-					alert('Failed to get energy data.');
+					dumpError('Failed to get energy data.');
 				},
 				onError: function(){
 					enable();
-					alert('Error occurred when getting energy information.');
+					dumpError('Error occurred when getting energy information.');
 				},
 				onStateChange: function(http){
 					var sbcd = sidebar.contentDocument;
@@ -146,27 +146,30 @@ piratequesting.Training = function() {
 		try {
 			if (piratequesting.baseTheme == "classic") {
 				var url = piratequesting.baseURL + "/index.php?on=train";
+				var proc = true;
 			} else if (piratequesting.baseTheme == "default") {
 				var url = piratequesting.baseURL + "/index.php?ajax=train";
+				var proc = false;
 			}	
-				disable();
-				ajax = AjaxRequest(url, {
-					protocol: "post",
-					onSuccess: enable,
-					onFailure: function(){
-						enable();
-						alert('Failed to complete Training.');
-					},
-					onError: function(){
-						enable();
-						alert('Error occurred when Training.');
-					},
-					onStateChange: function(http){
-						var sbcd = sidebar.contentDocument;
-						sbcd.getElementById('trnmeter').setAttribute('value', http.readyState * 25);
-					},
-					params: params
-				});
+			disable();
+			ajax = AjaxRequest(url, {
+				protocol: "post",
+				proc: proc,
+				onSuccess: enable,
+				onFailure: function(){
+					enable();
+					dumpError('Failed to complete Training.');
+				},
+				onError: function(){
+					enable();
+					dumpError('Error occurred when Training.');
+				},
+				onStateChange: function(http){
+					var sbcd = sidebar.contentDocument;
+					sbcd.getElementById('trnmeter').setAttribute('value', http.readyState * 25);
+				},
+				params: params
+			});
 			
 			 
 		}
@@ -177,13 +180,8 @@ piratequesting.Training = function() {
 	}
 	
 	function trainPC(stramount,defamount,speamount) {
-		dump("Starting train by %\n");
-		dump("Strength: " + stramount + "\n");
-		dump("Defense: " + defamount + "\n");
-		dump("Speed: " + speamount + "\n");
 		
 		var energy = getEnergy();
-		dump("Energy: " + energy + "\n");
 		
 		// alert(energy);
 		// get how much energy they want to use.... maybe they don't
@@ -272,19 +270,10 @@ piratequesting.Training = function() {
 				}
 			}
 		}
-		dump("when all is said and done...");
-		dump("Strength: " + stren + "\n");
-		dump("Defense: " + defen + "\n");
-		dump("Speed: " + speen + "\n");
-		
 		trainVal(stren,defen,speen);
 	}
 	
 	function trainVal(stren,defen,speen) {
-		dump("starting train by val\n");
-		dump("Strength: " + stren + "\n");
-		dump("Defense: " + defen + "\n");
-		dump("Speed: " + speen + "\n");
 		var params = "strength=" + stren + "&defense=" + defen + "&speed="
 					+ speen + "&train_x=1&train_y=1&train=Train";
 		doTraining(params);
@@ -315,11 +304,10 @@ piratequesting.Training = function() {
 			// alert("strength: " + stren + "\nDefense: " +defen+"\nSpeed: "+
 			// speen);
 			
-			}catch (error) { alert(getErrorString(error)); }
+			}catch (error) { dumpError(error); }
 		},
 
 		maxStrength : function() {
-			dump("Max Strength!\n");
 			if (piratequesting.baseTheme == "classic") {
 				var params = "trainstrength=All%20Strength";
 				doTraining(params);
@@ -330,9 +318,7 @@ piratequesting.Training = function() {
 		},
 
 		maxDefense : function() {
-			dump("Max Defense!\n");
-	
-			if (piratequesting.baseTheme == "classic") {
+					if (piratequesting.baseTheme == "classic") {
 				var params = "traindefense=All%20Defense";
 				doTraining(params);
 			} else if (piratequesting.baseTheme == "default") {
@@ -341,8 +327,6 @@ piratequesting.Training = function() {
 		},
 
 		maxSpeed : function() {
-			dump("Max Speed!\n");
-	
 			if (piratequesting.baseTheme == "classic") {
 				var params = "trainspeed=All%20Speed";
 				doTraining(params);
@@ -382,7 +366,7 @@ try {
 					//alert(piratequesting.baseURL + data.codesrc);
 				} else createResponse(trainresult, new Array(""),1);
 			}
-			} catch (error) { alert(getErrorString(error)); }
+			} catch (error) { dumpError(error); }
 		},
 
 		HandleKeyPressStats : function(e) {

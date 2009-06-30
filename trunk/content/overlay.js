@@ -126,7 +126,7 @@ var piratequesting = function () {
 					piratequesting.loadModules();
 					
 				} catch (error) {
-					alert(getErrorString(error));
+					dumpError(error);
 				}
 	
 			}
@@ -135,14 +135,14 @@ var piratequesting = function () {
 			try {
 				this.PQLoadCollection.push(new PageProcess(pattern, func));
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 			}
 		},
 		addResponseProcessor : function (pattern, func) {
 			try {
 				this.PQResponseProcessorCollection.push(new PageProcess(pattern, func));
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 			}
 		},
 		
@@ -150,7 +150,7 @@ var piratequesting = function () {
 			try {
 				this.PQRAWProcessorCollection.push(new PageProcess(pattern, func));
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 			}
 		},
 		
@@ -215,9 +215,7 @@ var piratequesting = function () {
 		 * @param {DOMEvent} event
 		 */
 		PQPageLoad : function(event) {
-			 /*
-			 * try { alert(event.originalTarget); } catch (e) { alert(e.message); }
-			 */
+			
 			if (event.originalTarget instanceof HTMLDocument) {
 				
 				var doc = event.originalTarget;
@@ -314,7 +312,7 @@ var piratequesting = function () {
 						+ " = new StringBundle('" + stringFile + "');");
 				nfunc();
 			} catch (e) {
-				alert(getErrorString(e));
+				dumpError(e);
 			}
 		},
 	
@@ -327,7 +325,7 @@ var piratequesting = function () {
 							.createInstance(Components.interfaces.nsIFileProtocolHandler);
 					var modFile = ph.getURLSpecFromFile(file);
 				} catch (e) {
-					alert(getErrorString(e));
+					dumpError(e);
 				}
 	
 				/**
@@ -350,7 +348,7 @@ var piratequesting = function () {
 									+ "= { };");
 							nfunc();
 						} catch (e) {
-							alert(getErrorString(e));
+							dumpError(e);
 						}
 	
 						try {
@@ -384,14 +382,14 @@ var piratequesting = function () {
 										overlay.firstChild.nodeValue);
 							}
 						} catch (e) {
-							alert(getErrorString(e));
+							dumpError(e);
 						}
 					}
 				}
 				try {
 					xmlReq.send(null);
 				} catch (e) {
-					alert(getErrorString(e));
+					dumpError(e);
 				}
 			}
 	
@@ -642,7 +640,7 @@ try {
 					var date = Date.parse(request.getResponseHeader("Date"));
 					var responseSource = this.receivedData.join();
 					//fix leading spaces bug
-					responseSource = responseSource.replace(/\s+(\S[\s\S]+)/,"$1");
+					responseSource = responseSource.replace(/^\s+(\S[\s\S]+)/,"$1");
 				
 					piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date, data);
 				}
