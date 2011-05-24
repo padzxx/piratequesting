@@ -5,18 +5,19 @@
   <RDF:Description RDF:about="rdf:#$NQa4k"
                    em:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    em:minVersion="3.0"
-                   em:maxVersion="3.5" />
+                   em:maxVersion="5.*" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    em:id="{D71839DC-FCB4-436e-8D2C-690D2C742153}"
                    em:name="PirateQuesting"
-                   em:version="2.0b8"
+                   em:version="2.2"
                    em:creator="Jonathan Fingland"
                    em:description="Unofficial add-on for the browser game Pirate Quest found at www.piratequest.net"
                    em:homepageURL="http://pq.ashita.org"
                    em:aboutURL="chrome://piratequesting/content/about.xul"
                    em:optionsURL="chrome://piratequesting/content/options.xul"
                    em:updateURL="http://pq.ashita.org/update.rdf"
-                   em:updateKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC9jkgnk9YYYjtK8PJgXA+hB/eIdQ7HNig4rNPFcV9KVo2icO07qTowDRQhdH6a+ZdRHjHNkr0StU18vyBeC9Y9ZkZ8w0xmuM0ZuSI27aReBn9VpbtGOe+2vThvnmablKby9/fCb0UTKzaX0vsPPjuA5yHToQR2ZuG0aojBvZY95QIDAQAB">
+                   em:unpack="true"
+                   em:updateKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNZZ0/W5s+f0JQb6YY+LWB5NhosdtgPwELMfQpOsznsGhF02nMabKGDsY3TlT1I51HQQleFrv+k792Q0LPfFthO7URjQLOdmkk5KKjP/fKry8EJf+L6X1cPaFH8bIHyupLvZUyd3WKTTeRxqjmOe4e++4F/I1OOJMTKfqWF7g77QIDAQAB">
     <em:targetApplication RDF:resource="rdf:#$NQa4k"/>
   </RDF:Description>
 </RDF:RDF>
