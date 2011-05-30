@@ -19,6 +19,7 @@
 <!DOCTYPE overlay SYSTEM "chrome://piratequesting/locale/piratequesting.dtd">
 <overlay id="piratequesting"
   xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="chrome://piratequesting/content/json2.js"/>
   <script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
   <script type="application/x-javascript" src="chrome://piratequesting/content/PageProcess.js"/>
   <script type="application/x-javascript" src="chrome://piratequesting/content/stringutils.js"/>
