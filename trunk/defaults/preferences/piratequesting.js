@@ -1,3 +1,4 @@
+pref("extensions.piratequesting.DebugLevel", 0);
 pref("extensions.piratequesting.FormatFightReports", true);
 pref("extensions.piratequesting.ForumSigsMaxSize", 165);
 pref("extensions.piratequesting.baseurl", "http://www.piratequesting.net");
