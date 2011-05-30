@@ -47,8 +47,9 @@ function PageProcess(pattern, func, context) {
 	   * @param {mixed} param
 	   */
 	  run: function(input, param, requestNumber, requestTime) {
+	  	pqdump("PQ: Running Page Processor\n", PQ_DEBUG_EXTREME);
 	  	var args = Array.prototype.slice.call(arguments,4);
-	  	//dump("\n\ninput: " + input + "\nargs: " + args.length);
+	  	pqdump("\tinput: " + input + "\n\targs: " + args.length);
 
 	  	var lr = _func.lastRequest;
 	  	var lrt = _func.lastRequestTime;
@@ -73,7 +74,8 @@ function PageProcess(pattern, func, context) {
 	   * @param {mixed} param
 	   */
 	  force: function(input,param) {
-	    _func.call(_context,param,input);
+	    pqdump("PQ: Forcing Run of Page Processor\n", PQ_DEBUG_EXTREME);
+	  	_func.call(_context,param,input);
 	  }
   }
 }
