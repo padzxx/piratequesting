@@ -67,3 +67,13 @@ String.prototype.parseQuery = function() {
 	}
 	return paramValues;
 }
+
+function toNumberSet(obj) {
+	var ret_obj = [], val, str_val; 
+	for (prop in obj) { 
+		val = obj[prop];
+		str_val = (String)(val);
+		ret_obj[prop] = str_val.toNumber(); 
+	} 
+	return ret_obj;	
+}
