@@ -180,7 +180,9 @@ piratequesting.Equipment = function() {
 	}
 	
 	function equipmentMenusLoaded() {
-		return (sbcd.getElementById("weapons_menu") &&  
+		var sbcd = sidebar.contentDocument;
+		return (sbcd && 
+				sbcd.getElementById("weapons_menu") &&  
 				sbcd.getElementById("head_menu") &&
 				sbcd.getElementById("armour_menu") && 
 				sbcd.getElementById("coats_menu") &&
