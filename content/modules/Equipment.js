@@ -29,6 +29,7 @@ piratequesting.Equipment = function() {
 		 */
 		var sbcd = sidebar.contentDocument;
 		
+		
 		var skip = skip || false;
 		var mi, tt,id;
 		var eqi,items,item;
@@ -42,15 +43,17 @@ piratequesting.Equipment = function() {
 
 		//check the category by name or by id number
 		var cat = inventory.evaluate("/inventory/category[@id='"+ category_id + "' or @name='"+ category_id +"']", inventory, null, XPathResult.ANY_UNORDERED_NODE_TYPE,null).singleNodeValue;
-		if (!cat) return;	//The category doesn't exist. bail!
+		if (!cat) {
+			return;	//The category doesn't exist. bail!
+		}
+	
 		var menu_id = cat.getAttribute("name") + "_menu";
 		var wm = sbcd.getElementById(menu_id);
 		while (wm.hasChildNodes())
 			wm.removeChild(wm.childNodes[0]);
 		
 		if (eqi = inventory.evaluate(".//item[@equipped='1']", cat, null, XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue) {
-			// if (category.HasItems())
-			// wm.appendChild(document.createElement("menuseparator"));
+				
 			mi = sbcd.createElement("menuitem");
 			mi.setAttribute("label", "Unequip " + eqi.getAttribute("name"));
 			mi.setAttribute("value", eqi.getAttribute("action_id"));
@@ -58,54 +61,68 @@ piratequesting.Equipment = function() {
 			wm.appendChild(mi);
 			
 			var img_src = eqi.getAttribute('image');
-			switch (-1) {
-				case img_src.indexOf("chrome://"):
-				case img_src.indexOf("http://"):
-					break;
-				default:
-					img_src = piratequesting.baseURL + "/" + img_src;
+			if ((-1 === img_src.indexOf("chrome://"))&&(-1 === img_src.indexOf("http://"))) {
+				img_src = piratequesting.baseURL + "/" + img_src;
 			}
 			sbcd.getElementById(cat.getAttribute("name") + "_image").setAttribute("src", img_src);
 			sbcd.getElementById(cat.getAttribute("name") + "_label").setAttribute("value", eqi.getAttribute('name'));
 		} else {
-		// add the unequipped items to the menu, create the associated
-		// labels, values and oncommand action
+			// add the unequipped items to the menu, create the associated
+			// labels, values and oncommand action
 			items = inventory.evaluate(".//item[@equipped='0' and @quantity>0]", cat, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-			for (var i = 0, len = items.snapshotLength; i < len; ++i) {
-				item = items.snapshotItem(i);
-				// get the item
-				// guide and start
-				// over
-				id = item.getAttribute("action_id");	
+			if (items.snapshotLength <= 0) {
 				mi = sbcd.createElement("menuitem");
-				mi.setAttribute("label", "Equip " + item.getAttribute("name"));
-				mi.setAttribute("value", id);
-				mi.setAttribute("oncommand","piratequesting.Equipment.equip(this.value)");
-				var old_one =  sbcd.getElementById("tt" + id);
-				tt = makeTooltip(id);
-				if (old_one) sbcd.getElementById('ttbox').replaceChild(tt,old_one);
-				else sbcd.getElementById('ttbox').appendChild(tt);
-				mi.setAttribute("tooltip", tt.getAttribute("id"));
-				mi.setAttribute("popupanchor", "topright");
+				mi.setAttribute("label", "No items...");
 				wm.appendChild(mi);
-				
-				switch (cat.getAttribute("name")) {
-					case "weapons":
-						sbcd.getElementById("weapons_image").setAttribute("src", piratequesting.baseURL + "/images/fists.gif");
-						break;
-					case "head":
-						sbcd.getElementById("head_image").setAttribute("src", piratequesting.baseURL + "/images/head.gif");
-						break;
-					case "armour":
-						sbcd.getElementById("armour_image").setAttribute("src", piratequesting.baseURL + "/images/armor.gif");
-						break;
-					case "offhand":
-						sbcd.getElementById("offhand_image").setAttribute("src", piratequesting.baseURL + "/images/offhand.gif");
-						break;
-					
-				}
-				sbcd.getElementById(cat.getAttribute("name") + "_label").setAttribute("value", "Nothing!");
 			}
+			else {
+				for (var i = 0, len = items.snapshotLength; i < len; ++i) {
+					item = items.snapshotItem(i);
+					// get the item
+					// guide and start
+					// over
+					id = item.getAttribute("action_id");	
+					mi = sbcd.createElement("menuitem");
+					mi.setAttribute("label", "Equip " + item.getAttribute("name"));
+					mi.setAttribute("value", id);
+					mi.setAttribute("oncommand","piratequesting.Equipment.equip(this.value)");
+					var old_one =  sbcd.getElementById("tt" + id);
+					tt = makeTooltip(id);
+					if (old_one) sbcd.getElementById('ttbox').replaceChild(tt,old_one);
+					else sbcd.getElementById('ttbox').appendChild(tt);
+					mi.setAttribute("tooltip", tt.getAttribute("id"));
+					mi.setAttribute("popupanchor", "topright");
+					wm.appendChild(mi);
+				}
+			}
+			
+			switch (cat.getAttribute("name")) {
+				case "weapons":
+					sbcd.getElementById("weapons_image").setAttribute("src", piratequesting.baseURL + "/images/fists.gif");
+					break;
+				case "head":
+					sbcd.getElementById("head_image").setAttribute("src", piratequesting.baseURL + "/images/head.gif");
+					break;
+				case "armour":
+					sbcd.getElementById("armour_image").setAttribute("src", piratequesting.baseURL + "/images/armor.gif");
+					break;
+				case "offhand":
+					sbcd.getElementById("offhand_image").setAttribute("src", piratequesting.baseURL + "/images/offhand.gif");
+					break;
+				case "coats":
+					sbcd.getElementById("coats_image").setAttribute("src", piratequesting.baseURL + "/images/coat.gif");
+					break;
+				case "feet":
+					sbcd.getElementById("feet_image").setAttribute("src", piratequesting.baseURL + "/images/foot.gif");
+					break;
+				case "leggings":
+					sbcd.getElementById("leggings_image").setAttribute("src", piratequesting.baseURL + "/images/legs.gif");
+					break;
+				case "accessories":
+					sbcd.getElementById("accessories_image").setAttribute("src", piratequesting.baseURL + "/images/accessories.gif");
+					break;
+			}
+			sbcd.getElementById(cat.getAttribute("name") + "_label").setAttribute("value", "Nothing!");
 		}
 		return true;
 	}
@@ -150,15 +167,27 @@ piratequesting.Equipment = function() {
 	}
 	
 	function checkInventory() {
+		pqdump("\nPQ: Requesting Inventory for forced update\n",PQ_DEBUG_STATUS);
 		var sbcd = sidebar.contentDocument;	
 		sbcd.getElementById('eqmeter').setAttribute('value',0);
 		ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&m=1", { 
-				onSuccess: function() { try { enable(); dump("\nInventory check succeeded.\n") } catch (error) {dump("\n" + getErrorString(error) + "\n");} }, 
-				onFailure: function() { enable(); dumpError('Failed to update Inventory.');}, 
-				onError: function() { enable(); dumpError('Error occurred when updating Inventory.');}, 
+				onSuccess: function() { try { enable(); pqdump("\n\tInventory check succeeded.\n") } catch (error) {dumpError(error);} }, 
+				onFailure: function() { enable(); dumpError('\n\tFailed to update Inventory.\n');}, 
+				onError: function() { enable(); dumpError('\n\tError occurred when updating Inventory.\n');}, 
 				onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('eqmeter').setAttribute('value',http.readyState * 25); },
 					proc: true
 		});
+	}
+	
+	function equipmentMenusLoaded() {
+		return (sbcd.getElementById("weapons_menu") &&  
+				sbcd.getElementById("head_menu") &&
+				sbcd.getElementById("armour_menu") && 
+				sbcd.getElementById("coats_menu") &&
+				sbcd.getElementById("leggings_menu") && 
+				sbcd.getElementById("feet_menu") &&
+				sbcd.getElementById("accessories_menu") && 
+				sbcd.getElementById("offhand_menu"));
 	}
 	
 	var forced_update_count = 0;
@@ -173,45 +202,56 @@ piratequesting.Equipment = function() {
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd) return;
 		
-		if ( !sbcd.getElementById("weapons_menu") ||  !sbcd.getElementById("head_menu") || !sbcd.getElementById("armour_menu") || !sbcd.getElementById("offhand_menu")) {
+		if (!equipmentMenusLoaded()) {
 			setTimeout(update,3000);
 			return;
 		}
 		
-		//var equipped_items = inventory.evaluate("descendant::item[@equipped=1]", inventory, null, XPathResult.ANY_TYPE,null);
-/*			while (item = equipped_items.iterateNext()) {
-				dump("\n"+item.parentNode.getAttribute("name")+ ": " + item.getAttribute("name")+"\n");
-			}*/
-			//re-get the item guide info if any of the items are missing a description
-		if (inventory.evaluate("boolean(/inventory/category[@id=1 or @id=2 or @id=5 or @id=11]/item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
-			var cur_time = (new Date()).getTime();  
-			if (cur_time - last_check > 5000) {
-				last_check = cur_time;
-				piratequesting.InventoryManager.checkItemGuide();
-			} else {
-				dumpError("Error Processing Item Guide Data in Equipment.js");
+		
+		if (inventory.evaluate("boolean(/inventory/category[@id=1 or @id=2 or @id=5 or @id=11 or @id=15 or @id=16 or @id=17 or @id=18]/item[not(@cost)])", inventory, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+			try {
+				var cur_time = (new Date()).getTime();  
+				if (cur_time - last_check > 5000) {
+					last_check = cur_time;
+					piratequesting.InventoryManager.checkItemGuide();
+				} else {
+					var bad_items = inventory.evaluate("/inventory/category[@id=1 or @id=2 or @id=5 or @id=11 or @id=15 or @id=16 or @id=17 or @id=18]/item[not(@cost)]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+					pqdump("Items lacking Item guide entries:\n")
+					for (var i=0,len=bad_items.snapshotLength;i<len;++i) {
+						var bad_item = bad_items.snapshotItem(i);
+						pqdump("\t"+bad_item.getAttribute("name")+"\n");
+					}
+
+					throw "Error Processing Item Guide Data in Equipment.js";
+				}
+			}
+			catch(e) {
+				dumpError(e);
 			}
 			return; // item description not found. bail.
 		} else {
-			
-		updateMenu("weapons");
-		updateMenu("head");
-		updateMenu("armour");
-		updateMenu("offhand");
+			updateMenu("weapons");
+			updateMenu("head");
+			updateMenu("armour");
+			updateMenu("offhand");
+			updateMenu("coats");
+			updateMenu("feet");
+			updateMenu("leggings");
+			updateMenu("accessories");
 		}	
 		
 	}
 	
 	return {
-
-
 		
 		unequip : function(id) {
+			pqdump("PQ: Equipping Item\n", PQ_DEBUG_STATUS);
+			pqdump("\tItem ID: "+ id + "\n");
 			disable();
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
 			//onSuccess: checkInventory, 
-					
+			pqdump("\tAjax call to: " + piratequesting.baseURL + "/index.php?on=inventory&action=unequip&id=" + id + "\n");
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=unequip&id=" + id, {
 					onSuccess: enable, 
 					onFailure: function() { enable(); dumpError('Failed to unequip item.');}, 
@@ -222,11 +262,15 @@ piratequesting.Equipment = function() {
 		},
 
 		equip : function(id) {
+			
+			pqdump("PQ: Equipping Item\n", PQ_DEBUG_STATUS);
+			pqdump("\tItem ID: "+ id + "\n");
 			disable();
 			var sbcd = sidebar.contentDocument;	
 			sbcd.getElementById('invmeter').setAttribute('value',0);
 			//onSuccess: checkInventory, 
-					
+			pqdump("\tAjax call to: " + piratequesting.baseURL + "/index.php?on=inventory&action=equip&id=" + id + "\n");
+			dR = top.debugResponse;
 			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory&action=equip&id=" + id, { 
 					onSuccess: enable, 
 					onFailure: function() { enable(); dumpError('Failed to equip item.');}, 
