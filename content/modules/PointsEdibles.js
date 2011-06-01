@@ -16,7 +16,7 @@ piratequesting.PointsEdibles = function() {
 		
 		var sbcd = sidebar.contentDocument;
 		if (!sbcd || !sbcd.getElementById('edibleitems') || !sbcd.getElementById('edibleslist')) {			//if stuff isn't loaded yet, wait a second and try again
-			//dump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
+			//pqdump("\nSidebar content not yet loaded. Trying again in 2 seconds.\n");
 			if (repeat)
 				setTimeout(updateEdiblesList.bind(piratequesting.PointsEdibles,true),2000);
 			return;
@@ -56,11 +56,6 @@ piratequesting.PointsEdibles = function() {
 		var sbcd = sidebar.contentDocument;
 			
 		sbcd.getElementById('ptsgrp').style.opacity = 0.5;
-		/*document.getElementById('ptsgrp').setAttribute("type","cover");
-		document.getElementById('ptscb').setAttribute("type","cbox");
-		document.getElementById('ptsmeter').setAttribute('value','0');
-		document.getElementById('pointslist').setAttribute('disabled','true');
-		document.getElementById('usepoints').setAttribute('disabled','true');*/
 	}
 	
 	function enablePoints() {
@@ -68,23 +63,11 @@ piratequesting.PointsEdibles = function() {
 			
 		if (pending_points == 0)
 			sbcd.getElementById('ptsgrp').style.opacity = 1.0;
-		/*document.getElementById('ptsgrp').setAttribute("type","");
-		document.getElementById('ptscb').setAttribute("type","hide");
-		document.getElementById('pointslist').removeAttribute('disabled');
-		document.getElementById('usepoints').removeAttribute('disabled');*/
 	}
 	
 	function disableEdibles() {
 		var sbcd = sidebar.contentDocument;
-			
 		sbcd.getElementById('edigrp').style.opacity = 0.5;
-		
-		/*document.getElementById('edigrp').setAttribute("type","cover");
-		document.getElementById('edicb').setAttribute("type","cbox");
-		document.getElementById('edibleslist').setAttribute('disabled','true');
-		document.getElementById('useedible1').setAttribute('disabled','true');
-		document.getElementById('useedible5').setAttribute('disabled','true');
-		document.getElementById('edimeter').setAttribute('value','0');*/
 	}
 	
 	function enableEdibles() {
@@ -92,18 +75,12 @@ piratequesting.PointsEdibles = function() {
 			
 		if (pending_edibles == 0)
 			sbcd.getElementById('edigrp').style.opacity = 1.0;
-		
-		/*document.getElementById('edigrp').setAttribute("type","");
-		document.getElementById('edicb').setAttribute("type","hide");
-		document.getElementById('edibleslist').removeAttribute('disabled');
-		document.getElementById('useedible1').removeAttribute('disabled');
-		document.getElementById('useedible5').removeAttribute('disabled');*/
 	}
-	
 		
 	return {
 		
 		usePoints: function() {
+			pqdump("PQ: Using points\n", PQ_DEBUG_STATUS);
 			var sbcd = sidebar.contentDocument;
 			var ptslist = sbcd.getElementById('pointslist'); 
 			if (ptslist.selectedIndex > -1) {
@@ -111,11 +88,18 @@ piratequesting.PointsEdibles = function() {
 				++pending_points;
 				ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=point_shop", {
 						protocol: "post",
-						onSuccess: function() { --pending_points; enablePoints()}, 
-						onFailure: function() { --pending_points; enablePoints(); dumpError('Error returned by server.');}, 
+						onSuccess: function(http) { 
+							--pending_points; 
+							enablePoints();
+							//AjaxRequest(piratequesting.baseURL+"/index.php?ajax=events_ajax&action=all_status_update");
+							pqdump("\tlogging response to console.\n", PQ_DEBUG_STATUS);
+							pqlog(http, PQ_DEBUG_STATUS);
+						}, 
+						onFailure: function(http) { --pending_points; enablePoints(); dumpError('Error returned by server.');}, 
 						onError: function() { --pending_points; enablePoints(); dumpError('Error occurred when using Points.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('ptsmeter').setAttribute('value',http.readyState * 25); },
-						params: 'action=' + ptslist.selectedItem.value
+						params: 'action=' + ptslist.selectedItem.value,
+						proc:true
 						
 				});
 			} else { alert("Select a point action first!"); }
@@ -123,15 +107,22 @@ piratequesting.PointsEdibles = function() {
 
 		
 		useEdible: function(amount) {
+			pqdump("PQ: Using edibles\n", PQ_DEBUG_STATUS);
 			var sbcd = sidebar.contentDocument;
 			var edilist = sbcd.getElementById('edibleslist'); 
 			if (edilist.selectedIndex > -1) {
 				disableEdibles();
 				++pending_edibles;
 				var id = edilist.selectedItem.value;
-				ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items", { 
+				ajax = AjaxRequest(piratequesting.baseURL + "/index.php?ajax=items&json", { 
 						protocol: "post",
-						onSuccess: function() { --pending_edibles; enableEdibles(); AjaxRequest(piratequesting.baseURL+"/index.php?ajax=events_ajax&action=all_status_update"); }, 
+						onSuccess: function(http) { 
+							--pending_edibles; 
+							enableEdibles(); 
+							//AjaxRequest(piratequesting.baseURL+"/index.php?ajax=events_ajax&action=all_status_update");
+							pqdump("\tlogging response to console.\n", PQ_DEBUG_STATUS);
+							pqlog(http, PQ_DEBUG_STATUS); 
+						}, 
 						onFailure: function() { --pending_edibles; enableEdibles(); dumpError('Error returned by server.');}, 
 						onError: function() { --pending_edibles; enableEdibles(); dumpError('Error occurred when using Edibles.');}, 
 						onStateChange: function(http) { var sbcd = sidebar.contentDocument;	sbcd.getElementById('edimeter').setAttribute('value',http.readyState * 25); },
@@ -142,42 +133,32 @@ piratequesting.PointsEdibles = function() {
 
 		},
 		
-		
-		
+		//TODO
 		/*abort : function() {
 			
 
 		},*/
-		process : function (repeat) {
-			//dump("Updating Edibles List");
+		processInventory : function (repeat) {
+			//pqdump("Updating Edibles List");
 			try {
 			inventory = piratequesting.InventoryManager.getInventory();
 			updateEdiblesList(repeat);
 			} catch (e) { dumpError(e); }
 		},
 		
-		processPoints : function(doc) {
-			var coinsnpts = doc.getElementById('coinsnpts');
-			// check to see if it exists
-			if (coinsnpts) {
-				// the first <a> should be the points, and since it has
-				// no id, we just have to hope it stays that way
-				points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue
-						.toNumber();
-				var points_val, coins_val, chest_val;
-				if (piratequesting.sidebar) {
-					if (points_val = sidebar.contentDocument
-							.getElementById('pointsvalue')) {
-						points_val.value = points;
-						points_val.setAttribute('value', points);
-					}
-				}						
+		processPoints : function() {
+			if (piratequesting.Bank) {
+				var points = piratequesting.Bank.getPoints(); 
+				if (points_val = sidebar.contentDocument
+						.getElementById('pointsvalue')) {
+					points_val.value = points;
+					points_val.setAttribute('value', points);
+				}
 			}
-
 		}
-
 	}
 }();
 
-document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.PointsEdibles.process(event); }, false);
+document.addEventListener("piratequesting:BankUpdated", piratequesting.PointsEdibles.processPoints, false);
+document.addEventListener("piratequesting:InventoryUpdated",function(event){ piratequesting.PointsEdibles.processInventory(event); }, false);
 piratequesting.addLoadProcess(new RegExp("",""),piratequesting.PointsEdibles.processPoints,piratequesting.PointsEdibles);
