@@ -35,17 +35,9 @@ piratequesting.EventsMessages = function() {
 			try {
 				var me = doc.getElementById("msgevts")
 				if (me) {
-					me = me.getElementsByTagName("span");
-					var msgs = me[0];
-					var evts = me[1];
-					if (msgs) {
-						messages = msgs.firstChild.firstChild.nodeValue.toNumber();
-					}
-
-					if (evts) {
-						events = evts.firstChild.firstChild.nodeValue.toNumber();
-					}
-					
+					//me = me.getElementsByTagName("span");
+					messages = doc.evaluate("//div[@class='message']", me, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+					events = doc.evaluate("//div[@class='events']", me, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
 				}
 				publish();
 			} catch (error) {
@@ -55,14 +47,17 @@ piratequesting.EventsMessages = function() {
 		
 		processRaw : function (text) {
 			try{
-				//expect xml doc here 
-				//dump("\nProcessing Events and Messages");
-					var parser=new DOMParser();
-  					var doc=parser.parseFromString(text,"text/xml");
-					messages = doc.evaluate("//user_messages", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
-					events = doc.evaluate("//user_events", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
-					//dump("\nEvents: " + events + "\t\tMessages: "+ messages);
-				publish();
+				if (text) {
+					var response_object = JSON.parse(text);
+					response_object = toNumberSet(response_object);
+					
+					messages = response_object.user_messages;
+					events = response_object.user_events;
+					
+					pqdump("Found " + messages + " messages and "+events + " events.\n", PQ_DEBUG_EXTREME);
+					
+					publish();
+				}
 			} catch (error) {
 				dumpError(error);
 			}
@@ -75,26 +70,13 @@ piratequesting.EventsMessages = function() {
 			openAndReuseOneTabPerURL(piratequesting.baseURL+'/index.php?on=events');
 		},
 		clearEvents: function () {
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseURL + "/index.php?on=events&action=delete_all";
-			http.open("GET", url, true);
-		
-			// Send the proper header information along with the request
-			http.setRequestHeader("Connection", "close");
-			http.onerror = function (e) {
-				onError(e);
-			}
 			
-			http.onreadystatechange = function () {
-				if(http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.ProcessResponse(url,http.responseText);
-					} else {
-						("Clearing Events failed due to error");
-					}
-				}
-			}
-			http.send(null);
+			var url = piratequesting.baseURL + "/index.php?on=events&action=delete_all";
+			
+			var ajax = new AjaxRequest(url,{
+				protocol:"get",
+				proc:true
+			});
 		}
 		
 	}
