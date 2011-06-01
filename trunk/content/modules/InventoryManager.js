@@ -41,10 +41,17 @@ piratequesting.InventoryManager = function() {
 	var inventory; 
 	
 	function zeroItems() {
-		var items = inventory.evaluate("/inventory/category/item",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-		for (var i=0,len=items.snapshotLength;i<len;++i) {
-			items.snapshotItem(i).setAttribute("quantity",0);
-			items.snapshotItem(i).setAttribute("equipped",0);
+		try 
+		{
+			var items = inventory.evaluate("/inventory/category/item",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			for (var i=0,len=items.snapshotLength;i<len;++i) {
+				items.snapshotItem(i).setAttribute("quantity",0);
+				items.snapshotItem(i).setAttribute("equipped",0);
+			}
+		}
+		catch (e)
+		{
+			dumpError(e);
 		}
 	}
 	
@@ -67,33 +74,62 @@ piratequesting.InventoryManager = function() {
 	
 	function makeNewInventory () { 
 		var doc = document.implementation.createDocument("","inventory",null);
+		
 		var head = doc.createElement("category");
 		head.setAttribute("name", "head");
 		head.setAttribute("id","5");
+		
 		var armour = doc.createElement("category");
 		armour.setAttribute("name", "armour");
 		armour.setAttribute("id","2");
+		
 		var weapons = doc.createElement("category");
 		weapons.setAttribute("name", "weapons");
 		weapons.setAttribute("id","1");
+		
 		var offhand = doc.createElement("category");
 		offhand.setAttribute("name", "offhand");
 		offhand.setAttribute("id","11");
+		
 		var edibles = doc.createElement("category");
 		edibles.setAttribute("name", "edibles");
 		edibles.setAttribute("id","3");
+		
 		var grenades = doc.createElement("category");
 		grenades.setAttribute("name", "grenades");
 		grenades.setAttribute("id","6");
+		
 		var miscellaneous = doc.createElement("category");
 		miscellaneous.setAttribute("name", "miscellaneous");
 		miscellaneous.setAttribute("id","8");
+		
 		var poisons = doc.createElement("category");
 		poisons.setAttribute("name", "poisons");
 		poisons.setAttribute("id","4");
+		
 		var tokens = doc.createElement("category");
 		tokens.setAttribute("name", "tokens");
 		tokens.setAttribute("id","12");
+		
+		var feet = doc.createElement("category");
+		feet.setAttribute("name", "feet");
+		feet.setAttribute("id","15");
+		
+		var coats = doc.createElement("category");
+		coats.setAttribute("name", "coats");
+		coats.setAttribute("id","16");
+		
+		var leggings = doc.createElement("category");
+		leggings.setAttribute("name", "leggings");
+		leggings.setAttribute("id","17");
+		
+		var accessories = doc.createElement("category");
+		accessories.setAttribute("name", "accessories");
+		accessories.setAttribute("id","18");
+		
+		var valuables = doc.createElement("category");
+		valuables.setAttribute("name", "valuables");
+		valuables.setAttribute("id","300");
 		
 		doc.documentElement.appendChild(head);
 		doc.documentElement.appendChild(armour);
@@ -104,6 +140,11 @@ piratequesting.InventoryManager = function() {
 		doc.documentElement.appendChild(miscellaneous);
 		doc.documentElement.appendChild(poisons);
 		doc.documentElement.appendChild(tokens);
+		doc.documentElement.appendChild(coats);
+		doc.documentElement.appendChild(leggings);
+		doc.documentElement.appendChild(feet);
+		doc.documentElement.appendChild(accessories);
+		doc.documentElement.appendChild(valuables);
 		return doc;
 	}
 	
@@ -121,27 +162,31 @@ piratequesting.InventoryManager = function() {
 
 		log.onreadystatechange = function() {
 			if (log.readyState == 4) {
-				var temp_inventory = log.responseXML;
-				//if there is a 'cat' element, then it belongs to the old system 
-				if (temp_inventory.evaluate("not(//cat)",temp_inventory,null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
-					inventory = temp_inventory;
-					document.fire('piratequesting:InventoryUpdated');
-				} else {
-					dump("Found old inventory file. Making new Inventory.\n");
-					inventory = makeNewInventory();
+				try 
+				{
+					var temp_inventory = log.responseXML;
+					//if there isn't a 'category' element with id 300 (valuables), then it belongs to one of the old systems. 
+					if (temp_inventory.evaluate("boolean(//category[@id = '300'])",temp_inventory,null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
+						pqdump("Current inventory file found\n");
+						inventory = temp_inventory;
+						document.fire('piratequesting:InventoryUpdated');
+					} else {
+						pqdump("Found old inventory file. Making new Inventory.\n");
+						inventory = makeNewInventory();
+						document.fire('piratequesting:InventoryUpdated');
+					}
+				} catch (e) {
+					dumpError(e);
 				}
 			}
 		}
 		log.send(null);
 	}
 	
-	function setCoinsPoints (doc) {
-		var coinsnpts = doc.getElementById('coinsnpts');
-		// check to see if it exists
-		if (coinsnpts) {
-			// the first <a> should be the points, and since it has
-			// no id, we just have to hope it stays that way
-			var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
+	function setPoints () {
+		if (piratequesting.Bank) {
+			var points = piratequesting.Bank.getPoints();
+			
 			var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost: 0};
 			var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
 			var item;
@@ -159,10 +204,14 @@ piratequesting.InventoryManager = function() {
 	
 	var ajax;
 	
-	if (logfile.exists())
+	if (logfile.exists()) 
+	{
 		load();
-	else 
+	}
+	else
+	{
 		inventory = makeNewInventory();
+	}
 	
 	return {
 		
@@ -182,29 +231,35 @@ piratequesting.InventoryManager = function() {
 
 		
 		checkInventory : function() {
-			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { onError: function() { dump("Error occurred while updating inventory\n"); } });
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=inventory", { onError: function() { pqdump("Error occurred while updating inventory\n"); }, proc:true });
 		},
 
 		checkItemGuide : function() {
-			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=item_guide", { onError: function() { dump("Error occurred while updating item guide\n"); } });
+			ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=item_guide", { onError: function() { pqdump("Error occurred while updating item guide\n"); }, proc:true });
 		},
-
+		
 		processInventory: function(doc){
+			pqdump("PQ: Processing Inventory Page\n",PQ_DEBUG_STATUS);
 			var addItem, getItems, getEquip;
-			
 			//do nothing if the swapspace isn't there. That means the inventory page is in a different mode. 
-			//dump("\n\n"+ doc.evaluate("//div[@id='contentarea']/form/table[1]",doc,null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotItem(0).innerHTML + "\n\n");
+			//pqdump("\n\n"+ doc.evaluate("//div[@id='contentarea']/form/table[1]",doc,null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotItem(0).innerHTML + "\n\n");
 			if (doc.evaluate("not(boolean(descendant-or-self::div[@id='swapspace']))", doc, null, XPathResult.BOOLEAN_TYPE,null).booleanValue) {  return; }
 			//not the new or old system... something weird happened so bail.
 			
+			pqdump("\tReset item quantities\n", PQ_DEBUG_STATUS);
 			zeroItems();
-					
-			setCoinsPoints(doc);
 			
+			//pqdump("\tSetting coin and point info\n", PQ_DEBUG_STATUS);
+			//setCoinsPoints(doc);
+			
+			pqdump("\tExtracting Item Categories...", PQ_DEBUG_STATUS);
 			var categories = inventory.evaluate("/inventory/category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
-			var category,items,item;
-					
-			if (piratequesting.baseTheme == 'default') {   
+			var category,items,item, numCategories;
+			numCategories = categories.snapshotLength;
+			pqdump("\t\tCategories found: "+numCategories+"\n");
+			
+			if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
+				pqdump("\tTheme in use: Default\n", PQ_DEBUG_STATUS);   
 				//using the new system 
 				addItem = function (category, item, equipped) {
 					try {
@@ -244,7 +299,7 @@ piratequesting.InventoryManager = function() {
 			
 							}
 						}
-					}catch (error) { dump("\n" + getErrorString(error) + "\n");}
+					}catch (error) { pqdump("\n" + getErrorString(error) + "\n");}
 				}
 				getItems = function (category) {
 					return doc.evaluate("(//div[@id='itemsec_"+ category.getAttribute("id") +"'])[1]/div[@class='box']", doc, null, XPathResult.ANY_TYPE,null);
@@ -257,8 +312,9 @@ piratequesting.InventoryManager = function() {
 				}
 				
 				
-			} else if (piratequesting.baseTheme == 'classic') {
-			
+			} else if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
+				pqdump("\tTheme in use: Classic\n", PQ_DEBUG_STATUS);
+				
 				getEquip = function () {
 					return doc.evaluate("//div[@id='contentarea']/form//table[1]/tbody[contains(tr[1]/td[last()],'Equipped')]/tr[2]/td//td[not(@align)]",doc,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 				}
@@ -274,6 +330,8 @@ piratequesting.InventoryManager = function() {
 					if (name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null)) {
 						if (!name.stringValue) return;
 						name = name.stringValue;
+						pqdump("\t\t\t\t"+name+"...\n");
+						
 						var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
 						
 						var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
@@ -304,21 +362,21 @@ piratequesting.InventoryManager = function() {
 		
 						}
 					} 
-					}catch (error) { dump("\n" + getErrorString(error) + "\n");}
+					}catch (error) { dumpError(error);}
 				}
 					
 			} else {
-				dump('Theme check failure: Not Default or Classic.\n');
+				pqdump('Theme check failure: Not Default or Classic.\n', PQ_DEBUG_ERROR);
 			}
 			
 			try {
 			
-				for (var i = 0, len=categories.snapshotLength; i<len;++i){
+				for (var i = 0; i<numCategories;++i){
 					/**
 					 * @type {Node}
 					 */
 					category = categories.snapshotItem(i);
-					//this gem gets each item in a cateogory from the inventory page. It does not, however, ghet the equipped items which have to be acquired separately below
+						//this gem gets each item in a cateogory from the inventory page. It does not, however, ghet the equipped items which have to be acquired separately below
 					// (//div[@id='"+ category.getAttribute("name") +"'])[1] is used because FM adds each category twice (bug?) and we only want to add the items from one of them.
 					// tr[position() mod 2 = 1] is used because every second row is empty
 					items = getItems(category);
@@ -333,97 +391,103 @@ piratequesting.InventoryManager = function() {
 				////td[not(@align)] is used because FM puts out 4 empty columns, carrying the align attribute, then 4 columns with the data we want.
 				items = getEquip();
 				//There will be exactly 4 results unless FM adds a new category to the equipment... in which case bigger changes need to happen.
-				//There should also be 4 categories selected so we'll just use the same index and need to be careful that the order is the same 
-				categories = inventory.evaluate("/inventory/category[@id='5' or @id='2' or @id='1' or @id='11'] ", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+				//There should also be 4 categories selected so we'll just use the same index and need to be careful that the order is the same
+				
+				//Well FM added 4 new equipment types so this had to be modified -- order is important. 
+				categories = inventory.evaluate("/inventory/category[@id='5' or @id='2' or @id='1' or @id='11' or @id='16' or @id='17' or @id='15' or @id='18'] ", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 				for (var i = 0, len=categories.snapshotLength; i<len;++i){
 					/**
 					 * @type {Node}
 					 */
 					category = categories.snapshotItem(i);
 					item = items.snapshotItem(i);
+					
 					addItem(category,item,1);
 				}
 			} catch(e) {
 				dumpError(e);
 			}
-			//dump("\n\nCurrent Inventory:\n"+piratequesting.InventoryManager+"\nTotal Number of items:");
-			//dump(inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");
+			//pqdump("\n\nCurrent Inventory:\n"+piratequesting.InventoryManager+"\nTotal Number of items:");
+			//pqdump(inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");
 			write();
-			//dump("firing event");
+			//pqdump("firing event");
 			document.fire('piratequesting:InventoryUpdated');
 			
 		},
 		
 		processItemGuide: function (doc) {
 			try{
-			var categories = inventory.evaluate("//category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 			
-			for (var i = 0, len=categories.snapshotLength; i<len;++i){
-				/**
-				 * @type {Node}
-				 */
-				var category = categories.snapshotItem(i);
-				var items = doc.evaluate("//div[@id='"+ category.getAttribute("name") +"']//table[@id='item_guide']", doc, null, XPathResult.ANY_TYPE,null);
-				while (item = items.iterateNext()) {
-					var name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null).stringValue;
-					var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
-					var image = "/" + doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
-					var cost = (/(\$[.,\d]+)/.exec(doc.evaluate("descendant-or-self::td[@class='bot']", item, null, XPathResult.STRING_TYPE,null).stringValue))[1].toNumber();
-					
-					var description = doc.evaluate("normalize-space(descendant-or-self::td[@class='desc'][1])", item, null, XPathResult.STRING_TYPE,null).stringValue;
-					var features = doc.evaluate("normalize-space(descendant-or-self::table//td[b[.='Features:']])", item, null, XPathResult.STRING_TYPE,null).stringValue;
-					features = features.split(/[^\+\-\:%\s\w]/).splice(1);
-					var attributes = {name:name, id:id, image:image, cost:cost};
-					///[+-:%\s\w]/
-					function addFeatures() {
-						for (var j = 0, flen = features.length; j<flen;++j) {
-							var feature = features[j].trim().replace(/([A-Za-z\s]+):? ?([\-\+,.\d%]+)/,"$1: $2").split(": ");
-							item.insert(inventory.newElement("feature", { type: feature[0], value: feature[1] } ));
+				var categories = inventory.evaluate("//category", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
+			
+               			
+			
+				for (var i = 0, len=categories.snapshotLength; i<len;++i){
+					/**
+					 * @type {Node}
+					 */
+					var category = categories.snapshotItem(i);
+					var items = doc.evaluate("//div[@id='"+ category.getAttribute("name") +"']//table[@class='item_guide']", doc, null, XPathResult.ANY_TYPE,null);
+					while (item = items.iterateNext()) {
+						var name = doc.evaluate("descendant-or-self::a[@class='item_view']", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						var id = doc.evaluate("substring-before(substring-after(descendant-or-self::a[@class='item_view']/@onclick,'id='),'&')", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						var image = doc.evaluate("descendant-or-self::img[1]/@src", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						var cost = (/(\$[.,\d]+)/.exec(doc.evaluate("descendant-or-self::div[@class='bot']", item, null, XPathResult.STRING_TYPE,null).stringValue))[1].toNumber();
+						
+						var description = doc.evaluate("normalize-space(descendant-or-self::td[@class='desc'][1])", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						var features = doc.evaluate("normalize-space(descendant-or-self::table//td[B[.='Features:']])", item, null, XPathResult.STRING_TYPE,null).stringValue;
+						features = features.split(/[^\+\-\:%\s\w]/).splice(1);
+						var attributes = {name:name, id:id, image:image, cost:cost};
+						///[+-:%\s\w]/
+						function addFeatures() {
+							for (var j = 0, flen = features.length; j<flen;++j) {
+								var feature = features[j].trim().replace(/([A-Za-z\s]+):? ?([\-\+,.\d%]+)/,"$1: $2").split(": ");
+								item.insert(inventory.newElement("feature", { type: feature[0], value: feature[1] } ));
+							}
+						}
+						var item_check = inventory.evaluate("./item[@id='"+id+"']", category, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+						if (item_check.snapshotLength > 0 ) {
+							item = item_check.snapshotItem(0); 
+							item.setAttributes(attributes);
+							while(item.hasChildNodes()) item.removeChild(item.firstChild);
+							item.insert(inventory.newElement("description").update(description));
+							addFeatures();
+							
+						} else {
+							item = inventory.newElement("item",attributes).insert(inventory.newElement("description").update(description));
+							addFeatures();
+							category.insert(item);
+	
 						}
 					}
-					var item_check = inventory.evaluate("./item[@id='"+id+"']", category, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
+				}
+				var coinsnpts = doc.getElementById('coinsnpts');
+				// check to see if it exists
+				if (coinsnpts) {
+					// the first <a> should be the points, and since it has
+					// no id, we just have to hope it stays that way
+					var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
+					var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost:0 };
+					var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
 					if (item_check.snapshotLength > 0 ) {
-						item = item_check.snapshotItem(0); 
+						var item = item_check.snapshotItem(0); 
 						item.setAttributes(attributes);
-						while(item.hasChildNodes()) item.removeChild(item.firstChild);
-						item.insert(inventory.newElement("description").update(description));
-						addFeatures();
-						
 					} else {
-						item = inventory.newElement("item",attributes).insert(inventory.newElement("description").update(description));
-						addFeatures();
-						category.insert(item);
-
+						var item = inventory.newElement("item",attributes);
+						inventory.documentElement.appendChild(item);
+	
 					}
+										
 				}
-			}
-			var coinsnpts = doc.getElementById('coinsnpts');
-			// check to see if it exists
-			if (coinsnpts) {
-				// the first <a> should be the points, and since it has
-				// no id, we just have to hope it stays that way
-				var points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue.toNumber();
-				var attributes = {name:"Points", id:"points", action_id: "points", image: "chrome://piratequesting/content/modules/points_dice.gif", quantity:points, actions: MARKET, cost:0 };
-				var item_check = inventory.evaluate("/inventory/item[@id='points']", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null)
-				if (item_check.snapshotLength > 0 ) {
-					var item = item_check.snapshotItem(0); 
-					item.setAttributes(attributes);
-				} else {
-					var item = inventory.newElement("item",attributes);
-					inventory.documentElement.appendChild(item);
-
-				}
-									
-			}
-
-			write();
-			document.fire('piratequesting:InventoryUpdated');
+				write();
+				document.fire('piratequesting:InventoryUpdated');
 			}catch(error) { dumpError(error); }
 		},
 		
-		process:function(doc) {
+		process:function() {
+			pqdump("PQ: Updating points for inventory.\n", PQ_DEBUG_STATUS);
 			var item;
-			if (item = setCoinsPoints(doc)) {	
+			if (item = setPoints()) {	
 				write();
 				document.fire('piratequesting:InventoryPointsUpdated',item);
 			} 
@@ -431,16 +495,11 @@ piratequesting.InventoryManager = function() {
 		
 		processRaw:function(text, url, data) {
 			try{
-				var parser=new DOMParser();
-  				var doc=parser.parseFromString(text,"text/xml");
-  				//dump(text+"\n"+data+"\n");
-  				
-  				/*for (part in data) {
-  					dump ("\ndata." + part + ":\t" + data[part]);
-  				}*/
-  				if (data.action == 'use') {
+				var response_object = JSON.parse(text);
+				
+				if (data.action == 'use') {
   					var itemID = data.id;
-  					var left = doc.evaluate("//left", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
+  					var left = response_object.left;
   					var item_check = inventory.evaluate("//item[@action_id="+itemID+"]",inventory,null,XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null);
 					if (item_check.snapshotLength > 0 ) {
 						var item = item_check.snapshotItem(0); 
@@ -462,9 +521,10 @@ piratequesting.InventoryManager = function() {
 	}
 }();
 
+document.addEventListener("piratequesting:BankUpdated",piratequesting.InventoryManager.process, false);
 
 piratequesting.addLoadProcess(new RegExp("index.php\\?on=inventory",""),piratequesting.InventoryManager.processInventory);
 piratequesting.addLoadProcess(new RegExp("index.php\\?on=item_guide",""),piratequesting.InventoryManager.processItemGuide);
-piratequesting.addLoadProcess(new RegExp("index.php(?!\\?on=item_guide|\\?on=inventory)",""),piratequesting.InventoryManager.process);
-piratequesting.addRawProcessor(/index.php\?ajax=items/,piratequesting.InventoryManager.processRaw, piratequesting.InventoryManager);
+//piratequesting.addLoadProcess(new RegExp("index.php(?!\\?on=item_guide|\\?on=inventory)",""),piratequesting.InventoryManager.process);
+piratequesting.addRawProcessor(/index.php\?ajax=items&json/,piratequesting.InventoryManager.processRaw, piratequesting.InventoryManager);
 }
