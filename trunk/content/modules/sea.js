@@ -12,10 +12,11 @@ piratequesting.Sea = {
 		oNewStyle.innerHTML += '#near_ships li a[title="Attack English Galleon"]:after { content: " English Galleon"; }';
 		oNewStyle.innerHTML += '#near_ships li a[title="Attack Spanish Galleon"]:after { content: " Spanish Galleon"; }';
 		oNewStyle.innerHTML += '#near_ships li a[title="Attack French Galleon"]:after { content: " French Galleon"; }';
+		oNewStyle.innerHTML += '#near_ships li a[title="Attack Phantom Galleon"]:after { content: " Phantom Galleon"; }';
+		oNewStyle.innerHTML += '#near_ships li a[title="Attack Marauder Galleon"]:after { content: " Marauder Galleon"; }';
+		oNewStyle.innerHTML += '#near_ships li a[title="Attack Row Boat"]:after { content: " Row Boat"; }';
 		doc.body.appendChild(oNewStyle);
 	}
 };
 
-piratequesting.addLoadProcess(new RegExp(piratequesting.strings.Sea
-						.getString("page_regex"), ""),
-		piratequesting.Sea.process);
+piratequesting.addLoadProcess(new RegExp(piratequesting.strings.Sea.getString("page_regex"), ""), piratequesting.Sea.process);
