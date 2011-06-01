@@ -49,7 +49,7 @@ function PageProcess(pattern, func, context) {
 	  run: function(input, param, requestNumber, requestTime) {
 	  	pqdump("PQ: Running Page Processor\n", PQ_DEBUG_EXTREME);
 	  	var args = Array.prototype.slice.call(arguments,4);
-	  	pqdump("\tinput: " + input + "\n\targs: " + args.length);
+	  	pqdump("\tinput: " + input + "\n\targs: " + args.length + "\n", PQ_DEBUG_EXTREME);
 
 	  	var lr = _func.lastRequest;
 	  	var lrt = _func.lastRequestTime;
