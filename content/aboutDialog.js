@@ -36,7 +36,7 @@ var mainWindow;
 function aboutDialogOnLoad() {
 	// right now we don't do anything special here
 	document.lastChild.focus();
-	mainWindow = window.arguments[0].in;
+	mainWindow = window.arguments[0].input;
 }
 
 // Called once if and only if the user clicks OK
