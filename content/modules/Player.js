@@ -112,7 +112,7 @@ try {
 	 *
 	 * @namespace
 	 */
-	piratequesting.Player = function(){
+	piratequesting.Player = function (){
 		var name = "";
 		var level = 0;
 		var progress = 0;
@@ -189,7 +189,7 @@ try {
 			 */
 			process: function(doc){
 				try {
-					if (piratequesting.baseTheme == "classic") {
+					if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
 						//exit if the section doesn't exist
 						if (!doc.getElementById("TabbedPanels2")) 
 							return;
@@ -220,10 +220,11 @@ try {
 						level = lp[1];
 						progress = lp[2];
 						publish();
+						document.fire('piratequesting:StatusUpdated');
 					}
 					else 
-						if (piratequesting.baseTheme == "default") {
-							//attributes are not available in the default theme, so they are omitted here.
+						if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
+							if (!doc.getElementById('prog-bar-hp')) { return; } // bail iff hp isn't present. assume the page is in a weird state.
 							var hpdata = doc.getElementById('prog-bar-hp').getAttribute('title').split(" / ");
 							var nervedata = doc.getElementById('prog-bar-nerve').getAttribute('title').split(" / ");
 							var awakedata = doc.getElementById('prog-bar-awake').getAttribute('title').split(" / ");
@@ -236,34 +237,51 @@ try {
 							stats.awake.setMax(awakedata[1]);
 							stats.energy.setCurrent(energydata[0]);
 							stats.energy.setMax(energydata[1]);
+							
+							var sname, value;
+							var attr_group = doc.getElementById('attributes');
+							var t = doc.evaluate(".//tr", attr_group, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+							pqdump("\n\nPQ: Setting Player attributes\n",PQ_DEBUG_STATUS);
+							for (var i = 0, v = t.snapshotItem(i); i < t.snapshotLength; i++, v = t.snapshotItem(i)) {
+								sname = doc.evaluate("./th/text()",v,null,XPathResult.STRING_TYPE,null).stringValue.toLowerCase();
+								value = doc.evaluate("./td/text()",v,null,XPathResult.STRING_TYPE,null).stringValue.toNumber();
+								pqdump("\tAttempting to set attributes[\""+sname+"\"] = " + value + "\n",PQ_DEBUG_STATUS);
+								attributes[sname].setValue(value);
+							}
+							
 							name = doc.evaluate('string(id("profilebox")//div[@class="user_role"][1]//a[last()])', doc, null, XPathResult.STRING_TYPE, null).stringValue;
 							level = doc.evaluate('substring-after(string(id("header_user_level")),"Level ")', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
 							progress = Math.round(eval(doc.evaluate('string(id("header_user_level_container")/@title)', doc, null, XPathResult.STRING_TYPE, null).stringValue) * 100);
 							publish();
+							document.fire('piratequesting:StatusUpdated');
 						}
 					
 				} 
 				catch (e) {
-					dumpError(getErrorString(e));
+					dumpError(e);
 				}
 				
 				
 			},
 			processTrainPage: function(doc){
-				if (piratequesting.baseTheme == "default") {
-					var str = doc.evaluate('string(id("str_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
-					var def = doc.evaluate('string(id("def_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
-					var spe = doc.evaluate('string(id("spd_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
-					
-					if (str && def && spe) { /* if all are non-zero/non-null */
-						attributes.strength.setValue(str);
-						attributes.defense.setValue(def);
-						attributes.speed.setValue(spe);
-						publish();
+				pqdump("PQ: Processing Training Page (Player.js)\n");
+				try {
+					if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
+						var str = doc.evaluate('string(id("str_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+						var def = doc.evaluate('string(id("def_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+						var spe = doc.evaluate('string(id("spd_stat"))', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+						
+						if (str && def && spe) { /* if all are non-zero/non-null */
+							attributes.strength.setValue(str);
+							attributes.defense.setValue(def);
+							attributes.speed.setValue(spe);
+							publish();
+						}
+						
 					}
-					
+				} catch(e) {
+					dumpError(e);
 				}
-				
 			},
 			getLevel: function(){
 				return level;
@@ -277,67 +295,94 @@ try {
 			},
 			processRawStatus: function(text){
 				try {
-					//expect xml doc here 
-					var parser = new DOMParser();
-					var doc = parser.parseFromString(text, "text/xml");
-					//messages = doc.evaluate("//user_messages", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
-					//events = doc.evaluate("//user_events", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
-					//dump("\nEvents: " + events + "\t\tMessages: "+ messages);
-					level = doc.evaluate("//user_level", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
-					progress = doc.evaluate("//xp", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
-					
-					var hp = doc.evaluate("//hp", doc, null, XPathResult.STRING_TYPE, null).stringValue;
-					setAttrPc(hp, stats.hp);
-					
-					var awake = doc.evaluate("//awake", doc, null, XPathResult.STRING_TYPE, null).stringValue;
-					setAttrPc(awake, stats.awake);
-					
-					var nerve = doc.evaluate("//nerve", doc, null, XPathResult.STRING_TYPE, null).stringValue;
-					setAttrPc(nerve, stats.nerve);
-					
-					var energy = doc.evaluate("//energy", doc, null, XPathResult.STRING_TYPE, null).stringValue;
-					setAttrPc(energy, stats.energy);
-					
-					
-					publish();
+					if (text) {
+						//used to be XML, now in JSON
+						
+						var response_object = JSON.parse(text);
+						
+						
+						/**
+						 *
+						 * @param {String} complicated_string
+						 */
+						function getCurVal(complicated_string) {
+							var ret_str;
+							ret_str = complicated_string.replace(/([\s\S]+?)(\d+)\/[\s\S]*/, "$2");
+							return ret_str;
+						}
+						
+						//first grab the energy and awake as they have precise values
+						var et = getCurVal(response_object.EnergySide);
+						//dump ("energy set to: " + et + "\n");
+						stats.energy.setCurrent(et);
+						
+						var at = getCurVal(response_object.AwakeSide);
+						//dump ("awake set to: " + at + "\n");
+						stats.awake.setCurrent(at);
+						
+						
+						response_object = toNumberSet(response_object);
+						
+						level = response_object.user_level;
+						progress = response_object.xp;
+						
+						var hp = response_object.hp;
+						setAttrPc(hp, stats.hp);
+						
+						
+						var nerve = response_object.nerve;
+						setAttrPc(nerve, stats.nerve);
+						document.fire('piratequesting:StatusUpdated');
+						publish();
+					}
 				} 
 				catch (error) {
 					dumpError(error);
 				}
 			},
 			processRawTrain: function(text, url, data){
+				pqdump("PQ: Processing Training AJAX (Player.js)\n");
 				try {
-					//fix leading spaces bug
-					text = text.replace(/\s+(\S[\s\S]+)/,"$1");
 					
-					var parser = new DOMParser();
-					var doc = parser.parseFromString(text, "text/xml");
-					
-					var energy = doc.evaluate("//Energy", doc, null, XPathResult.STRING_TYPE, null).stringValue;
-					setAttrPc(energy, stats.energy);
-					
-					var str = doc.evaluate('//Str', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
-					var def = doc.evaluate('//Def', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
-					var spe = doc.evaluate('//Spe', doc, null, XPathResult.STRING_TYPE, null).stringValue.stripCommas();
+					var response_object = JSON.parse(text);
+						
+					var str = response_object.str;
+					var def = response_object.def;
+					var spe = response_object.spd; //note the property name changed. piratequesting code changes kept to a minimum
 					
 					if (str && def && spe) { /* if all are non-zero/non-null */
-						attributes.strength.setValue(str);
-						attributes.defense.setValue(def);
-						attributes.speed.setValue(spe);
-						publish();
+						attributes.strength.setValue(str.stripCommas());
+						attributes.defense.setValue(def.stripCommas());
+						attributes.speed.setValue(spe.stripCommas());
 					}
-					
+					document.fire('piratequesting:AttributesUpdated');
+					publish();
 				} 
 				catch (error) {
 					dumpError(error);
 				}
+			},
+			
+			update:function(options) {
+				var options = options || {};
+				var url = piratequesting.baseURL + "/index.php?ajax=events_ajax&action=all_status_update";
+				var ajax = AjaxRequest(url, {
+					protocol: "get",
+					onSuccess: options.onSuccess,
+					onFailure: options.onFailure,
+					onError: options.onError || function(){
+						dumpError('Error occurred when updating player information.');
+					},
+					onStateChange: options.onStateChange,
+					proc: true
+			});
 			}
 		}
 	}();
 	
 	piratequesting.addLoadProcess("", piratequesting.Player.process, piratequesting.Player);
 	piratequesting.addLoadProcess(/index.php\?on=train/, piratequesting.Player.processTrainPage, piratequesting.Player);
-	piratequesting.addRawProcessor(/index.php\?ajax=events_ajax&action=all_status_update/, piratequesting.Player.processRawStatus, piratequesting.Player);
+	piratequesting.addRawProcessor(/index.php\?ajax=(events_ajax&action=all_status_update|train|items&json)/, piratequesting.Player.processRawStatus, piratequesting.Player);
 	piratequesting.addRawProcessor(/index.php\?ajax=train/, piratequesting.Player.processRawTrain, piratequesting.Player);
 	
 } 
