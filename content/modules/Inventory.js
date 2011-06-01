@@ -27,8 +27,7 @@ piratequesting.Inventory = function() {
 
 	function hideInventoryBox() {
 		var sbcd = sidebar.contentDocument;	
-		sbcd.getElementById("invdeck").setAttribute("selectedIndex",
-				"0");
+		sbcd.getElementById("invdeck").setAttribute("selectedIndex", "0");
 		var invd = sbcd.getElementById("invdetails");
 		content.focus();
 		// clear the details
@@ -50,24 +49,17 @@ piratequesting.Inventory = function() {
 			canReturn = actions & RETURN;
 			
 		
-		// start by creating all of the elements and setting their
-		// attributes.
+		// start by creating all of the elements and setting their attributes.
 		var container = sbcd.createElement("hbox");
 		container.setAttribute("align", "center");
 		container.setAttribute("id", "IL" + item.getAttribute("action_id"));
 		var img_src = item.getAttribute("image");
-		switch (-1) {
-			case img_src.indexOf("chrome://"):
-			case img_src.indexOf("http://"):
-				break;
-			default:
+		if ((-1 === img_src.indexOf("chrome://"))&&(-1 === img_src.indexOf("http://"))) {
 				img_src = piratequesting.baseURL + "/" + img_src;
 		}
 		var image = sbcd.createElement("image");
 		image.setAttribute("src",  img_src);
-		//image.setAttribute("height", "50");
-		//image.setAttribute("width", "50");
-
+		
 		var labelbox = sbcd.createElement("vbox");
 		labelbox.setAttribute("flex", "1");
 
@@ -85,9 +77,7 @@ piratequesting.Inventory = function() {
 			uselink.setAttribute("value", "Use");
 			uselink.setAttribute("type", "link");
 			uselink.setAttribute("flex", "1");
-			uselink.setAttribute("onclick",
-					'piratequesting.Inventory.useItem("' + item.getAttribute("action_id")
-							+ '");');
+			uselink.setAttribute("onclick", 'piratequesting.Inventory.useItem("' + item.getAttribute("action_id") + '");');
 			actioncontainer.appendChild(uselink);
 		}
 
@@ -96,12 +86,7 @@ piratequesting.Inventory = function() {
 			selllink.setAttribute("value", "Sell");
 			selllink.setAttribute("type", "link");
 			selllink.setAttribute("flex", "1");
-			selllink
-					.setAttribute("onclick",
-							'piratequesting.Inventory.showInventoryBox("'
-									+ item.getAttribute("action_id") + '","' + item.getAttribute("value")
-									+ '","' + item.getAttribute("name") + '","'
-									+ item.getAttribute('quantity') + '");');
+			selllink.setAttribute("onclick",'piratequesting.Inventory.showInventoryBox("' + item.getAttribute("action_id") + '","' + item.getAttribute("value") + '","' + item.getAttribute("name") + '","' + item.getAttribute('quantity') + '");');
 			actioncontainer.appendChild(selllink);
 		}
 
@@ -111,11 +96,7 @@ piratequesting.Inventory = function() {
 			marketlink.setAttribute("type", "link");
 			marketlink.setAttribute("flex", "1");
 			marketlink.setAttribute("number", item.getAttribute("action_id"));
-			marketlink.setAttribute("onclick",
-					'piratequesting.Inventory.showInventoryBox("'
-							+ item.getAttribute("action_id") + '",0,"' 
-							+ item.getAttribute("name") + '","'
-							+ item.getAttribute('quantity') + '");');
+			marketlink.setAttribute("onclick", 'piratequesting.Inventory.showInventoryBox("' + item.getAttribute("action_id") + '",0,"' + item.getAttribute("name") + '","' + item.getAttribute('quantity') + '");');
 			actioncontainer.appendChild(marketlink);
 		}
 
@@ -124,11 +105,7 @@ piratequesting.Inventory = function() {
 			checklink.setAttribute("value", "Check Prices");
 			checklink.setAttribute("type", "link");
 			checklink.setAttribute("flex", "1");
-			checklink.setAttribute("onclick",
-					'piratequesting.Inventory.showInventoryBox("'
-							+ item.getAttribute("action_id") + '",-1,"' 
-							+ item.getAttribute("name") + '","'
-							+ cat + '");');
+			checklink.setAttribute("onclick", 'piratequesting.Inventory.showInventoryBox("' + item.getAttribute("action_id") + '",-1,"' + item.getAttribute("name") + '","' + cat + '");');
 			actioncontainer.appendChild(checklink);
 		}
 
@@ -137,8 +114,7 @@ piratequesting.Inventory = function() {
 			returnlink.setAttribute("value", "Return");
 			returnlink.setAttribute("type", "link");
 			returnlink.setAttribute("flex", "1");
-			returnlink.setAttribute("onclick",
-					'piratequesting.Inventory.returnItem("' + item.getAttribute('action_id') + '");');
+			returnlink.setAttribute("onclick", 'piratequesting.Inventory.returnItem("' + item.getAttribute('action_id') + '");');
 			actioncontainer.appendChild(returnlink);
 		}
 
@@ -206,13 +182,7 @@ piratequesting.Inventory = function() {
 	}
 	
 	
-	//var forced_update_count = 0;
 	function updateInventoryList(event, repeat) {
-		/*if (!fromEvent) {
-			if (++forced_update_count >= 2) return;
-		} else {
-			forced_update_count = 0;
-		}*/
 		if (event && event.relatedTarget) {
 			if (updateInventoryItem(event, repeat))
 				return;
@@ -242,8 +212,6 @@ piratequesting.Inventory = function() {
 		if (points.snapshotLength > 0 ) {
 			inventoryList.appendChild(newInventoryItem(points.snapshotItem(0), "points"));
 		}
-		/*dump(inventory.evaluate("/inventory/category/item[@quantity=0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");
-		dump(inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null).snapshotLength+"\n");*/
 		var items = inventory.evaluate("/inventory/category/item[@quantity>0]", inventory, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,null); 
 		for (var i = 0, len=items.snapshotLength; i < len; ++i) {
 			inventoryList.appendChild(newInventoryItem(items.snapshotItem(i), items.snapshotItem(i).parentNode.getAttribute('id')));
@@ -258,7 +226,7 @@ piratequesting.Inventory = function() {
 		var ajax;
 		sbcd.getElementById('invmeter').setAttribute('value',0);
 		ajax = AjaxRequest(url, { 
-				proc:true,
+				proc:false,
 				onSuccess: function (http) { processPrices(name,http.responseText); }, 
 				onFailure: function() { enable(); dumpError('Failed to get prices from market.');}, 
 				onError: function() { enable(); dumpError('Error occurred when getting prices from market.');}, 
@@ -352,7 +320,6 @@ piratequesting.Inventory = function() {
 
 		process : function (event, repeat) {
 			inventory = piratequesting.InventoryManager.getInventory();
-			//dump("updating inventory list");
 			try {
 				updateInventoryList(event, repeat);
 			}catch(e) { dumpError(e); }
@@ -367,242 +334,236 @@ piratequesting.Inventory = function() {
 		
 		showInventoryBox : function(id, price, name, qty) {
 			try {
-				/**
-				 * @type {Document}
-				 */
-			var sbcd = sidebar.contentDocument;	
-			
-			sbcd.getElementById("invdeck").setAttribute("selectedIndex",
-					"1");
-			var invd = sbcd.getElementById("invdetails");
-	
-			// clear the details
-			while (invd.hasChildNodes())
-				invd.removeChild(invd.firstChild);
-	
-			var prn = String(price).toNumber();
-			if (prn > 0) {
-				// selling
-				var msg1 = sbcd.createElement("description");
-				msg1
-						.setAttribute("value", "You have " + qty + " " + name
-										+ ".");
-				var msg3 = sbcd.createElement("description");
-				msg3.setAttribute("value", "How many would you like to sell?");
-				invd.appendChild(msg1);
-				invd.appendChild(msg3);
-	
-				var sellbox = sbcd.createElement("hbox");
-				sellbox.setAttribute("align", "center");
-	
-				var qtyin = sbcd.createElement("textbox");
-				qtyin.setAttribute("type", "number");
-				qtyin.setAttribute("width", "50");
-				qtyin.setAttribute("id", "qtyin");
-				qtyin.setAttribute("max", qty);
-				qtyin.setAttribute("min", 0);
-	
-				var hiddenpricein = sbcd.createElement("textbox");
-				hiddenpricein.setAttribute("value", prn);
-				hiddenpricein.setAttribute("id", "pricein");
-				hiddenpricein.setAttribute("type", "hide");
-	
-				var hiddenid = sbcd.createElement("textbox");
-				hiddenid.setAttribute("value", id);
-				hiddenid.setAttribute("id", "item_id");
-				hiddenid.setAttribute("type", "hide");
-	
-				var pricelabel = sbcd.createElement("label");
-				pricelabel.setAttribute("value", " @ " + price + " each");
-	
-				var totalbox = sbcd.createElement("hbox");
-				totalbox.setAttribute("align", "center");
-	
-				var totallabel = sbcd.createElement("label");
-				totallabel.setAttribute("value", "Total: $");
-	
-				var resultlabel = sbcd.createElement("label");
-				resultlabel.setAttribute("value", "0");
-				resultlabel.setAttribute("id", "result");
-	
-				var buttonbox = sbcd.createElement("hbox");
-				buttonbox.setAttribute("align", "center");
-	
-				var actionbutton = sbcd.createElement("button");
-				actionbutton.setAttribute("label", "Sell");
-				actionbutton.setAttribute("id", "actionbutton");
-				actionbutton.setAttribute("maxwidth", "70");
-				actionbutton
-						.setAttribute(
-								"oncommand",
-								'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.sellitem()');
-	
-				var cancelbutton = sbcd.createElement("button");
-				cancelbutton.setAttribute("label", "Cancel");
-				cancelbutton.setAttribute("id", "cancelbutton");
-				cancelbutton.setAttribute("maxwidth", "70");
-				cancelbutton.addEventListener("command",hideInventoryBox,false);
-	
-				// now put them in the doc
-				totalbox.appendChild(totallabel);
-				totalbox.appendChild(resultlabel);
-	
-				sellbox.appendChild(qtyin);
-				sellbox.appendChild(pricelabel);
-				sellbox.appendChild(hiddenpricein);
-	
-				invd.appendChild(hiddenid);
-				invd.appendChild(sellbox);
-				invd.appendChild(totalbox);
-	
-				buttonbox.appendChild(actionbutton);
-				buttonbox.appendChild(cancelbutton);
-				invd.appendChild(buttonbox);
-				sbcd.getElementById("qtyin").addEventListener("change",
-						piratequesting.Inventory.giveResult, true);
-				sbcd.getElementById("qtyin").addEventListener("input",
-						piratequesting.Inventory.giveResult, true);
-				sbcd.getElementById('qtyin').addEventListener('keypress',
-						piratequesting.Inventory.HandleKeyPressItems, true);
-				sbcd.getElementById("qtyin").focus();
-				// sbcd.getElementById("qtyin").addEventListener("command",
-				// function () {
-				// sbcd.getElementById("sellbutton").doCommand(); }, true);
-	
-			} else if (prn == 0) {
-				// marketing
-	
-				var msg1 = sbcd.createElement("description");
-				msg1
-						.setAttribute("value", "You have " + qty + " " + name
-										+ ".");
-				var msg2 = sbcd.createElementNS("http://www.w3.org/1999/xhtml","html:div");
-				msg2.appendChild(sbcd.createTextNode("How many would you like to put on the market? And for how much?"));
-				invd.appendChild(msg1);
-				invd.appendChild(msg2);
+					/**
+					 * @type {Document}
+					 */
+				var sbcd = sidebar.contentDocument;	
 				
-				var sellbox = sbcd.createElement("hbox");
-				sellbox.setAttribute("align", "center");
-	
-				var qtyin = sbcd.createElement("textbox");
-				qtyin.setAttribute("type", "number");
-				qtyin.setAttribute("width", "50");
-				qtyin.setAttribute("id", "qtyin");
-				qtyin.setAttribute("max", qty);
-				qtyin.setAttribute("min", 0);
-	
-				var pricein = sbcd.createElement("textbox");
-				// pricein.setAttribute("value",prn);
-				pricein.setAttribute("id", "pricein");
-				pricein.setAttribute("width", "70");
-	
-				var hiddenid = sbcd.createElement("textbox");
-				hiddenid.setAttribute("value", id);
-				hiddenid.setAttribute("id", "item_id");
-				hiddenid.setAttribute("type", "hide");
-	
-				var pricelabel = sbcd.createElement("label");
-				pricelabel.setAttribute("value", " @ $");
-	
-				var pricelabel2 = sbcd.createElement("label");
-				pricelabel2.setAttribute("value", " each");
-	
-				var totalbox = sbcd.createElement("hbox");
-				totalbox.setAttribute("align", "center");
-	
-				var totallabel = sbcd.createElement("label");
-				totallabel.setAttribute("value", "Total: $");
-	
-				var resultlabel = sbcd.createElement("label");
-				resultlabel.setAttribute("value", "0");
-				resultlabel.setAttribute("id", "result");
-	
-				var buttonbox = sbcd.createElement("hbox");
-				buttonbox.setAttribute("align", "center");
-	
-				var actionbutton = sbcd.createElement("button");
-				actionbutton.setAttribute("label", "Market");
-				actionbutton.setAttribute("id", "actionbutton");
-				actionbutton.setAttribute("maxwidth", "70");
-				actionbutton
-						.setAttribute(
-								"oncommand",
-								'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.marketitem()');
-	
-				var cancelbutton = sbcd.createElement("button");
-				cancelbutton.setAttribute("label", "Cancel");
-				cancelbutton.setAttribute("id", "cancelbutton");
-				cancelbutton.setAttribute("maxwidth", "70");
-				cancelbutton.addEventListener("command",hideInventoryBox,false);
-	
-				// now put them in the doc
-				totalbox.appendChild(totallabel);
-				totalbox.appendChild(resultlabel);
-	
-				sellbox.appendChild(qtyin);
-				sellbox.appendChild(pricelabel);
-				sellbox.appendChild(pricein);
-				sellbox.appendChild(pricelabel2);
-	
-				invd.appendChild(hiddenid);
-				invd.appendChild(sellbox);
-				invd.appendChild(totalbox);
-	
-				buttonbox.appendChild(actionbutton);
-				buttonbox.appendChild(cancelbutton);
-				invd.appendChild(buttonbox);
-	
-				sbcd.getElementById("qtyin").addEventListener("change",
-						piratequesting.Inventory.giveResult, true);
-				sbcd.getElementById("qtyin").addEventListener("input",
-						piratequesting.Inventory.giveResult, true);
-				sbcd.getElementById('qtyin').addEventListener('keypress',
-						piratequesting.Inventory.HandleKeyPressItems, true);
-				sbcd.getElementById("pricein").addEventListener("input",
-						piratequesting.Inventory.giveResult, true);
-				sbcd.getElementById('pricein').addEventListener('keypress',
-						piratequesting.Inventory.HandleKeyPressItems, true);
-				sbcd.getElementById("qtyin").focus();
-			} else if (prn < 0) {
-				// checking prices
-				// note qty is treated at the category number for the item
-				// market here.
-				var cat = qty;
-				var msg1 = sbcd.createElement("description");
-				msg1.setAttribute("value", "Current market prices for:");
-				var msg2 = sbcd.createElement("description");
-				msg2.setAttribute("value", name);
-				msg2.setAttribute("style", "padding-left:20px;")
-	
-				invd.appendChild(msg1);
-				invd.appendChild(msg2);
-	
-				var buttonbox = sbcd.createElement("hbox");
-				buttonbox.setAttribute("align", "center");
-	
-				var cancelbutton = sbcd.createElement("button");
-				cancelbutton.setAttribute("label", "Close");
-				cancelbutton.setAttribute("id", "cancelbutton");
-				cancelbutton.setAttribute("maxwidth", "70");
-				cancelbutton.addEventListener("command",hideInventoryBox,false);
-	
-				buttonbox.appendChild(cancelbutton);
-	
-				var pricebox = sbcd.createElement("hbox");
-				var pricelist = sbcd.createElement("listbox");
-				pricelist.setAttribute("id", "pricelist");
-				var spacer = sbcd.createElement("box");
-				spacer.setAttribute("flex", "1");
-				// pricelist.setAttribute("style","");
-				// pricelist.setAttribute("max-height", "120");
-	
-				pricebox.appendChild(pricelist);
-				pricebox.appendChild(spacer);
-				invd.appendChild(pricebox);
-				invd.appendChild(buttonbox);
-				getPrices(cat, name);
+				sbcd.getElementById("invdeck").setAttribute("selectedIndex",
+						"1");
+				var invd = sbcd.getElementById("invdetails");
+		
+				// clear the details
+				while (invd.hasChildNodes())
+					invd.removeChild(invd.firstChild);
+		
+				var prn = String(price).toNumber();
+				if (prn > 0) {
+					// selling
+					var msg1 = sbcd.createElement("description");
+					msg1
+							.setAttribute("value", "You have " + qty + " " + name
+											+ ".");
+					var msg3 = sbcd.createElement("description");
+					msg3.setAttribute("value", "How many would you like to sell?");
+					invd.appendChild(msg1);
+					invd.appendChild(msg3);
+		
+					var sellbox = sbcd.createElement("hbox");
+					sellbox.setAttribute("align", "center");
+		
+					var qtyin = sbcd.createElement("textbox");
+					qtyin.setAttribute("type", "number");
+					qtyin.setAttribute("width", "50");
+					qtyin.setAttribute("id", "qtyin");
+					qtyin.setAttribute("max", qty);
+					qtyin.setAttribute("min", 0);
+		
+					var hiddenpricein = sbcd.createElement("textbox");
+					hiddenpricein.setAttribute("value", prn);
+					hiddenpricein.setAttribute("id", "pricein");
+					hiddenpricein.setAttribute("type", "hide");
+		
+					var hiddenid = sbcd.createElement("textbox");
+					hiddenid.setAttribute("value", id);
+					hiddenid.setAttribute("id", "item_id");
+					hiddenid.setAttribute("type", "hide");
+		
+					var pricelabel = sbcd.createElement("label");
+					pricelabel.setAttribute("value", " @ " + price + " each");
+		
+					var totalbox = sbcd.createElement("hbox");
+					totalbox.setAttribute("align", "center");
+		
+					var totallabel = sbcd.createElement("label");
+					totallabel.setAttribute("value", "Total: $");
+		
+					var resultlabel = sbcd.createElement("label");
+					resultlabel.setAttribute("value", "0");
+					resultlabel.setAttribute("id", "result");
+		
+					var buttonbox = sbcd.createElement("hbox");
+					buttonbox.setAttribute("align", "center");
+		
+					var actionbutton = sbcd.createElement("button");
+					actionbutton.setAttribute("label", "Sell");
+					actionbutton.setAttribute("id", "actionbutton");
+					actionbutton.setAttribute("maxwidth", "70");
+					actionbutton
+							.setAttribute(
+									"oncommand",
+									'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.sellitem()');
+		
+					var cancelbutton = sbcd.createElement("button");
+					cancelbutton.setAttribute("label", "Cancel");
+					cancelbutton.setAttribute("id", "cancelbutton");
+					cancelbutton.setAttribute("maxwidth", "70");
+					cancelbutton.addEventListener("command",hideInventoryBox,false);
+		
+					// now put them in the doc
+					totalbox.appendChild(totallabel);
+					totalbox.appendChild(resultlabel);
+		
+					sellbox.appendChild(qtyin);
+					sellbox.appendChild(pricelabel);
+					sellbox.appendChild(hiddenpricein);
+		
+					invd.appendChild(hiddenid);
+					invd.appendChild(sellbox);
+					invd.appendChild(totalbox);
+		
+					buttonbox.appendChild(actionbutton);
+					buttonbox.appendChild(cancelbutton);
+					invd.appendChild(buttonbox);
+					sbcd.getElementById("qtyin").addEventListener("change",
+							piratequesting.Inventory.giveResult, true);
+					sbcd.getElementById("qtyin").addEventListener("input",
+							piratequesting.Inventory.giveResult, true);
+					sbcd.getElementById('qtyin').addEventListener('keypress',
+							piratequesting.Inventory.HandleKeyPressItems, true);
+					sbcd.getElementById("qtyin").focus();
+					
+				} else if (prn == 0) {
+					// marketing
+		
+					var msg1 = sbcd.createElement("description");
+					msg1
+							.setAttribute("value", "You have " + qty + " " + name
+											+ ".");
+					var msg2 = sbcd.createElementNS("http://www.w3.org/1999/xhtml","html:div");
+					msg2.appendChild(sbcd.createTextNode("How many would you like to put on the market? And for how much?"));
+					invd.appendChild(msg1);
+					invd.appendChild(msg2);
+					
+					var sellbox = sbcd.createElement("hbox");
+					sellbox.setAttribute("align", "center");
+		
+					var qtyin = sbcd.createElement("textbox");
+					qtyin.setAttribute("type", "number");
+					qtyin.setAttribute("width", "50");
+					qtyin.setAttribute("id", "qtyin");
+					qtyin.setAttribute("max", qty);
+					qtyin.setAttribute("min", 0);
+		
+					var pricein = sbcd.createElement("textbox");
+					// pricein.setAttribute("value",prn);
+					pricein.setAttribute("id", "pricein");
+					pricein.setAttribute("width", "70");
+		
+					var hiddenid = sbcd.createElement("textbox");
+					hiddenid.setAttribute("value", id);
+					hiddenid.setAttribute("id", "item_id");
+					hiddenid.setAttribute("type", "hide");
+		
+					var pricelabel = sbcd.createElement("label");
+					pricelabel.setAttribute("value", " @ $");
+		
+					var pricelabel2 = sbcd.createElement("label");
+					pricelabel2.setAttribute("value", " each");
+		
+					var totalbox = sbcd.createElement("hbox");
+					totalbox.setAttribute("align", "center");
+		
+					var totallabel = sbcd.createElement("label");
+					totallabel.setAttribute("value", "Total: $");
+		
+					var resultlabel = sbcd.createElement("label");
+					resultlabel.setAttribute("value", "0");
+					resultlabel.setAttribute("id", "result");
+		
+					var buttonbox = sbcd.createElement("hbox");
+					buttonbox.setAttribute("align", "center");
+		
+					var actionbutton = sbcd.createElement("button");
+					actionbutton.setAttribute("label", "Market");
+					actionbutton.setAttribute("id", "actionbutton");
+					actionbutton.setAttribute("maxwidth", "70");
+					actionbutton.setAttribute("oncommand", 'if (confirm("Are you sure you want to do this?"))  piratequesting.Inventory.marketitem()');
+		
+					var cancelbutton = sbcd.createElement("button");
+					cancelbutton.setAttribute("label", "Cancel");
+					cancelbutton.setAttribute("id", "cancelbutton");
+					cancelbutton.setAttribute("maxwidth", "70");
+					cancelbutton.addEventListener("command",hideInventoryBox,false);
+		
+					// now put them in the doc
+					totalbox.appendChild(totallabel);
+					totalbox.appendChild(resultlabel);
+		
+					sellbox.appendChild(qtyin);
+					sellbox.appendChild(pricelabel);
+					sellbox.appendChild(pricein);
+					sellbox.appendChild(pricelabel2);
+		
+					invd.appendChild(hiddenid);
+					invd.appendChild(sellbox);
+					invd.appendChild(totalbox);
+		
+					buttonbox.appendChild(actionbutton);
+					buttonbox.appendChild(cancelbutton);
+					invd.appendChild(buttonbox);
+		
+					sbcd.getElementById("qtyin").addEventListener("change",
+							piratequesting.Inventory.giveResult, true);
+					sbcd.getElementById("qtyin").addEventListener("input",
+							piratequesting.Inventory.giveResult, true);
+					sbcd.getElementById('qtyin').addEventListener('keypress',
+							piratequesting.Inventory.HandleKeyPressItems, true);
+					sbcd.getElementById("pricein").addEventListener("input",
+							piratequesting.Inventory.giveResult, true);
+					sbcd.getElementById('pricein').addEventListener('keypress',
+							piratequesting.Inventory.HandleKeyPressItems, true);
+					sbcd.getElementById("qtyin").focus();
+				} else if (prn < 0) {
+					// checking prices
+					// note qty is treated at the category number for the item
+					// market here.
+					var cat = qty;
+					var msg1 = sbcd.createElement("description");
+					msg1.setAttribute("value", "Current market prices for:");
+					var msg2 = sbcd.createElement("description");
+					msg2.setAttribute("value", name);
+					msg2.setAttribute("style", "padding-left:20px;")
+		
+					invd.appendChild(msg1);
+					invd.appendChild(msg2);
+		
+					var buttonbox = sbcd.createElement("hbox");
+					buttonbox.setAttribute("align", "center");
+		
+					var cancelbutton = sbcd.createElement("button");
+					cancelbutton.setAttribute("label", "Close");
+					cancelbutton.setAttribute("id", "cancelbutton");
+					cancelbutton.setAttribute("maxwidth", "70");
+					cancelbutton.addEventListener("command",hideInventoryBox,false);
+		
+					buttonbox.appendChild(cancelbutton);
+		
+					var pricebox = sbcd.createElement("hbox");
+					var pricelist = sbcd.createElement("listbox");
+					pricelist.setAttribute("id", "pricelist");
+					var spacer = sbcd.createElement("box");
+					spacer.setAttribute("flex", "1");
+					
+					pricebox.appendChild(pricelist);
+					pricebox.appendChild(spacer);
+					invd.appendChild(pricebox);
+					invd.appendChild(buttonbox);
+					getPrices(cat, name);
+				}
+			} catch(e) { 
+				dumpError(e); 
 			}
-			}catch(e) { dumpError(e); }
 		},
 		
 		useItem : function(id) {
