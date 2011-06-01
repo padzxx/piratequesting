@@ -13,21 +13,37 @@
 	<tabpanel id="Equipment_tabpanel">
 		<stack flex="1" height="168">
 			<vbox id="equiplist" flex="1" height="168">
-				<hbox align="center" popup="head_menu" flex="1" tooltiptext="Click to change" >
+				<hbox align="center" popup="head_menu" tooltiptext="Click to change" >
 					<image id="head_image" persist="src" tooltiptext="Click to change"/>
 					<label id="head_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
-				<hbox align="center" popup="armour_menu" flex="1" tooltiptext="Click to change">
+				<hbox align="center" popup="armour_menu" tooltiptext="Click to change">
 					<image id="armour_image" persist="src" tooltiptext="Click to change"/>
 					<label id="armour_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
-				<hbox align="center" popup="weapons_menu" flex="1" tooltiptext="Click to change">
+				<hbox align="center" popup="weapons_menu" tooltiptext="Click to change">
 					<image id="weapons_image" persist="src" tooltiptext="Click to change"/>
 					<label id="weapons_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
-				<hbox align="center" popup="offhand_menu" flex="1" tooltiptext="Click to change">
+				<hbox align="center" popup="offhand_menu" tooltiptext="Click to change">
 					<image id="offhand_image" persist="src" tooltiptext="Click to change"/>
 					<label id="offhand_label" persist="value" type="bold" tooltiptext="Click to change"/>
+				</hbox>
+				<hbox align="center" popup="coats_menu" tooltiptext="Click to change">
+					<image id="coats_image" persist="src" tooltiptext="Click to change"/>
+					<label id="coats_label" persist="value" type="bold" tooltiptext="Click to change"/>
+				</hbox>
+				<hbox align="center" popup="leggings_menu" tooltiptext="Click to change">
+					<image id="leggings_image" persist="src" tooltiptext="Click to change"/>
+					<label id="leggings_label" persist="value" type="bold" tooltiptext="Click to change"/>
+				</hbox>
+				<hbox align="center" popup="feet_menu" tooltiptext="Click to change" >
+					<image id="feet_image" persist="src" tooltiptext="Click to change"/>
+					<label id="feet_label" persist="value" type="bold" tooltiptext="Click to change"/>
+				</hbox>
+				<hbox align="center" popup="accessories_menu" tooltiptext="Click to change">
+					<image id="accessories_image" persist="src" tooltiptext="Click to change"/>
+					<label id="accessories_label" persist="value" type="bold" tooltiptext="Click to change"/>
 				</hbox>
 
 			</vbox>
@@ -47,6 +63,10 @@
 		<menupopup type="equipment" id="head_menu" width="250" />
 		<menupopup type="equipment" id="armour_menu" width="250" />
 		<menupopup type="equipment" id="offhand_menu" width="250" />
+		<menupopup type="equipment" id="feet_menu" width="250" />
+		<menupopup type="equipment" id="coats_menu" width="250" />
+		<menupopup type="equipment" id="leggings_menu" width="250" />
+		<menupopup type="equipment" id="accessories_menu" width="250" />
 	</window> 
 </overlay>
 
