@@ -58,6 +58,9 @@ var piratequesting = function () {
 		scripts : [],
 		baseURL : "",
 		baseTheme: null,
+		DEFAULT_THEME: "default",
+		CLASSIC_THEME: "classic",
+		ACCEPTED_STATUS: [200,500], //PQ pages are returning status 500 pages even when things are valid. This array is for what status codes are considered OK
 	
 		/**
 		 * Database connection for the extension. Stored for re-use to cut down on repitition
@@ -87,7 +90,8 @@ var piratequesting = function () {
 		 * @type nsIPrefBranch
 		 */
 		prefs : Components.classes["@mozilla.org/preferences-service;1"]
-				.getService(Components.interfaces.nsIPrefService),
+				.getService(Components.interfaces.nsIPrefService)
+				.getBranch("extensions.piratequesting."),
 	
 		/**
 		 * Initialization for the sidebar.
@@ -98,15 +102,16 @@ var piratequesting = function () {
 			// first make sure we haven't already initialized things.
 			if (!piratequesting.initialized) {
 				try {
-					this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
-					this.baseURL = this.prefs
-							.getCharPref("extensions.piratequesting.baseurl");
-					this.baseTheme = this.prefs
-							.getCharPref("extensions.piratequesting.basetheme");
+					pqdump("Loading PirateQuesiting Extension\n=================================\n\n");
+				} catch (e) {dumpError(e);}
+				try {
+					//this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
+					this.baseURL 		= this.prefs.getCharPref("baseurl");
+					this.baseTheme 		= this.prefs.getCharPref("basetheme");
+										
 					// initialization code
 					this.initialized = true;
-					this.strings.core = document
-							.getElementById("piratequesting-strings");
+					this.strings.core = document.getElementById("piratequesting-strings");
 	
 					if (!piratequesting.DBConn.tableExists("moduleLayout")) {
 						// first run: create the layout table
@@ -166,6 +171,31 @@ var piratequesting = function () {
 			_iframe.docShell.allowImages = false;
 			
 			var doc = _iframe.contentDocument; 
+			
+			
+			/*************************************
+			 * Note: May 26, 2011
+			 * 
+			 * It appears that the pages PQ is 
+			 * returning do not always (never?) 
+			 * have closing body and html tags
+			 * 
+			 *  Below is to correct for that
+			 * 
+			 *************************************/
+			
+			pqdump("PQ: Generating document from text\n", PQ_DEBUG_STATUS);
+			var hasEndBodyHTMLRegex = /<\/body>\s*<\/html>\s*/i;
+			
+			if (!hasEndBodyHTMLRegex.test(htmlText)) {
+				pqdump("\tAdding </body></html> to correct PQ error\n");	
+				htmlText += "</body></html>";
+			}
+			pqdump("\tdumping source text to console....\n",PQ_DEBUG_STATUS);
+			if (console && console.log) {
+				console.log(htmlText);
+			}
+			
 			var strip = /<html[\s\S]*?>([\s\S]*?)<\/html>/i;
 			if (strip.test(htmlText)) {
 				doc.getElementsByTagName("html")[0].innerHTML = strip.exec(htmlText)[1];
@@ -181,7 +211,17 @@ var piratequesting = function () {
 		 * @param {String} htmlText The text to be changed into an html document 
 		 */
 		ProcessResponse : function(url, htmlText, requestNumber, requestTime) {
-			var doc = piratequesting.createDoc(htmlText);
+			try {
+				pqdump("PQ: Requesting document generation\n");
+				var doc = piratequesting.createDoc(htmlText);
+			} catch (e) {
+				pqdump("\tError creating document\n");
+				dumpError(e);
+			}
+			pqdump("\tdumping doc to console....\n",PQ_DEBUG_STATUS);
+			if (console && console.log) {
+				console.log(doc);
+			}
 			if (!(doc.body  && (doc.body.firstChild) && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
 				var curProc;
 				//first run the standard processors 
@@ -199,7 +239,11 @@ var piratequesting = function () {
 		},
 		
 		ProcessRawResponse :  function(url, text, requestTime, requestData) {
+			/**
+			 * @type PageProcess
+			 */
 			var curProc;
+			
 			//then run the ajax response processors - at this time only the captcha code stuff 
 			for (var i = 0, len = piratequesting.PQRAWProcessorCollection.length; i < len; i++) {
 				curProc = piratequesting.PQRAWProcessorCollection[i];
@@ -250,14 +294,14 @@ var piratequesting = function () {
 							//theme test: classic has a wrapper around all of the content with id 'outer', default has id 'skull' for the talking head
 							if (doc.evaluate("boolean(id('skull'))", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 								//using default theme
-								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme","default");
-								piratequesting.baseTheme = "default";
+								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme",piratequesting.DEFAULT_THEME);
+								piratequesting.baseTheme = piratequesting.DEFAULT_THEME;
 							}
 							//can't guarantee that the page will have either marker so don't use else
 							if (doc.evaluate("boolean(id('outer'))", doc, null,XPathResult.BOOLEAN_TYPE,null).booleanValue) {
 								//using default theme
-								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme","classic");
-								piratequesting.baseTheme = "classic";
+								top.piratequesting.prefs.setCharPref("extensions.piratequesting.basetheme",piratequesting.CLASSIC_THEME);
+								piratequesting.baseTheme = piratequesting.CLASSIC_THEME;
 							}
 							//if neither of the above matches, the preference won't change.
 							
@@ -418,7 +462,7 @@ var piratequesting = function () {
 				openAndReuseOneTabPerURL(addr);
 		},
 		openAbout: function () {
-			var params = { in: mainWindow, out:null};       
+			var params = { input: mainWindow };       
 			window.openDialog("chrome://piratequesting/content/aboutDialog.xul", "",
 	    	"chrome, dialog, titlebar=no, close=no,centerscreen, resizable=no, status=no, height=270, width=430", params).focus();
 		}
@@ -426,23 +470,6 @@ var piratequesting = function () {
 	}
 }();
 
-/*piratequesting.showContextMenu = function(event) {
-	// show or hide the menuitem based on what the context menu is on
-	// see http://kb.mozillazine.org/Adding_items_to_menus
-	document.getElementById("context-piratequesting").hidden = gContextMenu.onImage;
-
-}*/
-
-/*piratequesting.onMenuItemCommand = function(e) {
-	var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
-			.getService(Components.interfaces.nsIPromptService);
-	promptService.alert(window, this.strings.core
-					.getString("helloMessageTitle"),
-
-			this.strings.core.getString("helloMessage"));
-	toggleSidebar('viewPirateQuestingSidebar');
-
-}*/
 piratequesting.onToolbarButtonCommand = function(e) {
 	piratequesting.onMenuItemCommand(e);
 }
@@ -510,7 +537,7 @@ piratequesting.overlayRegistry = function() {
 			if (!conflicts(tabid, tabpanelid, stringFile))
 				overlays.push(new overlay(tabid, tabpanelid, stringFile));
 			else 
-				dump("\nOverlay conflict occurred on: " + tabid + ", " + tabpanelid + ", " + stringFile);
+				pqdump("\nOverlay conflict occurred on: " + tabid + ", " + tabpanelid + ", " + stringFile);
 		},
 		getOverlayByIndex : function(index) {
 			return overlays[index];
@@ -552,16 +579,6 @@ piratequesting.overlayRegistry = function() {
 }();
 try {
 
-	function isXHR(request){
-		try {
-			if (request.notificationCallbacks) 
-				return (request.notificationCallbacks instanceof XMLHttpRequest);
-		} 
-		catch (exc) {
-		}
-		return false;
-	}
-	
 	//largely from firebug. should refactor 
 	if (typeof Cc == "undefined") {
 		var Cc = Components.classes;
@@ -585,15 +602,12 @@ try {
 		//this.receivedData = [];
 	}
 		
-	TracingListener.prototype =
-	{
+	TracingListener.prototype = {
 	    originalListener: null,
 	    receivedData: null,   // array for incoming data.
 	
-	    onDataAvailable: function(request, context, inputStream, offset, count)
-	    {
-	       var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1",
-	                "nsIBinaryInputStream");
+	    onDataAvailable: function(request, context, inputStream, offset, count) {
+	        var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
 	        var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
 	        binaryInputStream.setInputStream(inputStream);
 	        storageStream.init(8192, count, null);
@@ -603,7 +617,7 @@ try {
 	           
 	        binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
 	
-	        // Copy received data as they come.*/
+	        // Copy received data as they come.
 	        var data = binaryInputStream.readBytes(count);
 			//var data = inputStream.readBytes(count);
 			
@@ -614,38 +628,39 @@ try {
 	    },
 	
 	    onStartRequest: function(request, context) {
-			this.receivedData = [];
+	    	this.receivedData = [];
 			this.originalListener.onStartRequest(request, context);
 	    },
 	
-	    onStopRequest: function(request, context, statusCode)
-	    {
+	    onStopRequest: function(request, context, statusCode) {
 			try {
-				if (request.originalURI && piratequesting.baseURL == request.originalURI.prePath && request.originalURI.path.indexOf("/index.php?ajax=") == 0) {
-					
-					//for(opt in request) {
-					//	dump("\nrequest."+opt);
-					//}
-					//dump(request.responseText);
-					
-					var data = null;
-					if(request.requestMethod.toLowerCase() == "post") {
-						var postText = this.readPostTextFromRequest(request,context);
-						if (postText)  
-							data = ((String)(postText)).parseQuery();
-							
-					}
-					
-					//dump("\nProcessing: " + request.originalURI.spec + "\n");
-					var date = Date.parse(request.getResponseHeader("Date"));
-					var responseSource = this.receivedData.join();
-					//fix leading spaces bug
-					responseSource = responseSource.replace(/^\s+(\S[\s\S]+)/,"$1");
+				request.QueryInterface(Ci.nsIHttpChannel);
 				
-					piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date, data);
+				if (request.originalURI && piratequesting.baseURL == request.originalURI.prePath) {
+					var date = Date.parse(request.getResponseHeader("Date"));
+					piratequesting.Clock.setDate(new Date(date));
+					if (request.originalURI.path.indexOf("/index.php?ajax=") == 0) {
+					
+						var data = null;
+						if (request.requestMethod.toLowerCase() == "post") {
+							var postText = this.readPostTextFromRequest(request, context);
+							if (postText) 
+								data = ((String)(postText)).parseQuery();
+							
+						}
+						var responseSource = this.receivedData.join('');
+						
+						//fix leading spaces bug
+						responseSource = responseSource.replace(/^\s+(\S[\s\S]+)/, "$1");
+						
+						piratequesting.ProcessRawResponse(request.originalURI.spec, responseSource, date, data);
+					}
 				}
-			} catch(e) { dumpError(e);}
-	        this.originalListener.onStopRequest(request, context, statusCode);
+			} 
+			catch (e) {
+				dumpError(e);
+			}
+			this.originalListener.onStopRequest(request, context, statusCode);
 	    },
 	
 	    QueryInterface: function (aIID) {
@@ -681,7 +696,7 @@ try {
 		            return text;
 		        }
 				else {
-					dump("Failed to Query Interface for upload stream.\n");
+					pqdump("Failed to Query Interface for upload stream.\n");
 				}
 		    }
 		    catch(exc)
@@ -708,32 +723,39 @@ try {
 		}
 		
 	}
-
-
+	
+	
 	hRO = {
-
-		observe: function(aSubject, aTopic, aData){
+	
+		observe: function(request, aTopic, aData){
 			try {
+				if (typeof Cc == "undefined") {
+					var Cc = Components.classes;
+				}
+				if (typeof Ci == "undefined") {
+					var Ci = Components.interfaces;
+				}
 		    	if (aTopic == "http-on-examine-response") {
-					if (aSubject.originalURI && piratequesting.baseURL == aSubject.originalURI.prePath && aSubject.originalURI.path.indexOf("/index.php?ajax=") == 0) {
+		    		request.QueryInterface(Ci.nsIHttpChannel);
+		    		
+					if (request.originalURI && piratequesting.baseURL == request.originalURI.prePath/* && request.originalURI.path.indexOf("/index.php?ajax=") == 0*/) { //will filter for ajax later. we want the date/time from normal pq pages too 
 						var newListener = new TracingListener();
-        				aSubject.QueryInterface(Ci.nsITraceableChannel);
-        				newListener.originalListener = aSubject.setNewListener(newListener);
+	    				request.QueryInterface(Ci.nsITraceableChannel);
+	    				newListener.originalListener = request.setNewListener(newListener);
 					}
-    			} /*else if(aTopic == "http-on-modify-request") {
-					if (aSubject.originalURI && piratequesting.baseURL == aSubject.originalURI.prePath && aSubject.originalURI.path.indexOf("/index.php?ajax=") == 0) {
-						var newListener = new TracingListener();
-						aSubject.QueryInterface(Ci.nsITraceableChannel);
-						newListener.originalListener = aSubject.setNewListener(newListener);
-					}
-				}*/
+				} 
 			} catch (e) {
-				dumpError(e);
-			
+				pqdump("\nhRO error: \n\tMessage: " + e.message + "\n\tFile: " + e.fileName + "  line: " + e.lineNumber + "\n");
 			}
 		},
 		
 		QueryInterface: function(aIID){
+			if (typeof Cc == "undefined") {
+				var Cc = Components.classes;
+			}
+			if (typeof Ci == "undefined") {
+				var Ci = Components.interfaces;
+			}
 			if (aIID.equals(Ci.nsIObserver) ||
 			aIID.equals(Ci.nsISupports)) {
 				return this;
@@ -744,7 +766,7 @@ try {
 		},
 	};
 		
-
+	
 	var observerService = Cc["@mozilla.org/observer-service;1"]
 	    .getService(Ci.nsIObserverService);
 	
