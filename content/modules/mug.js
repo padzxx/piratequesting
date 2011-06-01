@@ -40,54 +40,53 @@ piratequesting.Mug = {
 	 *            doc
 	 */
 	process : function(doc) {
-		var ca = doc.getElementById("contentarea");
-		var atags = ca.getElementsByTagName("a");
-		var name = atags[0].firstChild.nodeValue;
-		var id = /user=([0-9]+)/.exec(atags[0].getAttribute("href"))[1];
-		var picklink = doc.createElement("a");
-		picklink.setAttribute("id", "picklink");
-		picklink.setAttribute("href", "/index.php?on=mug&id=" + id);
-		picklink.appendChild(doc.createTextNode("Pickpocket " + name + "."));
-
-		var mugdiv = doc.createElement("div");
-		var span = doc.createElement("span");
-		span.setAttribute("id", "countDownText");
-		span.appendChild(doc.createTextNode("30"));
-		span.setAttribute("style", "font-weight:bold;");
-
-		mugdiv.appendChild(doc.createTextNode("You can pickpocket " + name
-				+ " again in "));
-		mugdiv.appendChild(span);
-		mugdiv.appendChild(doc.createTextNode(" seconds."));
-		mugdiv.appendChild(doc.createElement("br"));
-		mugdiv.appendChild(picklink);
-
-		var brtags = ca.getElementsByTagName("br");
-		var lbr = brtags[brtags.length - 1];
-		lbr.parentNode.insertBefore(doc.createElement("br"), lbr);
-		lbr.parentNode.insertBefore(mugdiv, lbr);
-		lbr.parentNode.insertBefore(doc.createElement("br"), lbr);
-
-		var index = 30;
-		var obj = new Timer();
-		obj.Interval = 1000;
-		obj.document = doc;
-		obj.Tick = timer_tick;
-		obj.Start();
-
-		function timer_tick() {
-			index--;
-			obj.document.getElementById("countDownText").innerHTML = index;
-
-			if (index == 0) {
-				obj.Stop();
-				delete obj;
+		pqdump("PQ: Processing mug page\n",PQ_DEBUG_STATUS);
+		try {
+			var ca = doc.getElementById("contentarea");
+			var user = doc.evaluate('id("contentarea")//a[starts-with(@href,"/index.php?on=profile&user=")][1]', doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+			if (!user) {
+				pqdump("\tNo user found. Aborting\n", PQ_DEBUG_STATUS);
+				return; //probably a hand code page.
 			}
+			var name = user.textContent;
+			pqdump("\tName: "+name+"\n",PQ_DEBUG_STATUS);
+			var id = /user=([0-9]+)/.exec(user.getAttribute("href"))[1];
+			var picklink = doc.createElement("a");
+			picklink.setAttribute("id", "picklink");
+			picklink.setAttribute("href", "/index.php?on=mug&id=" + id);
+			picklink.appendChild(doc.createTextNode("Pickpocket " + name + "."));
+			var mugdiv = doc.createElement("div");
+			var span = doc.createElement("span");
+			span.setAttribute("id", "countDownText");
+			span.appendChild(doc.createTextNode("30"));
+			span.setAttribute("style", "font-weight:bold;");
+			
+			mugdiv.appendChild(doc.createTextNode("You can pickpocket " + name + " again in "));
+			mugdiv.appendChild(span);
+			mugdiv.appendChild(doc.createTextNode(" seconds."));
+			mugdiv.appendChild(doc.createElement("br"));
+			mugdiv.appendChild(picklink);
+			
+			var brtags = ca.getElementsByTagName("br");
+			var lbr = brtags[brtags.length - 1];
+			lbr.parentNode.insertBefore(doc.createElement("br"), lbr);
+			lbr.parentNode.insertBefore(mugdiv, lbr);
+			lbr.parentNode.insertBefore(doc.createElement("br"), lbr);
+			
+			var seconds = 30;
+			function timer_tick(element, seconds) {
+				element.innerHTML = seconds;
+			}
+			var obj = new CountdownTimer(seconds, {
+				callback: timer_tick.curry(span)
+			});
+			obj.Start();
+			
+			
+		} catch(e) {
+			dumpError(e);
 		}
-
 	}
 };
 
-piratequesting.addLoadProcess(new RegExp(piratequesting.strings.Mug
-						.getString("page_regex"), ""),
-		piratequesting.Mug.process);
+piratequesting.addLoadProcess(new RegExp(piratequesting.strings.Mug.getString("page_regex"), ""),piratequesting.Mug.process);
