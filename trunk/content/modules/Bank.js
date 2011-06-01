@@ -48,7 +48,39 @@ piratequesting.Bank = function() {
 			sidebar.contentDocument.getElementById("damount").value='';
 		}
 		
+	function publish() {
+		var points_val, coins_val, chest_val;
+		if (piratequesting.sidebar) {
+			if (points_val = sidebar.contentDocument
+					.getElementById('points_val')) {
+				points_val.value = points;
+				points_val.setAttribute('value', points);
+			}
+			if (coins_val = sidebar.contentDocument
+					.getElementById('coins_val')) {
+				coins_val.value = '$' + String(coins).addCommas();
+				coins_val.setAttribute('value', '$' + String(coins).addCommas());
+			}
+			if (chest_val = sidebar.contentDocument
+					.getElementById('chest_val')) {
+				chest_val.value = '$' + String(chest).addCommas();
+				chest_val.setAttribute('value', '$' + String(chest).addCommas());
+			}
+		}
+	}
+		
 	return /** @lends piratequesting.Bank */ {
+		
+
+		getCoins: function() {
+			return coins;
+		},
+		getChest:function() {
+			return chest;
+		},
+		getPoints: function() {
+			return points;
+		},
 		
 		/**
 		 * 
@@ -56,48 +88,51 @@ piratequesting.Bank = function() {
 		 *            doc
 		 */
 		process : function(doc) {
+			pqdump("\nPQ: Processing Bank info\n", PQ_DEBUG_STATUS);
+			
 			var coinsnpts = doc.getElementById('coinsnpts');
 			// check to see if it exists
 			if (coinsnpts) {
-				// the first <a> should be the points, and since it has
-				// no id, we just have to hope it stays that way
-				points = coinsnpts.getElementsByTagName('a')[0].firstChild.nodeValue
+				points = doc.getElementById('pointsupd').firstChild.nodeValue
 						.toNumber();
+				pqdump("\tPoints: " + points + "\n", PQ_DEBUG_EXTREME);
 				coins = doc.getElementById('coinsupd').firstChild.nodeValue
 						.toNumber();
+				pqdump("\tCoins: " + coins + "\n", PQ_DEBUG_EXTREME);
 				chest = doc.getElementById('bankval2').firstChild.nodeValue
 						.toNumber();
+				pqdump("\tChest: " + chest + "\n", PQ_DEBUG_EXTREME);
 
-				// alert("points: " + points + "\ncoins: " + coins +
-				// "\nchest: " + chest);
-				var points_val, coins_val, chest_val;
-				if (piratequesting.sidebar) {
-					if (points_val = sidebar.contentDocument
-							.getElementById('points_val')) {
-						points_val.value = points;
-						points_val.setAttribute('value', points);
-					}
-					if (coins_val = sidebar.contentDocument
-							.getElementById('coins_val')) {
-						coins_val.value = '$' + String(coins).addCommas();
-						coins_val.setAttribute('value', '$' + String(coins).addCommas());
-					}
-					if (chest_val = sidebar.contentDocument
-							.getElementById('chest_val')) {
-						chest_val.value = '$' + String(chest).addCommas();
-						chest_val.setAttribute('value', '$' + String(chest).addCommas());
-					}
-				}						
+				document.fire("piratequesting:BankUpdated");
+				publish();						
 			}
 
+		},
+		
+		processRaw: function (text) {
+			try {
+				if (text) {
+					var response_object = JSON.parse(text);
+					response_object = toNumberSet(response_object);
+					
+					coins = response_object.user_cash.toNumber();
+					points = response_object.user_points.toNumber();
+					
+					publish();
+					document.fire("piratequesting:BankUpdated");
+				}
+			} 
+			catch (error) {
+				dumpError(error);
+			}
 		},
 		deposit: function() {
 			var damount = sidebar.contentDocument.getElementById("damount").value;
 			if (Number(damount) !=  damount) {
-createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid Input: Not a Number"], 1, "ffaeb9");
+				createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid Input: Not a Number"], 1, "ffaeb9");
 		    } else {
 				createResponse(sidebar.contentDocument.getElementById("bankresult"),["Depositing..."], 1);
-				var params = "deposit=deposit&damount=" + damount;
+				var params = "act=deposit&amt=" + damount;
 				disable();
 				piratequesting.Bank.doBanking(params);
 		    }
@@ -109,7 +144,7 @@ createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid In
 				createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid Input: Not a Number"], 1, "ffaeb9");
 			} else {
 				createResponse(sidebar.contentDocument.getElementById("bankresult"),["Withdrawing..."], 1);
-				var params = "withdraw=withdraw&wamount=" + wamount;
+				var params = "act=withdraw&amt=" + wamount;
 				disable();
 				piratequesting.Bank.doBanking(params);
 			}
@@ -117,113 +152,80 @@ createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid In
 		
 		depositAll: function() {
 			disable();
-			// get the bank page to get up-to-date values
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseURL + "/index.php?on=bank";
-			http.open("GET", url, true);
-			http.onerror = function (e) {
-				onError(e);
-				enable();
-			};
 			
-			ajax = http;
-		
-			http.onreadystatechange = function () {
-				if(http.readyState == 4) {
-					if (http.status == 200) {
-						var regex = /name='damount' value='([0-9]+)'/;
-						var tmp = regex.exec(http.responseText);
-						var amt = tmp[1];
-						if (amt > 0) {
-							createResponse(sidebar.contentDocument.getElementById("bankresult"),["Depositing "+amt+"..."], 1);
-							var params = "deposit=deposit&damount=" + amt;
-							piratequesting.Bank.doBanking(params);
-						} else {
-							createResponse(sidebar.contentDocument.getElementById("bankresult"),["Nothing to Deposit"], 1);
-							enable();
-						}
-					} else {
-						dumpError("Banking failed due to error");
-						enable();
-					}
-				}	
-			}
-			http.send(null);
-		},
-		
-		doBanking: function(params) {
-			var http = new XMLHttpRequest();
-			var url = piratequesting.baseURL + "/index.php?on=bank";
-			http.open("POST", url, true);
-			ajax = http;
-		
-			// Send the proper header information along with the request
-			http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			http.setRequestHeader("Content-length", params.length);
-			http.setRequestHeader("Connection", "close");
-			http.onerror = function (e) {
-				onError(e);
-				enable();
+			if (!piratequesting.Player) {
+				pqdump("PQ: Player component not loaded! Cannot deposit all funds without info.");
+				return;
 			}
 			
-			// onError;
-			http.onreadystatechange = function () {
-				sidebar.contentDocument.getElementById('bankmeter').setAttribute('value',	Number(sidebar.contentDocument.getElementById('bankmeter').getAttribute('value')) + 25);
-				if(http.readyState == 4) {
-					if (http.status == 200) {
-						piratequesting.Bank.parseBankResponse(http.responseText);
+			piratequesting.Player.update({
+				onFailure:function() {
+					enable()
+				},
+				onError: function(e) {
+					dumpError(e);
+					enable();
+				},
+				onSuccess: function() {
+					var amt = piratequesting.Bank.getCoins();
+					if (amt > 0) {
+						createResponse(sidebar.contentDocument.getElementById("bankresult"),["Depositing "+amt+"..."], 1);
+						var params = "act=deposit&amt=" + amt;
+						piratequesting.Bank.doBanking(params);
 					} else {
-						dumpError("Banking failed due to error");
+						createResponse(sidebar.contentDocument.getElementById("bankresult"),["Nothing to Deposit"], 1);
 						enable();
 					}
 				}
-			}
-			http.send(params);
+			});
+			
 		},
 		
-		parseBankResponse: function(text){
-			var regex = /Ye have (withdrawn|deposited) (\$[,0-9]+) successfully/i;
-			var fregex = /(withdraw|deposit) more than you have/i;
-			var url = piratequesting.baseURL + "/index.php?on=bank";
-			var match;
-			var fmatch;
-			var result;
-			match = regex.exec(text);
-		
-			if (match === null) {
-				// failed
-				fmatch = fregex.exec(text); 
-				if (fmatch === null) {
-					// you've done it now. fubar.
-					createResponse(sidebar.contentDocument.getElementById("bankresult"), ["Invalid Response from Bank"], 1, "ffaeb9");
-				} else
-					createResponse(sidebar.contentDocument.getElementById("bankresult"), [fmatch[1] + ' failed'], 1,"ffaeb9");
-			} else {
-				createResponse(sidebar.contentDocument.getElementById("bankresult"), [match[2] + ' ' + match[1]], 1,"caff70");
-				piratequesting.ProcessResponse(url,text);
-				match[2] = Number(match[2].toNumber());
-				chest = Number(Number(chest) - Number(((match[1] == "withdrawn") ? Number(match[2]) : -1 * Number(match[2]))));
-				coins = Number(Number(coins) + Number(((match[1] == "withdrawn") ? Number(match[2]) : -1 * Number(match[2]))));
-				//piratequesting.Player.publish();
-				
-				var coins_val, chest_val;
-				if (piratequesting.sidebar) {
-					if (coins_val = sidebar.contentDocument
-							.getElementById('coins_val')) {
-						coins_val.value = '$' + String(coins).addCommas();
-						coins_val.setAttribute('value', '$' + String(coins).addCommas());
-					}
-					if (chest_val = sidebar.contentDocument
-							.getElementById('chest_val')) {
-						chest_val.value = '$' + String(chest).addCommas();
-						chest_val.setAttribute('value', '$' + String(chest).addCommas());
-					}
-				}			
-			}
-			enable();
-
+		doBanking: function(params) {
+			
+			var url = piratequesting.baseURL + "/index.php?ajax=bank";
+			
+			ajax = new AjaxRequest(url,{
+				protocol: "get",
+				params:params,
+				onError:function (e) {
+					onError(e);
+					enable();
+				},
+				onFailure: enable,
+				onSuccess: enable,
+				onStateChange: function () {
+					sidebar.contentDocument.getElementById('bankmeter').setAttribute('value',	Number(sidebar.contentDocument.getElementById('bankmeter').getAttribute('value')) + 25);
+				}
+			});
 		},
-				
+		
+		processResponse: function (text) {
+			//responses look like:
+			//0::826988::You have deposited $71 successfully.::$0
+			//You can't deposit more than you have.
+			//Invalid input.
+			
+			if (text) { //we got some response
+				//the only valid response is a double colon delimited string.. 
+				var parts = text.split("::");
+				//failure will only have one element
+				if (parts.length < 2) {
+					createResponse(sidebar.contentDocument.getElementById("bankresult"), [text], 1, "ffaeb9");
+				} else {
+					coins = parts[0];
+					chest = parts[1];
+					var match = /withdrawn|deposited/.exec(parts[2]);
+					var amt = /\$[\d,]+/.exec(parts[2]);
+					if (match) {
+						createResponse(sidebar.contentDocument.getElementById("bankresult"), [ amt[0] + " " + match[0]], 1, "caff70");
+					} else {
+						createResponse(sidebar.contentDocument.getElementById("bankresult"), ["Banking Error"], 1, "ffaeb9");
+					}
+					publish();
+				}
+			}
+		},				
 		
 		HandleKeyPressWithdraw: function(e) {
 		  switch (e.keyCode) {
@@ -250,7 +252,7 @@ createResponse(sidebar.contentDocument.getElementById("bankresult"),["Invalid In
 			ajax.abort();
 			enable();
 		}
-
+		
 	}
 }();
 piratequesting.addLoadProcess("", piratequesting.Bank.process);
@@ -260,5 +262,8 @@ var mainWindow = mainWindow || window
 			.QueryInterface(Components.interfaces.nsIDocShellTreeItem).rootTreeItem
 			.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
 			.getInterface(Components.interfaces.nsIDOMWindow);
+
+piratequesting.addRawProcessor(/index.php\?ajax=(events_ajax&action=all_status_update|train|items&json)/, piratequesting.Bank.processRaw, piratequesting.Bank);
+piratequesting.addRawProcessor(/index.php\?ajax=bank/, piratequesting.Bank.processResponse, piratequesting.Bank);
 
 var sidebar = sidebar || mainWindow.document.getElementById("sidebar");
