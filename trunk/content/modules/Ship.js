@@ -76,7 +76,7 @@ piratequesting.Ship = function() {
 				sbcd.getElementById('shiptypeval').value = type;
 				sbcd.getElementById('crewlevelval').value = crewLevel + " [" + progress+"%]";
 				sbcd.getElementById('shiphpval').value = hp;
-				sbcd.getElementById('cargoval').value = currentCargo +"/" + maxCargo;
+				sbcd.getElementById('cargoval').value = currentCargo +" / " + maxCargo;
 				sbcd.getElementById('armourval').value = armour;
 				sbcd.getElementById('cannonsval').value = cannons;
 			}
@@ -85,6 +85,7 @@ piratequesting.Ship = function() {
 				dumpError(e);
 			}
 	};
+
 	
 	return {
 		/**
@@ -92,24 +93,49 @@ piratequesting.Ship = function() {
 		 */
 		process : function(doc) {
 			try {
-				if (piratequesting.baseTheme == "default") {
+				if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
 					var sb = doc.getElementById("shipbox");
 					if (!sb) return; 
 					//new page style as of 2009/04/29
 					
 					name = doc.evaluate('./div[@class="profile_ship_top"]//a[@href="index.php?on=ship"]', sb, null, XPathResult.STRING_TYPE, null).stringValue;
-					type = doc.evaluate('.//div[@class="user_ship"]//img/@title', sb, null, XPathResult.STRING_TYPE, null).stringValue; //just My ship for now. need to ask FM to change this.
-					crewLevel = doc.evaluate('id("header_sea_level")', doc, null, XPathResult.STRING_TYPE, null).stringValue;
+					
+					var type_lookup = [
+						"Sloop", 
+						"Schooner", 
+						"Barques", 
+						"Warship",
+						"Merchant Galleon",
+						"English Galleon",
+						"Spanish Galleon",
+						"Caravel",
+						"Row Boat",
+						"French Galleon",
+						null, //no ship for id 11
+						"Phantom Galleon",
+						null, //no ship for id 13
+						"Marauder Galleon"
+						];
+					
+					//type = doc.evaluate('.//div[@class="user_ship"]//img/@title', sb, null, XPathResult.STRING_TYPE, null).stringValue; //just My ship for now. need to ask FM to change this.
+					
+					var type_id = doc.evaluate('substring-after(substring-before(.//div[@class="user_ship"]//img/@src,"-small.gif"),"ships/")', sb, null, XPathResult.NUMBER_TYPE, null).numberValue;
+					
+					//minus one as array is zero indexed. should be replaced by a more abstract system
+					type = type_lookup[type_id-1];
+					
+					crewLevel = doc.evaluate('id("header_sea_level")', doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
 					progress = doc.evaluate('substring-before(substring-after(id("header_sea_progress")/@style,"width: "),"%")', doc, null, XPathResult.STRING_TYPE, null).stringValue;
 					hp = doc.evaluate('id("seastatbars")//tbody/tr[2]/td/div[@class="ship-prog-empty"]/@title', sb, null, XPathResult.STRING_TYPE, null).stringValue;
-					var cargo = doc.evaluate('id("seastatbars")//tbody/tr[6]/td/div[@class="ship-prog-empty"]/@title', sb, null, XPathResult.STRING_TYPE, null).stringValue.split('/');
+					var cargo = doc.evaluate('id("seastatbars")//tbody/tr[6]/td/div[@class="ship-prog-empty"]/@title', sb, null, XPathResult.STRING_TYPE, null).stringValue.split(' / ');
 					currentCargo = cargo[0];
 					maxCargo = cargo[1];
-					cannons = "N/A";
+					cannons = doc.evaluate('id("ship-prog-bar-cannons")/@title', sb, null, XPathResult.STRING_TYPE, null).stringValue;
+					name = doc.evaluate('//div[@class="user_role"]//a[@href="/index.php?on=ship"]/text()', sb, null, XPathResult.STRING_TYPE, null).stringValue;
 					armour = "N/A";
 				}
 				else 
-					if (piratequesting.baseTheme == "classic") {
+					if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
 						var si = doc.getElementById("ship_info");
 						if (!si) {
 							return;
@@ -135,9 +161,29 @@ piratequesting.Ship = function() {
 			}
 			
 			
-		}
+		},
+		processRaw: function(text) {
+			try {
+				if (text) {
+					var response_object = JSON.parse(text);
+					
+					cannons = response_object.cannons + " / " + response_object.cannons_max;
+					
+					response_object = toNumberSet(response_object);
+					
+					crewLevel = response_object.crew_level;
+					progress = response_object.crew;
+					
+					publish();
+				}
+			} 
+			catch (error) {
+				dumpError(error);
+			}
+	}
 		
 	}
 }();
 
 piratequesting.addLoadProcess("", piratequesting.Ship.process);
+piratequesting.addRawProcessor(/index.php\?ajax=(events_ajax&action=all_status_update|train|items&json)/, piratequesting.Ship.processRaw, piratequesting.Ship);
