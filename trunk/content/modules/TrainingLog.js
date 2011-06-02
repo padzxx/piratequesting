@@ -1,9 +1,7 @@
 var piratequesting = top.piratequesting;
 
 /**
- * Chirugeon page processing<br>
- * Changes time reamining into countdown timers<br>
- * Also adds links to attack and mug the players
+ * Training Log writer and processor
  * 
  * @namespace
  */
@@ -22,9 +20,6 @@ piratequesting.TrainingLog = function() {
 	var insertResult = piratequesting.DBConn
 			.createStatement("INSERT INTO training_result (training_id,attribute, energy, increase) VALUES (?1, ?2, ?3, ?4)");
 	
-// CREATE TABLE "training" ("id" INTEGER PRIMARY KEY NOT NULL ,"awake" INTEGER
-// DEFAULT 0 ,"port" VARCHAR,"chance" INTEGER DEFAULT 0 ,"rolled" INTEGER
-// DEFAULT 0 )
 	function write (data) {
 		try {
 			piratequesting.DBConn.beginTransaction();
@@ -33,12 +28,12 @@ piratequesting.TrainingLog = function() {
 			insertPrimary.bindUTF8StringParameter(1,data.port); // port
 			var matches;
 			if (data.failure && (data.failure != "")) {
-				if (piratequesting.baseTheme == "classic") {
+				if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
 					matches = ((String) (data.failure)).split(/\D+/);
 					
 					insertPrimary.bindInt32Parameter(2,matches[1]);
 					insertPrimary.bindInt32Parameter(3,matches[2]);
-				} else if (piratequesting.baseTheme == "default") {
+				} else if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
 					insertPrimary.bindInt32Parameter(2,data.failure.toNumber());
 					insertPrimary.bindInt32Parameter(3,data.chance);
 				}
@@ -98,20 +93,17 @@ piratequesting.TrainingLog = function() {
 			// training left join training_result on training.id = training_id
 			// group by training_id
 			try { 
-			if (!data.injured && ((data.failure && (data.failure != "")) || (data.success.length > 0)) ) {
-				write(data);
-			}
+				if (!data.injured && ((data.failure && (data.failure != "")) || (data.success.length > 0)) ) {
+					write(data);
+				}
 			} catch (error) { dumpError(error);}
 
 		},
 		open : function() {
-			openAndReuseOneTabPerURL(
-					file,
-					true);
+			openAndReuseOneTabPerURL(file,true);
 		}
 	}
 
 }();
 
 document.addEventListener("piratequesting:TrainingUpdated",function(event){ piratequesting.TrainingLog.process(); }, false);
-
