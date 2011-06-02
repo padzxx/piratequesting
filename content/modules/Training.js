@@ -7,12 +7,6 @@ var mainWindow = mainWindow
 				.getInterface(Components.interfaces.nsIDOMWindow);
 var sidebar = sidebar || mainWindow.document.getElementById("sidebar");
 
-/*
- * try { var sbundle = new
- * StringBundle("chrome://piratequesting/locale/train.properties"); } catch
- * (error) { alert(error.message); }
- */
-
 piratequesting.Training = function() {
 
 	var ajax;
@@ -28,7 +22,7 @@ piratequesting.Training = function() {
 			disable();
 			
 			// this one can't be async
-			// yes it can. pass the other function in as an argument
+			//TODO yes it can. pass the other function in as an argument
 			var energy, doc;
 			var url = piratequesting.baseURL + "/index.php?ajax=events_ajax&action=all_status_update";
 			ajax = AjaxRequest(url, {
@@ -53,15 +47,6 @@ piratequesting.Training = function() {
 				async: false
 			});
 			
-			// Send the proper header information along with the request
-			/*
-	 		* http.onreadystatechange = function() { if (http.readyState == 4 &&
-	 		* http.status == 200) { } }
-	 		*/
-			//http.send(null);
-			// = /<li id="EnergyAttrib"><strong>Energy:<\/strong> ([,0-9]+)\/[,0-9]+/;
-			//var rt = http.responseText;
-			//http = null;
 			energy = doc.evaluate("//energy", doc, null, XPathResult.STRING_TYPE, null).stringValue.toNumber();
 			
 			enable();
@@ -76,26 +61,15 @@ piratequesting.Training = function() {
 
 	function getChance() {
 		var url = piratequesting.baseURL + "/index.php?on=train";
-		var http = new XMLHttpRequest();
-		http.open("GET", url, true);
-		http.onerror = function(e) {
-			onError(e);
-		}
-		ajax = http;
-		// Send the proper header information along with the request
-		http.setRequestHeader("Connection", "close");
-		http.onreadystatechange = function() {
-			if (http.readyState == 4 && http.status == 200) {
-				piratequesting.ProcessResponse(url, http.responseText);
-				http = null;
-
-			}
-		}
-		http.send(null);
+		
+			
+		ajax = new AjaxRequest(url,{
+			protocol:"get",
+			proc:true
+		});
 	}
 
 	function disable() {
-		dump("Disabling training group...\n");
 		sidebar.contentDocument.getElementById('trngrp').setAttribute("type",
 				"cover");
 		sidebar.contentDocument.getElementById('trncb').setAttribute("type",
@@ -119,7 +93,6 @@ piratequesting.Training = function() {
 	}
 
 	function enable() {
-		dump("Enabling training group...\n");
 		sidebar.contentDocument.getElementById('trngrp').setAttribute("type",
 				"");
 		sidebar.contentDocument.getElementById('trncb').setAttribute("type",
@@ -144,12 +117,15 @@ piratequesting.Training = function() {
 		var trainresult = sidebar.contentDocument.getElementById("trainresult");
 		createResponse(trainresult, new Array("Training"), 1);
 		try {
-			if (piratequesting.baseTheme == "classic") {
+			if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
 				var url = piratequesting.baseURL + "/index.php?on=train";
 				var proc = true;
-			} else if (piratequesting.baseTheme == "default") {
+			} else if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
 				var url = piratequesting.baseURL + "/index.php?ajax=train";
 				var proc = false;
+				params = params + "&key=" + piratequesting.TrainingProcessor.getKey();
+				
+				
 			}	
 			disable();
 			ajax = AjaxRequest(url, {
@@ -180,7 +156,7 @@ piratequesting.Training = function() {
 	}
 	
 	function trainPC(stramount,defamount,speamount) {
-		
+		pqdump("PQ: Sending Training Request\n",PQ_DEBUG_STATUS);
 		var energy = getEnergy();
 		
 		// alert(energy);
@@ -191,10 +167,10 @@ piratequesting.Training = function() {
 		stren = energy * (stramount / 100);
 		defen = energy * (defamount / 100);
 		speen = energy * (speamount / 100);
-		dump("fractionally...\n");
-		dump("Strength: " + stren + "\n");
-		dump("Defense: " + defen + "\n");
-		dump("Speed: " + speen + "\n");
+		pqdump("\tEnergy being spent:\n",PQ_DEBUG_EXTREME);
+		pqdump("\t\tStrength: " + stren + "\n",PQ_DEBUG_EXTREME);
+		pqdump("\t\tDefense: " + defen + "\n",PQ_DEBUG_EXTREME);
+		pqdump("\t\tSpeed: " + speen + "\n",PQ_DEBUG_EXTREME);
 		
 		// floor is used here because if we round it, they may go over
 		var strrem = stren - Math.floor(stren);
@@ -308,29 +284,29 @@ piratequesting.Training = function() {
 		},
 
 		maxStrength : function() {
-			if (piratequesting.baseTheme == "classic") {
+			if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
 				var params = "trainstrength=All%20Strength";
 				doTraining(params);
-			} else if (piratequesting.baseTheme == "default") {
+			} else if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
 				trainPC(100,0,0);
 			}
 			
 		},
 
 		maxDefense : function() {
-					if (piratequesting.baseTheme == "classic") {
+					if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
 				var params = "traindefense=All%20Defense";
 				doTraining(params);
-			} else if (piratequesting.baseTheme == "default") {
+			} else if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
 				trainPC(0,100,0);
 			}
 		},
 
 		maxSpeed : function() {
-			if (piratequesting.baseTheme == "classic") {
+			if (piratequesting.baseTheme == piratequesting.CLASSIC_THEME) {
 				var params = "trainspeed=All%20Speed";
 				doTraining(params);
-			} else if (piratequesting.baseTheme == "default") {
+			} else if (piratequesting.baseTheme == piratequesting.DEFAULT_THEME) {
 				trainPC(0,0,100);
 			}
 		},
@@ -344,7 +320,7 @@ piratequesting.Training = function() {
 		 *            doc
 		 */
 		process : function() {
-try {
+			try {
 			var sbcd = sidebar.contentDocument;
 
 			if (piratequesting.sidebar
