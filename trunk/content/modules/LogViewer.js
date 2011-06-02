@@ -39,9 +39,15 @@ function LogViewer () {
 		length : 0,
 	
 		DBConn : function() {
-			var PQCom = Components.classes['@pq.ashita.org/pqcom;1']
-											.getService().wrappedJSObject;
-			return PQCom.database;
+			var file = Components.classes["@mozilla.org/file/directory_service;1"]
+  					.getService(Components.interfaces.nsIProperties).get("ProfD",
+  							Components.interfaces.nsIFile);
+  			file.append("piratequesting.sqlite");
+  	
+  			var db = Components.classes["@mozilla.org/storage/service;1"]
+  					.getService(Components.interfaces.mozIStorageService)
+  					.openDatabase(file);
+  			return db;
 
 		}(),
 	
