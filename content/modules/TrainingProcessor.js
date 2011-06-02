@@ -30,17 +30,13 @@ piratequesting.TrainingProcessor = function() {
 		
 	return {
 		
-		getKey : function () {
-			//if the key hasn't been set yet then we have to go out and get it. first from prefs and then, failing that, from PQ itself  
-			if (key === null)
-			{
-					
-				key = top.piratequesting.prefs.getCharPref("training_key");
-				if (!key)
-				{
-					//cross your fingers. async: false is teh evils.
-					var ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=train", { onError: function() { pqdump("Error occurred while checking training page\n"); }, proc:true, async:false });
-				}
+		getKey : function (async) {
+			var async = async || false;
+			//if the key hasn't been set yet then we have to go out and get it.
+			if (!key) {
+				//cross your fingers. async: false is teh evils.
+				var ajax = AjaxRequest(piratequesting.baseURL + "/index.php?on=train", { onError: function() { pqdump("Error occurred while checking training page\n", PQ_DEBUG_ERROR); }, proc:true, async:async });
+			
 			}
 			return key;
 		},
@@ -89,11 +85,6 @@ piratequesting.TrainingProcessor = function() {
 					chance = doc.evaluate('substring-before(id("train")//div[@class="right"]/p[1]/strong[2],"%")',doc,null,XPathResult.NUMBER_TYPE,null).numberValue;
 					
 					document.fire('piratequesting:TrainingUpdated');
-					/*var evt = document.createEvent("MouseEvents");
-					evt.initMouseEvent(,false,true, window,
-		   				0, 0, 0, 0, 0, false, false, false, false, 0, null);
-		
-					document.dispatchEvent(evt);*/
 				} catch (error) {
 					dumpError(error);
 					
@@ -109,11 +100,10 @@ piratequesting.TrainingProcessor = function() {
 					port = doc.evaluate('id("sidebar")/ul[@class="menucontent"][1]/li[1]/a/em/text()',doc,null,XPathResult.STRING_TYPE,null).stringValue;
 					codesrc = doc.evaluate('id("train")//img[@alt="Image Verification"]/@src',doc,null,XPathResult.STRING_TYPE,null).stringValue;
 					
-					pqdump("\tKey: "+ key + "\n");
-					pqdump("\tChance: "+ chance + "\n");
-					pqdump("\tPort: "+ port + "\n");
+					pqdump("\tKey: "+ key + "\n", PQ_DEBUG_STATUS);
+					pqdump("\tChance: "+ chance + "\n", PQ_DEBUG_STATUS);
+					pqdump("\tPort: "+ port + "\n", PQ_DEBUG_STATUS);
 					
-					top.piratequesting.prefs.setCharPref("training_key", key);
 					document.fire('piratequesting:TrainingUpdated');
 					
 				} 
@@ -129,9 +119,11 @@ piratequesting.TrainingProcessor = function() {
 		processRawTrain : function(text, url, data) {
 			try{
 				
-				//pqdump("Raw response:\n\n"+text+"\n\n");
+				pqdump("PQ: Processing Training Response\n", PQ_DEBUG_STATUS);
+				pqdump("\tLogging response to console", PQ_DEBUG_STATUS);
 				
 				var response_object = JSON.parse(text);
+				pqlog(response_object, PQ_DEBUG_STATUS);
 										
 				clear();
 				
@@ -141,8 +133,12 @@ piratequesting.TrainingProcessor = function() {
 				
 				
 				if (!succ) {
-					//trim out the garbage HINT about respected status. It's not even formatted properly.
-					message = message.replace(/^([\s\S]+?\d+)([\s\S]*)/,"$1");
+					if (message) {
+						//trim out the garbage HINT about respected status. It's not even formatted properly.
+						message = message.replace(/^([\s\S]+?\d+)([\s\S]*)/, "$1");
+					} else {
+						message = "Failed to Train. Try again.";						
+					}
 					failure = message;
 				} else {
 					message = message.split("  ");
@@ -162,7 +158,6 @@ piratequesting.TrainingProcessor = function() {
 				key = response_object.key;
 				key = key + "" + key;
 				
-				top.piratequesting.prefs.setCharPref("training_key",key);
 				chance = response_object.successchance;
 				document.fire('piratequesting:TrainingUpdated');
 				
