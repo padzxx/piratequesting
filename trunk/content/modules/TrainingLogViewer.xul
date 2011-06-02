@@ -7,8 +7,8 @@
     xmlns:html="http://www.w3.org/1999/xhtml"
     xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 	<script type="application/x-javascript" src="chrome://piratequesting/content/prototype.js"/>
-  <script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
-  <script type="application/x-javascript" src="chrome://piratequesting/content/stringutils.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/util.js"/>
+	<script type="application/x-javascript" src="chrome://piratequesting/content/stringutils.js"/>
 	<script type="application/x-javascript" src="chrome://piratequesting/content/modules/logViewer.js"/>
 	<script type="application/x-javascript" src="chrome://piratequesting/content/modules/TrainingLogViewer.js"/>
 	<script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
