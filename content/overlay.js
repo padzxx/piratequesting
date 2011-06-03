@@ -188,13 +188,12 @@ var piratequesting = function () {
 			var hasEndBodyHTMLRegex = /<\/body>\s*<\/html>\s*/i;
 			
 			if (!hasEndBodyHTMLRegex.test(htmlText)) {
-				pqdump("\tAdding </body></html> to correct PQ error\n");	
+				pqdump("\tAdding </body></html> to correct PQ error\n", PQ_DEBUG_STATUS);	
 				htmlText += "</body></html>";
 			}
 			pqdump("\tdumping source text to console....\n",PQ_DEBUG_STATUS);
-			if (console && console.log) {
-				console.log(htmlText);
-			}
+			pqlog(htmlText, PQ_DEBUG_STATUS);
+			
 			
 			var strip = /<html[\s\S]*?>([\s\S]*?)<\/html>/i;
 			if (strip.test(htmlText)) {
@@ -212,16 +211,15 @@ var piratequesting = function () {
 		 */
 		ProcessResponse : function(url, htmlText, requestNumber, requestTime) {
 			try {
-				pqdump("PQ: Requesting document generation\n");
+				pqdump("PQ: Requesting document generation\n", PQ_DEBUG_STATUS);
 				var doc = piratequesting.createDoc(htmlText);
 			} catch (e) {
 				pqdump("\tError creating document\n");
 				dumpError(e);
 			}
 			pqdump("\tdumping doc to console....\n",PQ_DEBUG_STATUS);
-			if (console && console.log) {
-				console.log(doc);
-			}
+			pqlog(doc, PQ_DEBUG_STATUS);
+			
 			if (!(doc.body  && (doc.body.firstChild) && (doc.body.firstChild.nodeType == 3) && ( doc.body.firstChild.nodeValue == "The server is performing the new day count resets - this will take several minutes." ))) {
 				var curProc;
 				//first run the standard processors 
