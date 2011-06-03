@@ -374,7 +374,7 @@ try {
 						dumpError('Error occurred when updating player information.');
 					},
 					onStateChange: options.onStateChange,
-					proc: true
+					proc: false
 			});
 			}
 		}

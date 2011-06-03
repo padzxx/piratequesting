@@ -166,8 +166,13 @@ piratequesting.Bank = function() {
 					dumpError(e);
 					enable();
 				},
-				onSuccess: function() {
+				onSuccess: function(http) {
+					pqdump("PQ: Player Update Successful\n", PQ_DEBUG_STATUS);
+					pqdump("\tLogging response to console\n", PQ_DEBUG_STATUS);
+					pqlog(http, PQ_DEBUG_STATUS);
 					var amt = piratequesting.Bank.getCoins();
+					pqdump("\tcoins: " + coins + "\n", PQ_DEBUG_STATUS);
+					pqdump("\tgetCoins(): " + amt + "\n", PQ_DEBUG_STATUS);
 					if (amt > 0) {
 						createResponse(sidebar.contentDocument.getElementById("bankresult"),["Depositing "+amt+"..."], 1);
 						var params = "act=deposit&amt=" + amt;
