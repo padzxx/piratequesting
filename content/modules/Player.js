@@ -184,6 +184,15 @@ try {
 		}
 		
 		return {
+			
+			getName: function() {
+				return name;
+			},
+			
+			getLevel: function() {
+				return level;
+			},
+			
 			/**
 			 * @param {Document} doc
 			 */
