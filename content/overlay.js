@@ -102,7 +102,7 @@ var piratequesting = function () {
 			// first make sure we haven't already initialized things.
 			if (!piratequesting.initialized) {
 				try {
-					pqdump("Loading PirateQuesiting Extension\n=================================\n\n");
+					pqdump("Loading PirateQuesting Extension\n=================================\n\n");
 				} catch (e) {dumpError(e);}
 				try {
 					//this.prefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
@@ -463,6 +463,13 @@ var piratequesting = function () {
 			var params = { input: mainWindow };       
 			window.openDialog("chrome://piratequesting/content/aboutDialog.xul", "",
 	    	"chrome, dialog, titlebar=no, close=no,centerscreen, resizable=no, status=no, height=270, width=430", params).focus();
+		},
+		
+		openOptions: function() {
+		  var branch = Components.classes["@mozilla.org/preferences-service;1"]
+										.getService(Components.interfaces.nsIPrefService).getBranch("browser.");
+		  var instantApply = branch.getBoolPref("preferences.instantApply");
+		  window.openDialog("chrome://piratequesting/content/options.xul", "Options", "chrome,resizable,centerscreen" + (instantApply ? ",dialog=no" : ",modal,dialog"));
 		}
 	
 	}

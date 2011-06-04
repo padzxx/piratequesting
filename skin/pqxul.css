@@ -1,4 +1,4 @@
-dialog,window {
+dialog,window,prefwindow {
 	background-color: #FFFFFF !important;
 	background-image: url(chrome://piratequesting/content/mainback.jpg)
 		!important;
