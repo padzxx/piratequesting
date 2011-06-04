@@ -171,4 +171,4 @@ piratequesting.FightLog = function() {
 
 }();
 
-document.addEventListener("piratequesting:FightUpdated",function(event){ piratequesting.FightLog.process(event.relatedTarget); }, false);
+//document.addEventListener("piratequesting:FightUpdated",function(event){ piratequesting.FightLog.process(event.relatedTarget); }, false);
