@@ -42,8 +42,7 @@
 						<menubar id="pqmenu">
 							<menu id="pqmenu_edit" label="&piratequestingsidebar.menu.edit;">
 								<menupopup id="pqmenu_edit_popup">
-									<menuitem label="Say Hello" oncommand="alert('hello')" />
-									<menuitem label="Say Goodbye" oncommand="alert('goodbye')" />
+									<menuitem label="Options" oncommand="piratequesting.openOptions();" />
 								</menupopup>
 							</menu>
 							<menu id="pqmenu_help" label="&piratequestingsidebar.menu.help;">
