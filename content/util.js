@@ -857,3 +857,10 @@ var HeaderVisitor = function() {
 		}
 	}
 }();
+
+function notifyObservers(aSubject, aTopic, data) {
+	Components.classes["@mozilla.org/observer-service;1"]
+	          .getService(Components.interfaces.nsIObserverService)
+	          .notifyObservers(aSubject, aTopic, data);
+}
+
