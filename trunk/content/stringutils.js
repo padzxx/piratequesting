@@ -1,3 +1,7 @@
+String.prototype.contains = function(subStr) {
+	return (this.indexOf(subStr) != -1);
+}
+
 String.prototype.stripTags = function() {
 	var regExp = /<\/?[^>]+>/gi;
 	var regex = /[\n\r\t\s]+/gi;
