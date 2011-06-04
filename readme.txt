@@ -1,7 +1,7 @@
 Unofficial Pirate Quest Sidebar
-v2.0b7
+v2.2
 Created by Jonathan Fingland aka Gilgalad
-readme date: 2009-006-28
+readme date: 2011-06-4
 
 WARNING:This extension, although approved by PQ staff, is in no way an official Pirate Quest extension.
 This extension does not protect you from the PQ rules. If you would get frozen/banned for behaviour using 
@@ -20,6 +20,7 @@ If something doesn't work, please check the Error Console (Tools->Error Console)
 The errors will have the source in small writing. My files are all under chrome://piratequesting/.  At time of writing, 
 the piratequest.net site has 4 warnings and 2 errors on EVERY page. Those have nothing to do with the piratequesting sidebar. 
 
+If you're feeling particularly adventurous, you can run firefox in console mode. Note that it's non-trivial so only do so if you're really into that sort of thing. The sidebar outputs additional error info to the console to prevent catastrophic failure. Unfortunately the Error console (not the console window!) only shows catastrophic errors.
 
 
 Installation instructions
@@ -34,7 +35,7 @@ To enable the sidebar, go to the View menu->Sidebar->Pirate Questing. Or press C
 Notes
 -----
 
-The 2.0b4 release is a _beta_. It will have bugs. Please let me know what you find And I'll do my best to resolve them.
+It will have bugs. Please let me know what you find And I'll do my best to resolve them.
 
 And of course, Happy Pirating!
 
@@ -42,6 +43,36 @@ And of course, Happy Pirating!
 
 Version History
 ---------------
+
+v2.2
+
+After a long hiatus, Piratequesting has been updated to address numerous changes to PQ by Final Motive which broke some features of the sidebar
+- Fixed banking (all features)
+- Fixed item use
+- Fixed fight processing
+- Added default theme support for fight reports
+- Fixed training and training log
+- Fixed equipment functions
+- Adds new equipment caegories
+- Fixed inventory processing and listing
+- Fixes numerous PQ bugs (status 500 errors, missing tags, etc)
+- Adds optional debugging output levels
+- Adds new ships to sea info and
+- Adds support for up to Firefox 5.*
+- Fixes and optimizes timers for hospital and mugging
+- Changes sidebar clock to server (header) time, rather than time on game pages.   
+
+v2.1
+- Fixes timers on mug page, hospital page, and the main game clock
+- Brings support up to firefox 3.6.*
+
+v2.0.1
+- Fixes massive AJAX support bug (most AJAX features only worked for those who also had Firebug)
+
+v2.0
+- Adds support for new inventory and equipment types.
+- Fixes training in default theme
+- Handles changes in format on FM's side -- strange mix of XML and JSON at the moment.
 
 v2.0b7
 - skipped releaqse of 2.0b6 due to significant changes in PQ at the time
