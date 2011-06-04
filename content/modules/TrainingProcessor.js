@@ -137,7 +137,8 @@ piratequesting.TrainingProcessor = function() {
 						//trim out the garbage HINT about respected status. It's not even formatted properly.
 						message = message.replace(/^([\s\S]+?\d+)([\s\S]*)/, "$1");
 					} else {
-						message = "Failed to Train. Try again.";						
+						message = "Failed to Train. Try again.";
+						key = null;//clear key because it's probably wrong.						
 					}
 					failure = message;
 				} else {
